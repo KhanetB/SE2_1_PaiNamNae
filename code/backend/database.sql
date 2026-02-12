@@ -3,11 +3,12 @@ CREATE OR REPLACE FUNCTION hard_delete_data()
 RETURNS VOID AS $$
 BEGIN
     -- GET ALL URL IMAGE IN CLOUDINARY TO REMOVE ON CLOUD
-    DELETE Notification
+    -- 
+    DELETE FROM Notification WHERE userId = "";
     
-    DELETE USER
+    DELETE FROM USER WHERE id = "";
     
-    DELETE DriverVerification
+    DELETE FROM DriverVerification WHERE userId = "";
     
     DELETE Vehicle
     
