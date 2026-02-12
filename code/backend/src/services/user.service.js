@@ -120,7 +120,7 @@ const getUserPublicById = async (id) => {
         select: {
             id: true, firstName: true, lastName: true,
             profilePicture: true, role: true, isVerified: true,
-            createdAt: true
+            createdAt: true, deletedAt: true
         }
     });
     if (!user) throw new ApiError(404, 'User not found');
@@ -214,6 +214,11 @@ const softDeleteUser = async (id, deletedBy = 'USER') => {
     if (!checkDeletionStatus.canDelete) {
         throw new ApiError(400, `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`);
     }
+    // if user already soft deleted
+    const existingUser = await prisma.user.findUnique({ where: { id } });
+    if (!existingUser || existingUser.deletedAt) {
+        throw new ApiError(404, 'User not found or already deleted');
+    }
     const user = await prisma.user.update({
         where: { id },
         data: {
@@ -228,7 +233,6 @@ const softDeleteUser = async (id, deletedBy = 'USER') => {
 
 
 // Check routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
-// routes status {enum RouteStatus {AVAILABLE FULL COMPLETED CANCELLED IN_TRANSIT
 const ACTIVE_ROUTE_STATUSES = ['AVAILABLE', 'FULL', 'IN_TRANSIT'];
 const ACTIVE_BOOKING_STATUSES = ['PENDING', 'CONFIRMED'];
 
@@ -270,8 +274,6 @@ const checkUserDeletionStatus = async (userId) => {
         message: 'ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้',
     };
 };
-
-// Check Routes for softDeleteUser usage
 
 
 // const setUserStatusActive = async (id, isActive) => {

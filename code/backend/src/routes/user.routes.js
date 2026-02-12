@@ -2,6 +2,7 @@ const express = require('express');
 const userController = require("../controllers/user.controller");
 const validate = require('../middlewares/validate');
 const upload = require('../middlewares/upload.middleware');
+const { anonymizeDeletedUsers } = require('../middlewares/anonymizeDeletedUsers');
 const { idParamSchema, createUserSchema, updateMyProfileSchema, updateUserByAdminSchema, updateUserStatusSchema, listUsersQuerySchema } = require('../validations/user.validation');
 const { protect, requireAdmin } = require('../middlewares/auth');
 
@@ -76,6 +77,7 @@ router.get(
 router.get(
     '/:id',
     validate({ params: idParamSchema }),
+    anonymizeDeletedUsers,
     userController.getUserPublicById
 );
 
