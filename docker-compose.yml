@@ -8,3 +8,9 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    networks:
+      - se_network
+
+networks:
+  se_network:
+    external: true
