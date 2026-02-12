@@ -47,24 +47,47 @@
             <div>
                 <ul class="space-y-1">
                     <li>
-                        <NuxtLink to="/profile/confirmdelete" class="block px-4 py-2 text-sm rounded-md"
-                        :class="isActive('/profile/confirmdelete') ? 'font-semibold text-red-600 bg-red-700' : 'text-red-700 hover:bg-red-100'">
-                            ลบบัญชีผู้ใช้
-                        </NuxtLink>
+                       <button
+                            @click="openConfirmDelete"
+                            class="block w-full text-left px-4 py-2 text-sm rounded-md text-red-700 hover:bg-red-100"
+                            >
+                                ลบบัญชีผู้ใช้
+                        </button>
                     </li>
                 </ul>
             </div>
         </nav>
+        <ConfirmDelete
+    :isVisible="showConfirmDelete"
+    @close="closeConfirmDelete"
+  />
+
+  <ConfirmDelete
+  :isVisible="showConfirmDelete"
+  @close="showConfirmDelete = false"
+  @confirm="handleDelete"
+/>
     </aside>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import ConfirmDelete from './ConfirmDelete.vue'
 
-const route = useRoute();
+const route = useRoute()
 
-// Function to check if a menu item is active
+const showConfirmDelete = ref(false)
+
+const openConfirmDelete = () => {
+  showConfirmDelete.value = true
+}
+
+const closeConfirmDelete = () => {
+  showConfirmDelete.value = false
+}
+
 const isActive = (path) => {
-    return route.path === path;
-};
+  return route.path === path
+}
 </script>
