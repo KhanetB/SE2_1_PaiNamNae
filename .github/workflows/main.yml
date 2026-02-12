@@ -19,32 +19,51 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase Image Name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Build and push docker image
         uses: docker/build-push-action@v5
         with:
           context: ./code/backend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
   deploy:
     needs: build-and-push
     runs-on: self-hosted
+    permissions:
+      contents: read 
+      packages: read 
+
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lowercase Image Name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Pull and Restart
         run: |
-          # 1. Login to GHCR using Runner Token
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.action }} --password-stdin
-
-          cd ~/apps/backend
-
+          
           docker compose pull
-
+          
           docker compose up -d
-
+          
           docker image prune -f
+        env:
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
