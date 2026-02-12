@@ -44,6 +44,16 @@
                     </li>
                 </ul>
             </div>
+            <div>
+                <ul class="space-y-1">
+                    <li>
+                        <NuxtLink to="/profile/confirmdelete" class="block px-4 py-2 text-sm rounded-md"
+                        :class="isActive('/profile/confirmdelete') ? 'font-semibold text-red-600 bg-red-700' : 'text-red-700 hover:bg-red-100'">
+                            ลบบัญชีผู้ใช้
+                        </NuxtLink>
+                    </li>
+                </ul>
+            </div>
         </nav>
     </aside>
 </template>
