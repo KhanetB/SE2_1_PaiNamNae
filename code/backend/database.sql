@@ -1,0 +1,17 @@
+-- HARD DELETE DATA IN DATABASE AFTER 90 DAYS
+CREATE OR REPLACE FUNCTION hard_delete_data()
+RETURNS VOID AS $$
+BEGIN
+    -- GET ALL URL IMAGE IN CLOUDINARY TO REMOVE ON CLOUD
+    DELETE Notification
+    
+    DELETE USER
+    
+    DELETE DriverVerification
+    
+    DELETE Vehicle
+    
+    DELETE Route
+    
+    DELETE Booking
+END
