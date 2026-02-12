@@ -65,6 +65,12 @@ router.get(
     protect,
     userController.getMyUser
 );
+// GET /api/users/check-deletion-status
+router.get(
+    '/check-deletion-status',
+    protect,
+    userController.checkUserDeletionStatus
+);
 
 // GET /api/users/:id
 router.get(
@@ -103,5 +109,7 @@ router.delete(
     protect,
     userController.deleteUserController
 );
+
+
 
 module.exports = router;

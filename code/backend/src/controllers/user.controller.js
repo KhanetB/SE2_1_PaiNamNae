@@ -207,6 +207,15 @@ const deleteUserController = asyncHandler(async(req,res) => {
     });
 })
 
+// Check trip routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
+const checkUserDeletionStatus = asyncHandler(async(req,res) => {
+    const userId = req.user.sub;
+    const statusResult = await userService.checkUserDeletionStatus(userId);
+    res.status(200).json(
+        statusResult
+    );
+});
+
 module.exports = {
     adminListUsers,
     getAllUsers,
@@ -218,5 +227,6 @@ module.exports = {
     adminUpdateUser,
     adminDeleteUser,
     setUserStatus,
-    deleteUserController
+    deleteUserController,
+    checkUserDeletionStatus
 };

@@ -210,18 +210,68 @@ const deleteUser = async (id) => {
 
 // Soft delete by User 
 const softDeleteUser = async (id, deletedBy = 'USER') => {
-  const user = await prisma.user.update({
-    where: { id },
-    data: {
-      deletedAt: new Date(),
-      deletedBy,
-      isActive: false
+    const checkDeletionStatus = await checkUserDeletionStatus(id);
+    if (!checkDeletionStatus.canDelete) {
+        throw new ApiError(400, `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`);
     }
-  });
-
+    const user = await prisma.user.update({
+        where: { id },
+        data: {
+            deletedAt: new Date(),
+            deletedBy,
+            isActive: false
+        }
+    });
   const { password, ...safeUser } = user;
   return safeUser;
 };
+
+
+// Check routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
+// routes status {enum RouteStatus {AVAILABLE FULL COMPLETED CANCELLED IN_TRANSIT
+const ACTIVE_ROUTE_STATUSES = ['AVAILABLE', 'FULL', 'IN_TRANSIT'];
+const ACTIVE_BOOKING_STATUSES = ['PENDING', 'CONFIRMED'];
+
+const checkUserDeletionStatus = async (userId) => {
+    // Check if user has any active driver routes or passenger bookings
+    const [driverRouteCount, passengerBookingCount] = await Promise.all([
+        prisma.route.count({
+            where: {
+                driverId: userId,
+                status: { in: ACTIVE_ROUTE_STATUSES },
+            },
+        }),
+        prisma.booking.count({
+            where: {
+                passengerId: userId,
+                status: { in: ACTIVE_BOOKING_STATUSES },
+                route: {
+                    status: { in: ACTIVE_ROUTE_STATUSES },
+                },
+            },
+        })
+    ]);
+    // Return result
+    let messages = [];
+    if (driverRouteCount > 0) {
+        messages.push('คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด');
+    }
+    if (passengerBookingCount > 0) {
+        messages.push('คุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด');
+    }
+    if (messages.length > 0) {
+        return {
+            canDelete: false,
+            message: messages.join(' และ '),
+        };
+    }
+    return {
+        canDelete: true,
+        message: 'ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้',
+    };
+};
+
+// Check Routes for softDeleteUser usage
 
 
 // const setUserStatusActive = async (id, isActive) => {
@@ -256,5 +306,6 @@ module.exports = {
     deleteUser,
     updateUserProfile,
     getUserPublicById,
-    softDeleteUser
+    softDeleteUser,
+    checkUserDeletionStatus,
 };
