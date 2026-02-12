@@ -98,6 +98,11 @@ function anonymizeUsersRecursive(data, userFields = ['driver', 'passenger', 'use
     return data;
   }
 
+  // ถ้าเป็น Date object, RegExp, หรือ special objects อื่นๆ ให้คืนค่าเดิม
+  if (data instanceof Date || data instanceof RegExp || data.constructor.name !== 'Object') {
+    return data;
+  }
+
   // สร้าง object ใหม่
   const result = { ...data };
 
