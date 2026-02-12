@@ -1,0 +1,39 @@
+meta {
+  name: CreateUser
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/api/users
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+  Content-Type: multipart/form-data
+}
+
+body:multipart-form {
+  email: test@gmail.com
+  username: testUser
+  password: 123456789
+  firstName: Test
+  lastName: User
+  phoneNumber: 08123456789
+  gender: MALE
+  nationalIdNumber: 9351407024077
+  nationalIdExpiryDate: 2030-12-31T00:00:00.000Z
+  nationalIdPhotoUrl: @file(C:\Users\thana\Pictures\เอกสาร\002.jpg) @contentType(image/jpeg)
+  selfiePhotoUrl: @file(C:\Users\thana\Pictures\เอกสาร\img018.jpg) @contentType(image/jpeg)
+}
+
+assert {
+  res.status: eq 201
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
