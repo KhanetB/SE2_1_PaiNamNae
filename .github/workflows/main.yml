@@ -73,6 +73,9 @@ jobs:
           echo "ADMIN_LAST_NAME=${{ secrets.ADMIN_LAST_NAME }}" >> .env
 
           echo "NODE_ENV=production" >> .env
+      - name: Check .env file
+        run: |
+          cat .env
       - name: Pull and Restart
         run: |
           
