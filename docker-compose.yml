@@ -1,13 +1,16 @@
 version: '3.8'
+
 services:
   backend:
-    build: .
+    image: ghcr.io/khanetb/se2_1_painamnae:latest
     container_name: se-backend-app
     restart: always
     ports:
       - "3000:3000"
+    
     env_file:
       - .env
+      
     networks:
       - se_network
 
