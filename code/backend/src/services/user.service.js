@@ -206,6 +206,23 @@ const deleteUser = async (id) => {
     const { password, ...safeDeletedUser } = deletedUser;
     return safeDeletedUser;
 };
+// Service for user deletion
+
+// Soft delete by User 
+const softDeleteUser = async (id, deletedBy = 'USER') => {
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+      deletedBy,
+      isActive: false
+    }
+  });
+
+  const { password, ...safeUser } = user;
+  return safeUser;
+};
+
 
 // const setUserStatusActive = async (id, isActive) => {
 //     const updatedUser = await prisma.user.update({
@@ -239,4 +256,5 @@ module.exports = {
     deleteUser,
     updateUserProfile,
     getUserPublicById,
+    softDeleteUser
 };

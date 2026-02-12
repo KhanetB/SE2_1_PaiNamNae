@@ -196,6 +196,17 @@ const setUserStatus = asyncHandler(async (req, res) => {
     res.status(200).json({ success: true, message: "User status updated", data: updatedUser });
 });
 
+// Delete user controller (soft delete by user themselves)
+const deleteUserController = asyncHandler(async(req,res) => {
+    const userId = req.user.sub;
+    const deletedUser = await userService.softDeleteUser(userId, 'USER');
+    res.status(200).json({
+        success: true,
+        message: "User account deleted successfully.",
+        data: { deletedUserId: deletedUser.id }
+    });
+})
+
 module.exports = {
     adminListUsers,
     getAllUsers,
@@ -207,5 +218,5 @@ module.exports = {
     adminUpdateUser,
     adminDeleteUser,
     setUserStatus,
-
+    deleteUserController
 };
