@@ -57,10 +57,6 @@
                 </ul>
             </div>
         </nav>
-        <ConfirmDelete
-    :isVisible="showConfirmDelete"
-    @close="closeConfirmDelete"
-  />
 
   <ConfirmDelete
   :isVisible="showConfirmDelete"
@@ -89,5 +85,10 @@ const closeConfirmDelete = () => {
 
 const isActive = (path) => {
   return route.path === path
+}
+
+const handleDelete = () => {
+  console.log('บัญชีผู้ใช้ถูกลบ')
+  showConfirmDelete.value = false
 }
 </script>

@@ -60,7 +60,7 @@
           <button
             class="bg-red-600 text-white px-4 py-2 rounded-md
                    disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="!email"
+            :disabled="!isValidEmail"
             @click="confirmDelete"
           >
             ยืนยันลบบัญชี
@@ -95,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref , computed } from 'vue'
 import { CheckCircleIcon } from '@heroicons/vue/24/solid'
 
 
@@ -103,7 +103,7 @@ const props = defineProps({
   isVisible: Boolean
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'confirm'])
 
 const step = ref(1)
 const acceptTerms = ref(false)
@@ -132,6 +132,16 @@ const confirmDelete = () => {
 const finishDelete = () => {
   closeModal()
 }
+
+
+const Email = ref('')
+
+const isValidEmail = computed(() => {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailPattern.test(email.value)
+})
+
+
 </script>
 
 <style scoped>
