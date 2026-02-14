@@ -7,11 +7,22 @@ meta {
 delete {
   url: http://localhost:3000/api/users/me?permanent=true
   body: none
-  auth: inherit
+  auth: none
 }
 
 params:query {
   permanent: true
+}
+
+script:pre-request {
+  const token = bru.getEnvVar("token")
+  console.log(token)
+  const headerVar = "Bearer "+ token
+  req.setHeader("Authorization", headerVar)
+}
+
+script:post-response {
+  console.log(req)
 }
 
 tests {
@@ -29,7 +40,7 @@ tests {
     const message = body.message
     const expected = "User account deleted successfully."
     expect(body).to.have.property("message")
-    expect(message).to.equal(expect)
+    expect(message).to.equal(expected)
     if(message !== expect){
       bru.runner.stopExecution();
     }

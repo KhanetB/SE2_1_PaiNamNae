@@ -5,30 +5,36 @@ meta {
 }
 
 delete {
-  url: http://localhost:3000/api/user/me?permanent=true
+  url: http://localhost:3000/api/users/me?permanent=true
   body: none
-  auth: inherit
+  auth: none
 }
 
 params:query {
   permanent: true
 }
 
+script:pre-request {
+  const token = bru.getEnvVar("token")
+  console.log(token)
+  const headerVar = "Bearer "+ token
+  req.setHeader("Authorization", headerVar)
+}
+
 tests {
   test("resposne status should return unauthorized",function(){
     const status = res.getStatus();
-    const expectedStatus = 400
-    expect(res.getStatus()).to.equal(400);
+    const expectedStatus = 401
+    expect(status).to.equal(expectedStatus);
     if (status !== expectedStatus){
       bru.runner.stopExecution();
     }
   });
   
   test("resposne body should contain", function(){
-    const body = res.body()
+    const body = res.getBody();
     const message = body.message
     const expectedMessage = "Not authorized, token failed"
-    expect(body).to.have.property("message")
     expect(message).to.equal(expectedMessage)
     if(message !== expectedMessage){
       bru.runner.stopExecution();
