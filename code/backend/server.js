@@ -8,6 +8,7 @@ const promClient = require('prom-client');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./src/config/swagger');
 const routes = require('./src/routes');
+const exportRoutes = require('./src/routes/export.routes');
 const { errorHandler } = require('./src/middlewares/errorHandler');
 const ApiError = require('./src/utils/ApiError')
 const { metricsMiddleware } = require('./src/middlewares/metrics');
@@ -66,6 +67,9 @@ app.use('/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Main API Routes
 app.use('/api', routes);
+
+// Export Data Route
+app.use('/api/export', exportRoutes);
 
 app.use((req, res, next) => {
     next(new ApiError(404, `Cannot ${req.method} ${req.originalUrl}`));
