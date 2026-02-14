@@ -1,0 +1,28 @@
+meta {
+  name: TC03_Login
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3000/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "test@gmail.com",
+    "username": "testUser",
+    "password": 123456789
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

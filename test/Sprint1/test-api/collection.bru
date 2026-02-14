@@ -1,3 +1,21 @@
 auth {
   mode: bearer
 }
+
+docs {
+  มีไว้สำหรับ Test ตัวของ DELETE /api/users/me โดยขั้นตอนในการทดสอบ
+  1. Requst ไปที่ DELETE /api/users/me
+  Expected: HTTP Status 400
+  2. Request ไปที่ POST /api/users
+  Expected: HTTP Status 201
+  3. Request ไปที่ POST /auth/login
+  ข้อมูลที่ส่ง(JSON Body)
+  - email: test@gmail.com
+  - username: testUser
+  - password: 123456789
+  Expected: HTTP Status 200 และข้อความ "Login successful"
+  4. Request ไปที่ DELETE /api/users/me
+  Expected: HTTP Status 200 และข้อความ "User account deleted successfully"
+  5. Request ไปที่ DELETE /api/users/me
+  Expected: HTTP Status 404 แลข้อความ "user not found or already deleted"
+}
