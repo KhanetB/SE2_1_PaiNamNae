@@ -1,7 +1,7 @@
 meta {
   name: TC02_CreateUser
   type: http
-  seq: 1
+  seq: 3
 }
 
 post {
@@ -29,8 +29,17 @@ body:multipart-form {
   selfiePhotoUrl: @file(C:\Users\thana\Pictures\เอกสาร\img018.jpg) @contentType(image/jpeg)
 }
 
-assert {
-  res.status: eq 201
+tests {
+  test("resposne status should return 201 Created", function(){
+    const status = res.getStatus()
+    const expectedStatus = 201
+    expect(status).to.equal(expectedStatus);
+    if (status !== expectedStatus){
+      bru.runner.stopExecution();
+    }
+  });
+  
+  // bru.setNextRequest("TC03_Login");
 }
 
 settings {

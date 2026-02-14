@@ -10,8 +10,28 @@ delete {
   auth: inherit
 }
 
-assert {
-  res.status: eq 400
+tests {
+  test("resposne status should return unauthorized",function(){
+    const status = res.getStatus();
+    const expectedStatus = 400
+    expect(res.getStatus()).to.equal(400);
+    if (status !== expectedStatus){
+      bru.runner.stopExecution();
+    }
+  });
+  
+  test("resposne body should contain", function(){
+    const body = res.body()
+    const message = body.message
+    const expectedMessage = "Not authorized, token failed"
+    expect(body).to.have.property("message")
+    expect(message).to.equal(expectedMessage)
+    if(message !== expectedMessage){
+      bru.runner.stopExecution();
+    }
+  });
+  
+  // bru.setNextRequest("TC02_CreateUser");
 }
 
 settings {
