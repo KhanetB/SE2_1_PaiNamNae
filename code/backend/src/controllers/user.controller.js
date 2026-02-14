@@ -198,13 +198,23 @@ const setUserStatus = asyncHandler(async (req, res) => {
 
 // Delete user controller (soft delete by user themselves)
 const deleteUserController = asyncHandler(async(req,res) => {
+    const permanentDelete = req.query.permanent === 'true';
     const userId = req.user.sub;
+    if (permanentDelete) {
+        const deletedUser = await userService.deleteUser(userId);
+        return res.status(200).json({
+            success: true,
+            message: "User account permanently deleted.",
+            data: { deletedUserId: deletedUser.id }
+        });
+    }
     const deletedUser = await userService.softDeleteUser(userId, 'USER');
     res.status(200).json({
         success: true,
         message: "User account deleted successfully.",
         data: { deletedUserId: deletedUser.id }
     });
+
 })
 
 // Check trip routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
