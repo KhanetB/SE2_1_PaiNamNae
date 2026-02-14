@@ -2,6 +2,7 @@ const express = require('express');
 const validate = require('../middlewares/validate');
 const { protect, requireAdmin } = require('../middlewares/auth');
 const requireDriverVerified = require('../middlewares/driverVerified');
+const { anonymizeDeletedUsers } = require('../middlewares/anonymizeDeletedUsers');
 const bookingController = require('../controllers/booking.controller');
 const {
   createBookingSchema,
@@ -68,6 +69,7 @@ router.delete(
 router.get(
   '/me',
   protect,
+  anonymizeDeletedUsers,
   bookingController.getMyBookings
 );
 
@@ -76,6 +78,7 @@ router.get(
   '/:id',
   protect,
   validate({ params: idParamSchema }),
+  anonymizeDeletedUsers,
   bookingController.getBookingById
 );
 
