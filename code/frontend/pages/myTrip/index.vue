@@ -106,9 +106,9 @@
                                                 <li class="mt-1">
                                                     • จุดปลายทาง:
                                                     <span class="font-medium text-gray-900">{{ trip.destination
-                                                    }}</span>
+                                                        }}</span>
                                                     <span v-if="trip.destinationAddress"> — {{ trip.destinationAddress
-                                                    }}</span>
+                                                        }}</span>
                                                 </li>
                                             </ul>
                                         </div>
@@ -247,13 +247,24 @@
                         class="object-cover w-24 h-24 rounded-full" />
                     <h5 class="font-medium text-xl text-gray-900 mt-3">{{ tripToReview?.driver.name }}</h5>
 
-                    <!-- ⭐ Rating -->
-                    <div class="flex text-4xl cursor-pointer select-none">
-                        <span v-for="n in 5" :key="n" @click="reviewRating = n"
-                            :class="n <= reviewRating ? 'text-yellow-400' : 'text-gray-300'">
-                            ★
+                    <!-- Rating -->
+                    <div class="flex text-3xl cursor-pointer select-none">
+                        <span v-for="star in 5" :key="star" class="relative" @mousemove="setRating($event, star)"
+                            @click="setRating($event, star)">
+                            
+                            <span class="text-gray-300">★</span>
+
+                            <span class="absolute left-0 top-0 overflow-hidden text-yellow-400"
+                                :style="{ width: getStarFill(star) }">
+                                ★
+                            </span>
                         </span>
                     </div>
+
+                    <p class="mt-2 text-sm text-gray-600">
+                        {{ reviewRating }} ดาว
+                    </p>
+
                     <div class="m-3 flex flex-wrap gap-2">
                         <button v-for="tag in reviewTags" :key="tag" @click="toggleTag(tag)" type="button" :class="[
                             'px-3 py-1 text-sm rounded-full border transition',
@@ -274,7 +285,7 @@
                 <!-- photo upload -->
                 <div class="mt-4">
 
-                        <label class="block mb-1 text-md">เพิ่มรูปภาพ (สูงสุด 3 รูป)</label>
+                    <label class="block mb-1 text-md">เพิ่มรูปภาพ (สูงสุด 3 รูป)</label>
 
                     <div class="flex gap-3">
 
@@ -871,7 +882,6 @@ function initializeMap() {
 // ---- modal ----
 const isReviewModalVisible = ref(false)
 const tripToReview = ref(null)
-
 const reviewRating = ref(0)
 const reviewComment = ref('')
 const isSubmittingReview = ref(false)
@@ -938,6 +948,23 @@ function removeImage(index) {
     previewImages.value.splice(index, 1)
 }
 
+// rating
+function setRating(event, star) {
+  const { left, width } = event.target.getBoundingClientRect()
+  const clickX = event.clientX - left
+
+  if (clickX < width / 2) {
+    reviewRating.value = star - 0.5
+  } else {
+    reviewRating.value = star
+  }
+}
+
+function getStarFill(star) {
+    if (reviewRating.value >= star) return '100%'
+    if (reviewRating.value >= star - 0.5) return '50%'
+    return '0%'
+}
 
 </script>
 
