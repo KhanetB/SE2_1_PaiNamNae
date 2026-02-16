@@ -236,7 +236,8 @@ const deleteUser = async (id) => {
 // Service for user deletion
 
 // Soft delete by User
-const softDeleteUser = async (id, deletedBy = "USER", now = new Date()) => {
+// deleteDate: Date is for testing only
+const softDeleteUser = async (id, deletedBy = "USER", deleteDate = new Date()) => {
 	const checkDeletionStatus = await checkUserDeletionStatus(id);
 	if (!checkDeletionStatus.canDelete) {
 		throw new ApiError(
@@ -252,7 +253,7 @@ const softDeleteUser = async (id, deletedBy = "USER", now = new Date()) => {
 	const user = await prisma.user.update({
 		where: { id },
 		data: {
-			deletedAt: now,
+			deletedAt: deleteDate,
 			deletedBy,
 			isActive: false,
 		},
