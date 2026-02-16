@@ -476,6 +476,25 @@ const cancelRoute = asyncHandler(async (req, res) => {
   });
 });
 
+const startRoute = asyncHandler(async (req, res) => {
+  try{
+    const driverId = req.user.sub;
+    const { id } = req.params;
+    const result = await routeService.startRoute(id, driverId);
+    res.status(200).json({
+      success: true,
+      message: "Route started successfully",
+      data: result
+    });
+  }
+  catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to start route",
+    });
+  }
+});
+
 module.exports = {
   getAllRoutes,
   listRoutes,
@@ -490,4 +509,5 @@ module.exports = {
   adminDeleteRoute,
   adminGetRoutesByDriver,
   cancelRoute,
+  startRoute,
 };

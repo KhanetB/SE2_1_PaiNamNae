@@ -374,6 +374,44 @@ const cancelRoute = async (routeId, driverId, opts = {}) => {
   return { id: routeId, status: RouteStatus.CANCELLED, cancelledBy: 'DRIVER', cancelledAt: now };
 };
 
+const startRoute = async (routeId, driverId) => {
+  const route = await prisma.route.findUnique({
+    where: { id: routeId },
+    select: {
+      id: true,
+      driverId: true,
+      status: true,
+    },
+  });
+  if(route.status == RouteStatus.IN_TRANSIT) {
+    throw new ApiError(400, 'Route is already in transit');
+  }
+
+  if(route.status !== RouteStatus.AVAILABLE) {
+    throw new ApiError(400, 'Route is not in a state that can be started');
+  }
+
+  if (!route) {
+    throw new ApiError(404, 'Route not found');
+  }
+
+  if (route.driverId !== driverId) {
+    throw new ApiError(403, 'Forbidden - you are not the driver of this route');
+  }
+
+  if (route.status !== RouteStatus.AVAILABLE) {
+    throw new ApiError(400, 'Route is not available to start');
+  }
+
+  return prisma.route.update({
+    where: { id: routeId },
+    data: {
+      status: RouteStatus.IN_TRANSIT,
+      startedAt: new Date(),
+    },
+  });
+};
+
 module.exports = {
   getAllRoutes,
   searchRoutes,
@@ -382,5 +420,6 @@ module.exports = {
   createRoute,
   updateRoute,
   deleteRoute,
-  cancelRoute
+  cancelRoute,
+  startRoute,
 };
