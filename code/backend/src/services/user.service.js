@@ -4,149 +4,149 @@ const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 
 const searchUsers = async (opts = {}) => {
-  const {
-    page = 1,
-    limit = 20,
-    q,
-    role,
-    isActive,
-    isVerified,
-    createdFrom,
-    createdTo,
-    sortBy = "createdAt",
-    sortOrder = "desc",
-  } = opts;
+	const {
+		page = 1,
+		limit = 20,
+		q,
+		role,
+		isActive,
+		isVerified,
+		createdFrom,
+		createdTo,
+		sortBy = "createdAt",
+		sortOrder = "desc",
+	} = opts;
 
-  const where = {
-    ...(role && { role }),
-    ...(typeof isActive === "boolean" ? { isActive } : {}),
-    ...(typeof isVerified === "boolean" ? { isVerified } : {}),
-    ...(createdFrom || createdTo
-      ? {
-          createdAt: {
-            ...(createdFrom ? { gte: new Date(createdFrom) } : {}),
-            ...(createdTo ? { lte: new Date(createdTo) } : {}),
-          },
-        }
-      : {}),
-    ...(q
-      ? {
-          OR: [
-            { email: { contains: q, mode: "insensitive" } },
-            { username: { contains: q, mode: "insensitive" } },
-            { firstName: { contains: q, mode: "insensitive" } },
-            { lastName: { contains: q, mode: "insensitive" } },
-            { phoneNumber: { contains: q, mode: "insensitive" } },
-          ],
-        }
-      : {}),
-  };
+	const where = {
+		...(role && { role }),
+		...(typeof isActive === "boolean" ? { isActive } : {}),
+		...(typeof isVerified === "boolean" ? { isVerified } : {}),
+		...(createdFrom || createdTo
+			? {
+				createdAt: {
+					...(createdFrom ? { gte: new Date(createdFrom) } : {}),
+					...(createdTo ? { lte: new Date(createdTo) } : {}),
+				},
+			}
+			: {}),
+		...(q
+			? {
+				OR: [
+					{ email: { contains: q, mode: "insensitive" } },
+					{ username: { contains: q, mode: "insensitive" } },
+					{ firstName: { contains: q, mode: "insensitive" } },
+					{ lastName: { contains: q, mode: "insensitive" } },
+					{ phoneNumber: { contains: q, mode: "insensitive" } },
+				],
+			}
+			: {}),
+	};
 
-  const skip = (page - 1) * limit;
-  const take = limit;
+	const skip = (page - 1) * limit;
+	const take = limit;
 
-  const [total, dataRaw] = await prisma.$transaction([
-    prisma.user.count({ where }),
-    prisma.user.findMany({
-      where,
-      orderBy: { [sortBy]: sortOrder },
-      skip,
-      take,
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        firstName: true,
-        lastName: true,
-        gender: true,
-        phoneNumber: true,
-        profilePicture: true,
-        role: true,
-        isVerified: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    }),
-  ]);
+	const [total, dataRaw] = await prisma.$transaction([
+		prisma.user.count({ where }),
+		prisma.user.findMany({
+			where,
+			orderBy: { [sortBy]: sortOrder },
+			skip,
+			take,
+			select: {
+				id: true,
+				email: true,
+				username: true,
+				firstName: true,
+				lastName: true,
+				gender: true,
+				phoneNumber: true,
+				profilePicture: true,
+				role: true,
+				isVerified: true,
+				isActive: true,
+				createdAt: true,
+				updatedAt: true,
+			},
+		}),
+	]);
 
-  return {
-    data: dataRaw,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+	return {
+		data: dataRaw,
+		pagination: {
+			page,
+			limit,
+			total,
+			totalPages: Math.ceil(total / limit),
+		},
+	};
 };
 
 const getUserByEmail = async (email) => {
-  return await prisma.user.findUnique({ where: { email } });
+	return await prisma.user.findUnique({ where: { email } });
 };
 
 const getUserByUsername = async (username) => {
-  return await prisma.user.findUnique({ where: { username } });
+	return await prisma.user.findUnique({ where: { username } });
 };
 
 const comparePassword = async (user, plainPassword) => {
-  return bcrypt.compare(plainPassword, user.password);
+	return bcrypt.compare(plainPassword, user.password);
 };
 
 const getAllUsers = async () => {
-  const users = await prisma.user.findMany({
-    where: {
-      isActive: true,
-    },
-  });
+	const users = await prisma.user.findMany({
+		where: {
+			isActive: true,
+		},
+	});
 
-  // หรือจะสร้าง object ใหม่แบบนี้ก็ได้ (ปลอดภัยกว่า)
-  /*
-    const safeUsers = users.map(user => ({
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      // ... เอาฟิลด์อื่นๆ ที่ต้องการมาใส่ ...
-    }));
-    */
+	// หรือจะสร้าง object ใหม่แบบนี้ก็ได้ (ปลอดภัยกว่า)
+	/*
+	  const safeUsers = users.map(user => ({
+		id: user.id,
+		email: user.email,
+		username: user.username,
+		// ... เอาฟิลด์อื่นๆ ที่ต้องการมาใส่ ...
+	  }));
+	  */
 
-  return users.map((user) => {
-    const { password, ...safeUser } = user;
-    return safeUser;
-  });
+	return users.map((user) => {
+		const { password, ...safeUser } = user;
+		return safeUser;
+	});
 };
 
 const getUserById = async (id) => {
-  const user = await prisma.user.findUnique({
-    where: {
-      id,
-    },
-  });
+	const user = await prisma.user.findUnique({
+		where: {
+			id,
+		},
+	});
 
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
+	if (!user) {
+		throw new ApiError(404, "User not found");
+	}
 
-  const { password, ...safeUser } = user;
-  return safeUser;
+	const { password, ...safeUser } = user;
+	return safeUser;
 };
 
 const getUserPublicById = async (id) => {
-  const user = await prisma.user.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      profilePicture: true,
-      role: true,
-      isVerified: true,
-      createdAt: true,
-      deletedAt: true,
-    },
-  });
-  if (!user) throw new ApiError(404, "User not found");
-  return user;
+	const user = await prisma.user.findUnique({
+		where: { id },
+		select: {
+			id: true,
+			firstName: true,
+			lastName: true,
+			profilePicture: true,
+			role: true,
+			isVerified: true,
+			createdAt: true,
+			deletedAt: true,
+		},
+	});
+	if (!user) throw new ApiError(404, "User not found");
+	return user;
 };
 
 // const getMyUser = async (id) => {
@@ -161,104 +161,104 @@ const getUserPublicById = async (id) => {
 // }
 
 const createUser = async (data) => {
-  const existingUserByEmail = await getUserByEmail(data.email);
-  if (existingUserByEmail) {
-    throw new ApiError(409, "This email is already in use.");
-  }
-  const existingUserByUsername = await getUserByUsername(data.username);
-  if (existingUserByUsername) {
-    throw new ApiError(409, "This username is already taken.");
-  }
-  const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
+	const existingUserByEmail = await getUserByEmail(data.email);
+	if (existingUserByEmail) {
+		throw new ApiError(409, "This email is already in use.");
+	}
+	const existingUserByUsername = await getUserByUsername(data.username);
+	if (existingUserByUsername) {
+		throw new ApiError(409, "This username is already taken.");
+	}
+	const hashedPassword = await bcrypt.hash(data.password, SALT_ROUNDS);
 
-  const createData = {
-    email: data.email,
-    username: data.username,
-    password: hashedPassword,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    phoneNumber: data.phoneNumber,
-    gender: data.gender,
-    nationalIdNumber: data.nationalIdNumber,
-    nationalIdExpiryDate: new Date(data.nationalIdExpiryDate), // แปลง string เป็น Date object
-    nationalIdPhotoUrl: data.nationalIdPhotoUrl, // URL จาก Cloudinary
-    selfiePhotoUrl: data.selfiePhotoUrl, // URL จาก Cloudinary
-    role: data.role || "PASSENGER",
-  };
+	const createData = {
+		email: data.email,
+		username: data.username,
+		password: hashedPassword,
+		firstName: data.firstName,
+		lastName: data.lastName,
+		phoneNumber: data.phoneNumber,
+		gender: data.gender,
+		nationalIdNumber: data.nationalIdNumber,
+		nationalIdExpiryDate: new Date(data.nationalIdExpiryDate), // แปลง string เป็น Date object
+		nationalIdPhotoUrl: data.nationalIdPhotoUrl, // URL จาก Cloudinary
+		selfiePhotoUrl: data.selfiePhotoUrl, // URL จาก Cloudinary
+		role: data.role || "PASSENGER",
+	};
 
-  const user = await prisma.user.create({ data: createData });
+	const user = await prisma.user.create({ data: createData });
 
-  const { password, ...safeUser } = user;
-  return safeUser;
+	const { password, ...safeUser } = user;
+	return safeUser;
 };
 
 const updatePassword = async (userId, currentPassword, newPassword) => {
-  const userWithPassword = await prisma.user.findUnique({
-    where: { id: userId },
-  });
+	const userWithPassword = await prisma.user.findUnique({
+		where: { id: userId },
+	});
 
-  if (!userWithPassword) {
-    return { success: false, error: "USER_NOT_FOUND" };
-  }
+	if (!userWithPassword) {
+		return { success: false, error: "USER_NOT_FOUND" };
+	}
 
-  const isPasswordCorrect = await bcrypt.compare(
-    currentPassword,
-    userWithPassword.password,
-  );
+	const isPasswordCorrect = await bcrypt.compare(
+		currentPassword,
+		userWithPassword.password,
+	);
 
-  if (!isPasswordCorrect) {
-    return { success: false, error: "INCORRECT_PASSWORD" };
-  }
+	if (!isPasswordCorrect) {
+		return { success: false, error: "INCORRECT_PASSWORD" };
+	}
 
-  const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+	const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { password: hashedNewPassword },
-  });
+	await prisma.user.update({
+		where: { id: userId },
+		data: { password: hashedNewPassword },
+	});
 
-  return { success: true };
+	return { success: true };
 };
 
 const updateUserProfile = async (id, data) => {
-  const updatedUser = await prisma.user.update({ where: { id }, data });
+	const updatedUser = await prisma.user.update({ where: { id }, data });
 
-  const { password, ...safeUser } = updatedUser;
-  return safeUser;
+	const { password, ...safeUser } = updatedUser;
+	return safeUser;
 };
 
 const deleteUser = async (id) => {
-  const deletedUser = await prisma.user.delete({ where: { id } });
+	const deletedUser = await prisma.user.delete({ where: { id } });
 
-  const { password, ...safeDeletedUser } = deletedUser;
-  return safeDeletedUser;
+	const { password, ...safeDeletedUser } = deletedUser;
+	return safeDeletedUser;
 };
 // Service for user deletion
 
 // Soft delete by User
-const softDeleteUser = async (id, deletedBy = "USER") => {
-  const checkDeletionStatus = await checkUserDeletionStatus(id);
-  if (!checkDeletionStatus.canDelete) {
-    throw new ApiError(
-      400,
-      `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`,
-    );
-  }
-  // if user already soft deleted
-  const existingUser = await prisma.user.findUnique({ where: { id } });
-  if (!existingUser || existingUser.deletedAt) {
-    throw new ApiError(404, "User not found or already deleted");
-  }
-  const user = await prisma.user.update({
-    where: { id },
-    data: {
-      deletedAt: new Date(),
-      deletedBy,
-      isActive: false,
-    },
-  });
-  const { password, ...safeUser } = user;
-  return safeUser;
+const softDeleteUser = async (id, deletedBy = "USER", now = new Date()) => {
+	const checkDeletionStatus = await checkUserDeletionStatus(id);
+	if (!checkDeletionStatus.canDelete) {
+		throw new ApiError(
+			400,
+			`ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`,
+		);
+	}
+	// if user already soft deleted
+	const existingUser = await prisma.user.findUnique({ where: { id } });
+	if (!existingUser || existingUser.deletedAt) {
+		throw new ApiError(404, "User not found or already deleted");
+	}
+	const user = await prisma.user.update({
+		where: { id },
+		data: {
+			deletedAt: now,
+			deletedBy,
+			isActive: false,
+		},
+	});
+	const { password, ...safeUser } = user;
+	return safeUser;
 };
 
 // Check routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
@@ -266,42 +266,42 @@ const ACTIVE_ROUTE_STATUSES = ["AVAILABLE", "FULL", "IN_TRANSIT"];
 const ACTIVE_BOOKING_STATUSES = ["PENDING", "CONFIRMED"];
 
 const checkUserDeletionStatus = async (userId) => {
-  // Check if user has any active driver routes or passenger bookings
-  const [driverRouteCount, passengerBookingCount] = await Promise.all([
-    prisma.route.count({
-      where: {
-        driverId: userId,
-        status: { in: ACTIVE_ROUTE_STATUSES },
-      },
-    }),
-    prisma.booking.count({
-      where: {
-        passengerId: userId,
-        status: { in: ACTIVE_BOOKING_STATUSES },
-        route: {
-          status: { in: ACTIVE_ROUTE_STATUSES },
-        },
-      },
-    }),
-  ]);
-  // Return result
-  let messages = [];
-  if (driverRouteCount > 0) {
-    messages.push("คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด");
-  }
-  if (passengerBookingCount > 0) {
-    messages.push("คุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด");
-  }
-  if (messages.length > 0) {
-    return {
-      canDelete: false,
-      message: messages.join(" และ "),
-    };
-  }
-  return {
-    canDelete: true,
-    message: "ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้",
-  };
+	// Check if user has any active driver routes or passenger bookings
+	const [driverRouteCount, passengerBookingCount] = await Promise.all([
+		prisma.route.count({
+			where: {
+				driverId: userId,
+				status: { in: ACTIVE_ROUTE_STATUSES },
+			},
+		}),
+		prisma.booking.count({
+			where: {
+				passengerId: userId,
+				status: { in: ACTIVE_BOOKING_STATUSES },
+				route: {
+					status: { in: ACTIVE_ROUTE_STATUSES },
+				},
+			},
+		}),
+	]);
+	// Return result
+	let messages = [];
+	if (driverRouteCount > 0) {
+		messages.push("คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด");
+	}
+	if (passengerBookingCount > 0) {
+		messages.push("คุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด");
+	}
+	if (messages.length > 0) {
+		return {
+			canDelete: false,
+			message: messages.join(" และ "),
+		};
+	}
+	return {
+		canDelete: true,
+		message: "ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้",
+	};
 };
 
 // const setUserStatusActive = async (id, isActive) => {
@@ -325,17 +325,17 @@ const checkUserDeletionStatus = async (userId) => {
 // };
 
 module.exports = {
-  searchUsers,
-  getAllUsers,
-  getUserById,
-  createUser,
-  getUserByEmail,
-  getUserByUsername,
-  comparePassword,
-  updatePassword,
-  deleteUser,
-  updateUserProfile,
-  getUserPublicById,
-  softDeleteUser,
-  checkUserDeletionStatus,
+	searchUsers,
+	getAllUsers,
+	getUserById,
+	createUser,
+	getUserByEmail,
+	getUserByUsername,
+	comparePassword,
+	updatePassword,
+	deleteUser,
+	updateUserProfile,
+	getUserPublicById,
+	softDeleteUser,
+	checkUserDeletionStatus,
 };
