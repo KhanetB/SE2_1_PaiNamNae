@@ -1,8 +1,11 @@
 const express = require("express");
 const userController = require("../controllers/user.controller");
-<<<<<<< HEAD
+
 const validate = require("../middlewares/validate");
 const upload = require("../middlewares/upload.middleware");
+const {
+  anonymizeDeletedUsers,
+} = require("../middlewares/anonymizeDeletedUsers");
 const {
   idParamSchema,
   createUserSchema,
@@ -12,13 +15,6 @@ const {
   listUsersQuerySchema,
 } = require("../validations/user.validation");
 const { protect, requireAdmin } = require("../middlewares/auth");
-=======
-const validate = require('../middlewares/validate');
-const upload = require('../middlewares/upload.middleware');
-const { anonymizeDeletedUsers } = require('../middlewares/anonymizeDeletedUsers');
-const { idParamSchema, createUserSchema, updateMyProfileSchema, updateUserByAdminSchema, updateUserStatusSchema, listUsersQuerySchema } = require('../validations/user.validation');
-const { protect, requireAdmin } = require('../middlewares/auth');
->>>>>>> origin/Phuri_2283
 
 const router = express.Router();
 
@@ -76,34 +72,20 @@ router.patch(
 
 // --- Public / User-specific Routes ---
 // GET /api/users/me
-<<<<<<< HEAD
 router.get("/me", protect, userController.getMyUser);
+// GET /api/users/check-deletion-status
+router.get(
+  "/check-deletion-status",
+  protect,
+  userController.checkUserDeletionStatus,
+);
 
 // GET /api/users/:id
 router.get(
   "/:id",
   validate({ params: idParamSchema }),
+  anonymizeDeletedUsers,
   userController.getUserPublicById,
-=======
-router.get(
-    '/me',
-    protect,
-    userController.getMyUser
-);
-// GET /api/users/check-deletion-status
-router.get(
-    '/check-deletion-status',
-    protect,
-    userController.checkUserDeletionStatus
-);
-
-// GET /api/users/:id
-router.get(
-    '/:id',
-    validate({ params: idParamSchema }),
-    anonymizeDeletedUsers,
-    userController.getUserPublicById
->>>>>>> origin/Phuri_2283
 );
 
 // POST /api/users
@@ -130,17 +112,7 @@ router.put(
   userController.updateCurrentUserProfile,
 );
 
-<<<<<<< HEAD
-module.exports = router;
-=======
 // DELETE /api/users/me
-router.delete(
-    '/me',
-    protect,
-    userController.deleteUserController
-);
-
-
+router.delete("/me", protect, userController.deleteUserController);
 
 module.exports = router;
->>>>>>> origin/Phuri_2283

@@ -12,7 +12,7 @@ const { errorHandler } = require("./src/middlewares/errorHandler");
 const ApiError = require("./src/utils/ApiError");
 const { metricsMiddleware } = require("./src/middlewares/metrics");
 const ensureAdmin = require("./src/bootstrap/ensureAdmin");
-const startCleanuoCron = require("./src/cron/cleanupCron");
+const { startCleanuoCron } = require("./src/cron/cleanupCron");
 
 const app = express();
 promClient.collectDefaultMetrics();
@@ -90,6 +90,8 @@ const PORT = process.env.PORT || 3000;
     console.log(
       `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
     );
+
+    startCleanuoCron();
   });
 })();
 // Graceful Shutdown

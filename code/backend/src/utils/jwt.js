@@ -1,7 +1,8 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
-const secret = "p36mLy5CRaepXDXXRegGMQX+ioodkAZhPxSBhAHAWkw=";
+const secret = process.env.JWT_SECRET;
+
 if (!secret) {
   throw new Error("Missing JWT_SECRET in environment");
 }

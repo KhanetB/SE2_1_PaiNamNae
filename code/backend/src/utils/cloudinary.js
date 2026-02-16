@@ -60,13 +60,19 @@ const deleteManyFromCloudinary = async (imageUrls) => {
   const publicIds = imageUrls
     .map(getPublicIdFromUrl)
     .filter((id) => id !== null);
+  console.log("Public IDs:", publicIds);
 
   if (publicIds.length === 0) return;
 
   try {
-    const result = await cloudinary.api.delete_resources(publicIds);
+    const result = await cloudinary.api.delete_resources(publicIds, {
+      invalidate: true,
+    });
+    console.log("Result: ", result);
+
     return result;
   } catch (error) {
+    console.error("Error when remove image in cloud: ", error);
     return null;
   }
 };
