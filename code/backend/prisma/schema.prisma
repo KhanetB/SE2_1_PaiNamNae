@@ -60,6 +60,13 @@ enum NotificationType {
   ROUTE
 }
 
+enum ReviewLabel {
+  SAFE_DRIVING        // ขับขี่ปลอดภัย
+  CLEAN_CAR           // สะอาด รถน่านั่ง
+  FRIENDLY_DRIVER     // คนขับอัธยาศัยดี
+  GOOD_MUSIC          // ชอบเพลงที่เปิด
+}
+
 model User {
   id                      String              @id @default(cuid())
   username                String              @unique
@@ -89,7 +96,11 @@ model User {
   createdRoutes           Route[]             @relation("DriverRoutes")
   bookings                Booking[]           @relation("PassengerBookings")
   deletedAt               DateTime?          
-  deletedBy               String?             
+  deletedBy               String?           
+
+  PassengerReviews        Review[]            @relation("PassengerReviews")
+  DriverReviews           Review[]            @relation("DriverReviews")
+
 
   @@index([role])
   @@index([isActive])
@@ -213,4 +224,32 @@ model Booking {
   pickupLocation  Json          @db.Json
   dropoffLocation Json          @db.Json
   createdAt       DateTime      @default(now())
+  
+  review          Review?
 }
+
+model Review {
+  id          String        @id @default(cuid())
+
+  bookingId   String        @unique
+  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  driverId    String 
+  driver      User          @relation("DriverReviews", fields: [driverId], references: [id], onDelete: Cascade)
+
+  passengerId String
+  passenger   User          @relation("PassengerReviews", fields: [passengerId], references: [id], onDelete: Cascade)
+
+  rating      Float
+  comment     String?
+
+  images      String[]
+  labels      ReviewLabel[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([driverId, createdAt])
+  @@index([passengerId, createdAt])
+}
+
