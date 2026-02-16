@@ -440,6 +440,47 @@ const startRoute = async (routeId, driverId) => {
   };
 };
 
+// Update ว่า ROUTE นั้น COMPLETE
+const completeRoute = async (routeId, driverId) => {
+  const route = await prisma.route.findUnique({
+    where: { id: routeId },
+    select: {
+      id: true,
+      driverId: true,
+      status: true,
+    },
+  });
+  if (!route) {
+    throw new ApiError(404, 'Route not found');
+  }
+  if (route.driverId !== driverId) {
+    throw new ApiError(403, 'Forbidden - you are not the driver of this route');
+  }
+  if (route.status !== RouteStatus.IN_TRANSIT) {
+    throw new ApiError(400, 'Route is not in transit and cannot be completed');
+  }
+  //All booking in this route must be COMPLETED 
+  const allBookingsCompleted = await prisma.booking.count({
+    where: {
+      routeId,
+      status: {
+        not: BookingStatus.COMPLETED,
+      },
+    },
+  }) === 0;
+  if (!allBookingsCompleted) {
+    throw new ApiError(400, 'All bookings must be completed before completing the route');
+  }
+  const updatedRoute = await prisma.route.update({
+    where: { id: routeId },
+    data: {
+      status: RouteStatus.COMPLETED,
+      completedAt: new Date(),
+    },
+  });
+  return updatedRoute;  
+}
+
 
 module.exports = {
   getAllRoutes,
