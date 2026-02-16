@@ -456,9 +456,13 @@ const completeRoute = async (routeId, driverId) => {
   if (route.driverId !== driverId) {
     throw new ApiError(403, 'Forbidden - you are not the driver of this route');
   }
+  if (route.status === RouteStatus.COMPLETED) {
+    throw new ApiError(400, 'Route is already completed');
+  }
   if (route.status !== RouteStatus.IN_TRANSIT) {
     throw new ApiError(400, 'Route is not in transit and cannot be completed');
   }
+
   //All booking in this route must be COMPLETED 
   const allBookingsCompleted = await prisma.booking.count({
     where: {
@@ -492,4 +496,5 @@ module.exports = {
   deleteRoute,
   cancelRoute,
   startRoute,
+  completeRoute,
 };

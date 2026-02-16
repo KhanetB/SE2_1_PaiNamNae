@@ -567,16 +567,7 @@ const driverConfirmDropOff = async (bookingId, driverId) => {
         status: BookingStatus.COMPLETED,
         completedAt: now,
       },
-    });
-
-    await tx.route.update({
-      where: { id: booking.routeId },
-      data: {
-        status: RouteStatus.COMPLETED,
-        completedAt: now,
-      },
-    });
-
+    }); 
     return updatedBooking;
   });
 };
