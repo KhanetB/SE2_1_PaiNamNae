@@ -221,10 +221,10 @@
             @cancel="closeConfirmModal" />
 
         <!-- Review Modal -->
-        <div v-if="isReviewModalVisible" class="fixed overflow-y-auto inset-0 z-50 flex items-center justify-center bg-black/40"
+        <div v-if="isReviewModalVisible" class="fixed  inset-0 z-50 flex items-center justify-center bg-black/40"
             @click.self="closeReviewModal">
 
-            <div class="w-4xl p-6 bg-white rounded-lg shadow-xl overflow-y">
+            <div class="w-4xl p-6 bg-white rounded-lg shadow-xl overflow-y-auto max-h-[90vh]">
                 <h3 class="text-3xl font-semibold text-gray-900">
                     รีวิวการเดินทาง
                 </h3>
