@@ -12,7 +12,8 @@ const baseInclude = {
       lastName: true,
       gender: true,
       profilePicture: true,
-      isVerified: true
+      isVerified: true,
+      deletedAt: true
     }
   },
   vehicle: {
@@ -249,7 +250,8 @@ const getRouteById = async (id) => {
               id: true,
               firstName: true,
               lastName: true,
-              profilePicture: true
+              profilePicture: true,
+              deletedAt: true
             }
           }
         }
@@ -275,7 +277,8 @@ const getMyRoutes = async (driverId) => {
               lastName: true,
               profilePicture: true,
               isVerified: true,
-              email: true
+              email: true,
+              deletedAt: true
             }
           }
         }
@@ -371,6 +374,118 @@ const cancelRoute = async (routeId, driverId, opts = {}) => {
   return { id: routeId, status: RouteStatus.CANCELLED, cancelledBy: 'DRIVER', cancelledAt: now };
 };
 
+const startRoute = async (routeId, driverId) => {
+  const route = await prisma.route.findUnique({
+    where: { id: routeId },
+    select: {
+      id: true,
+      driverId: true,
+      status: true,
+    },
+  });
+
+  if (!route) {
+    throw new ApiError(404, 'Route not found');
+  }
+
+  if (route.driverId !== driverId) {
+    throw new ApiError(403, 'Forbidden - you are not the driver of this route');
+  }
+
+  if (route.status === RouteStatus.IN_TRANSIT) {
+    throw new ApiError(400, 'Route is already in transit');
+  }
+
+  if (route.status !== RouteStatus.AVAILABLE) {
+    throw new ApiError(400, 'Route is not in a state that can be started');
+  }
+
+  // เช็คว่ามี booking ที่ยังไม่ CONFIRMED ไหม
+  const pendingBooking = await prisma.booking.findFirst({
+    where: {
+      routeId,
+      status: {
+        not: BookingStatus.CONFIRMED,
+      },
+    },
+  });
+
+  if (pendingBooking) {
+    throw new ApiError(400,'Cannot start route with pending bookings. Please confirm or reject all bookings first.');
+  }
+
+  // Update route
+  const updatedRoute = await prisma.route.update({
+    where: { id: routeId },
+    data: {
+      status: RouteStatus.IN_TRANSIT,
+      startedAt: new Date(),
+    },
+  });
+
+  // Update bookings (ตอนนี้มั่นใจแล้วว่ามีแต่ CONFIRMED)
+  const updatedBookings = await prisma.booking.updateMany({
+    where: {
+      routeId,
+      status: BookingStatus.CONFIRMED,
+    },
+    data: {
+      status: BookingStatus.IN_TRANSIT,
+    },
+  });
+
+  return {
+    route: updatedRoute,
+    updatedBookingCount: updatedBookings.count,
+  };
+};
+
+// Update ว่า ROUTE นั้น COMPLETE
+const completeRoute = async (routeId, driverId) => {
+  const route = await prisma.route.findUnique({
+    where: { id: routeId },
+    select: {
+      id: true,
+      driverId: true,
+      status: true,
+    },
+  });
+  if (!route) {
+    throw new ApiError(404, 'Route not found');
+  }
+  if (route.driverId !== driverId) {
+    throw new ApiError(403, 'Forbidden - you are not the driver of this route');
+  }
+  if (route.status === RouteStatus.COMPLETED) {
+    throw new ApiError(400, 'Route is already completed');
+  }
+  if (route.status !== RouteStatus.IN_TRANSIT) {
+    throw new ApiError(400, 'Route is not in transit and cannot be completed');
+  }
+
+  //All booking in this route must be COMPLETED 
+  const allBookingsCompleted = await prisma.booking.count({
+    where: {
+      routeId,
+      status: {
+        not: BookingStatus.COMPLETED,
+      },
+    },
+  }) === 0;
+  if (!allBookingsCompleted) {
+    throw new ApiError(400, 'All bookings must be completed before completing the route');
+  }
+  const updatedRoute = await prisma.route.update({
+    where: { id: routeId },
+    data: {
+      status: RouteStatus.COMPLETED,
+      completedAt: new Date(),
+    },
+  });
+  return updatedRoute;  
+}
+
+
 module.exports = {
   getAllRoutes,
   searchRoutes,
@@ -379,5 +494,7 @@ module.exports = {
   createRoute,
   updateRoute,
   deleteRoute,
-  cancelRoute
+  cancelRoute,
+  startRoute,
+  completeRoute,
 };
