@@ -12,7 +12,8 @@ const baseInclude = {
       lastName: true,
       gender: true,
       profilePicture: true,
-      isVerified: true
+      isVerified: true,
+      deletedAt: true
     }
   },
   vehicle: {
@@ -249,7 +250,8 @@ const getRouteById = async (id) => {
               id: true,
               firstName: true,
               lastName: true,
-              profilePicture: true
+              profilePicture: true,
+              deletedAt: true
             }
           }
         }
@@ -275,7 +277,8 @@ const getMyRoutes = async (driverId) => {
               lastName: true,
               profilePicture: true,
               isVerified: true,
-              email: true
+              email: true,
+              deletedAt: true
             }
           }
         }
