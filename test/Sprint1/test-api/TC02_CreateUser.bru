@@ -25,13 +25,14 @@ body:multipart-form {
   gender: MALE
   nationalIdNumber: 9351407024077
   nationalIdExpiryDate: 2030-12-31T00:00:00.000Z
-  nationalIdPhotoUrl: @file(C:\Users\thana\Pictures\เอกสาร\002.jpg) @contentType(image/jpeg)
-  selfiePhotoUrl: @file(C:\Users\thana\Pictures\เอกสาร\img018.jpg) @contentType(image/jpeg)
+  nationalIdPhotoUrl: @file(person.jpg) @contentType(image/jpeg)
+  selfiePhotoUrl: @file(person.jpg) @contentType(image/jpeg)
 }
 
 tests {
   test("resposne status should return 201 Created", function(){
     const status = res.getStatus()
+    console.log(res.getBody())
     const expectedStatus = 201
     expect(status).to.equal(expectedStatus);
     if (status !== expectedStatus){
