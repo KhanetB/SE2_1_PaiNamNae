@@ -75,7 +75,7 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 // --- Cron job for hard delete ---
-startCleanuoCron();
+// startCleanuoCron();
 
 // --- Start Server ---
 const PORT = process.env.PORT || 3000;
