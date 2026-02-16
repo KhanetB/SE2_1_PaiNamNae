@@ -220,10 +220,25 @@
 
                     <button
                         class="bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        :disabled="!isValidEmail"
+                        :disabled="!isValidEmail || isLoading"
                         @click="confirmDelete"
                     >
-                        ยืนยันลบบัญชี
+                        <span v-if="!isLoading">ยืนยันการลบัญชี</span>
+                        <span v-else class="flex items-center gap-2"
+                            ><svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    fill="white"
+                                    d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+                                    class="spinner_P7sC"
+                                />
+                            </svg>
+                            กำลังดำเนินการ...</span
+                        >
                     </button>
                 </div>
             </div>
@@ -284,6 +299,8 @@ import { ExclamationCircleIcon } from "@heroicons/vue/24/solid";
 
 const { $api } = useNuxtApp();
 
+const config = useRuntimeConfig();
+
 const props = defineProps({
     isVisible: Boolean,
 });
@@ -293,6 +310,8 @@ const emit = defineEmits(["close", "confirm"]);
 const step = ref(1);
 const acceptTerms = ref(false);
 const email = ref("");
+
+const isLoading = ref(false);
 
 const closeModal = () => {
     step.value = 1;
@@ -306,23 +325,84 @@ const goToEmailStep = () => {
     step.value = 2;
 };
 
+const downloadMyData = async () => {
+    const token =
+        useCookie("token").value ||
+        (process.client ? localStorage.getItem("token") : "");
+
+    if (!token) {
+        throw new Error("Unauthorized: token not found in download my data");
+    }
+    const response = await fetch(`${config.public.apiBase}export/me`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error("Download failed");
+    }
+
+    const blob = await response.blob();
+
+    const contentDisposition = response.headers.get("content-disposition");
+    let fileName = "my-data.json";
+
+    if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?(.+)"?/);
+        if (match?.[-1]) {
+            fileName = match[1];
+        }
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+};
+
+const sendBackupToEmail = async () => {
+    const token =
+        useCookie("token").value ||
+        (process.client ? localStorage.getItem("token") : "");
+
+    if (!token) {
+        throw new Error(
+            "Unauthorized: token not found in send backup to email",
+        );
+    }
+    await $fetch(`/export/email`, {
+        method: "POST",
+        baseURL: config.public.apiBase,
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: {
+            email: email.value,
+        },
+    });
+};
+
 // เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ
 const confirmDelete = async () => {
-    console.log("ลบบัญชีด้วยอีเมล:", email.value);
-    // if complete set step.value = 3
-    // if not complete set step.value = 4
-
-    const config = useRuntimeConfig();
     const router = useRouter();
     try {
+        isLoading.value = true;
         const token =
             useCookie("token").value ||
             (process.client ? localStorage.getItem("token") : "");
-        // console.log("Token: ", token);
 
         if (!token) {
             throw new Error("Unauthorized");
         }
+        // await Promise.all([downloadMyData(), sendBackupToEmail()]);
 
         const response = await $fetch(`/users/me`, {
             method: "DELETE",
@@ -334,7 +414,7 @@ const confirmDelete = async () => {
             },
         });
         console.log("Delete success: ", response);
-
+        await sendBackupToEmail();
         useCookie("token").value = null;
         useCookie("user").value = null;
         useCookie("session").value = null;
@@ -344,22 +424,6 @@ const confirmDelete = async () => {
         }
 
         step.value = 3;
-        emit("confirm");
-
-        // const emailResponse = await fetch(`${apiBase}/users/email`, {
-        //   method: "POST",
-        //   credentials: "include",
-        //   headers: {
-        //     "Content-Type": "application/json"
-        //   },
-        //   body: JSON.stringify({
-        //     email: email.value
-        //   })
-        // })
-
-        // if (!emailResponse.ok) {
-        //   throw new Error("ส่งอีเมลไม่สำเร็จ");
-        // }
     } catch (error) {
         console.error("Error deleting account: ", error);
         if (error?.data?.message) {
@@ -367,10 +431,13 @@ const confirmDelete = async () => {
         }
 
         step.value = 4;
+    } finally {
+        isLoading.value = false;
     }
 };
 
 const finishDelete = async () => {
+    emit("confirm");
     const router = useRouter();
     await router.push("/");
     closeModal();
@@ -415,6 +482,16 @@ const isValidEmail = computed(() => {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+.spinner_P7sC {
+    transform-origin: center;
+    animation: spinner_svv2 0.75s infinite linear;
+}
+@keyframes spinner_svv2 {
+    100% {
+        transform: rotate(360deg);
     }
 }
 </style>
