@@ -30,6 +30,9 @@ enum RouteStatus {
 enum BookingStatus {
   PENDING
   CONFIRMED
+  IN_TRANSIT
+  PASSENGER_CONFIRMED_ARRIVAL
+  COMPLETED
   REJECTED
   CANCELLED
 }
@@ -200,6 +203,8 @@ model Route {
   steps           Json?       @db.Json
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  startedAt       DateTime?
+  completedAt     DateTime?
 
   bookings Booking[]
 
@@ -224,6 +229,10 @@ model Booking {
   pickupLocation  Json          @db.Json
   dropoffLocation Json          @db.Json
   createdAt       DateTime      @default(now())
+
+  inTransitAt     DateTime?
+  passengerComfirmedAt DateTime?
+  completedAt     DateTime?
   
   review          Review?
 }
