@@ -48,6 +48,10 @@
                                                 class="status-badge status-rejected">ปฏิเสธ</span>
                                             <span v-else-if="trip.status === 'cancelled'"
                                                 class="status-badge status-cancelled">ยกเลิก</span>
+                                            <span v-else-if="trip.status === 'mytrip' || trip.status === 'mytrip'"
+                                                 class="status-badge status-mytrip">เส้นทางของฉัน</span>
+                                            <span v-else-if="trip.status === 'completed' || trip.status === 'mytrip'"
+                                                 class="status-badge status-completed">เสร็จสิ้น</span>
                                         </div>
                                         <p class="mt-1 text-sm text-gray-600">จุดนัดพบ: {{ trip.pickupPoint }}</p>
                                         <p class="text-sm text-gray-600">
@@ -166,6 +170,35 @@
                                         class="px-4 py-2 text-sm text-gray-600 transition duration-200 border border-gray-300 rounded-md hover:bg-gray-50">
                                         ลบรายการ
                                     </button>
+
+                                    <!-- Active Mytrip: ยืนยันการลง -->
+                                        <button v-else-if="trip.status === 'mytrip'"
+                                            class="px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700"
+                                            @click.stop="handleConfirmTrip(trip)">
+                                            ยืนยันการเดินทาง
+                                        </button>
+                                    
+                                    <!-- Completed: รีวิว -->
+                                    <template v-else-if="trip.status === 'completed'">
+                                        <!-- ยังไม่รีวิว -->
+                                        <button v-if="!trip.hasReviewed && within7Days(trip.completed)"
+                                            @click.stop="openReviewModal(trip)"
+                                            class="px-4 py-2 text-sm text-blue-600 transition duration-200 bg-white border border-blue-600 rounded-md hover:bg-blue-700 hover:text-white">
+                                            รีวิวการเดินทาง
+                                        </button>
+                                        <!-- รีวิวแล้ว: แก้ไข (7 วัน) -->
+                                        <button v-else-if="trip.hasReviewed && within7Days(trip.completed)"
+                                            @click.stop="openEditReviewModal(trip)"
+                                            class="px-4 py-2 text-sm text-yellow-600 transition duration-200 bg-white border border-yellow-600 rounded-md hover:bg-yellow-700 hover:text-white">
+                                            แก้ไข
+                                        </button>
+                                        <!-- รีวิวแล้ว: ลบ (ไม่จำกัดเวลา) -->
+                                        <button v-if="trip.hasReviewed"
+                                            @click.stop="openDeleteReviewModal(trip)"
+                                            class="px-4 py-2 text-sm text-red-600 transition duration-200 bg-white border border-red-600 rounded-md hover:bg-red-700 hover:text-white">
+                                            ลบ
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -223,6 +256,16 @@
 </template>
 
 <script setup>
+// เมื่อผู้โดยสารกด ยืนยันการเดินทางจะส่งให้ผู้ขับกดยืนยันอีกครั้ง
+async function handleConfirmTrip(trip) {
+    try {
+        await $api(`/bookings/${trip.id}/status`, { method: 'PATCH', body: { status: 'pending_review' } })
+        toast.success('ส่งคำขอยืนยันไปยังคนขับแล้ว', 'กรุณารอคนขับยืนยันการเดินทาง')
+        await fetchMyTrips()
+    } catch (error) {
+        toast.error('เกิดข้อผิดพลาด', error?.data?.message || 'ไม่สามารถยืนยันการเดินทางได้')
+    }
+}
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
@@ -242,6 +285,8 @@ const activeTab = ref('pending')
 const selectedTripId = ref(null)
 const isLoading = ref(false)
 const mapContainer = ref(null)
+const mytrip = ref([])
+
 let map = null
 let currentPolyline = null
 let currentMarkers = []
@@ -263,6 +308,7 @@ const tabs = [
     { status: 'confirmed', label: 'ยืนยันแล้ว' },
     { status: 'rejected', label: 'ปฏิเสธ' },
     { status: 'cancelled', label: 'ยกเลิก' },
+    { status: 'mytrip', label: 'เส้นทางของฉัน' },
     { status: 'all', label: 'ทั้งหมด' }
 ]
 
@@ -304,6 +350,21 @@ function cleanAddr(a) {
 }
 
 // --- Methods ---
+// ตรวจสอบว่าอยู่ใน 7 วันหลัง completed หรือไม่
+function within7Days(completedDate) {
+    if (!completedDate) return false
+    const now = dayjs()
+    const completed = dayjs(completedDate)
+    return now.isAfter(completed) && now.diff(completed, 'day') < 7
+}
+// --- Review Modal Actions ---
+function openEditReviewModal(trip) {
+    toast.info('ฟีเจอร์แก้ไขรีวิว ยังไม่เปิดใช้งาน')
+}
+
+function openDeleteReviewModal(trip) {
+    toast.info('ฟีเจอร์ลบรีวิว ยังไม่เปิดใช้งาน')
+}
 async function fetchMyTrips() {
     isLoading.value = true
     try {
@@ -393,7 +454,7 @@ async function fetchMyTrips() {
                     (typeof b.route.distanceMeters === 'number' ? `${(b.route.distanceMeters / 1000).toFixed(1)} กม.` : '-')
             }
         })
-
+        
         allTrips.value = formatted
 
         // รอให้แผนที่พร้อมก่อน แล้วค่อย reverse geocode เพื่อได้ "ชื่อสถานที่" สวยๆ
@@ -833,6 +894,11 @@ function initializeMap() {
 .status-cancelled {
     background-color: #f3f4f6;
     color: #6b7280;
+}
+
+.status-mytrip {
+    background-color: #e0e7ff;
+    color: #3730a3;
 }
 
 @keyframes slide-in-from-top {

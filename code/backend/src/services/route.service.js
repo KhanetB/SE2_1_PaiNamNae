@@ -400,7 +400,7 @@ const startRoute = async (routeId, driverId) => {
     throw new ApiError(400, 'Route is not in a state that can be started');
   }
 
-  // ✅ เช็คว่ามี booking ที่ยังไม่ CONFIRMED ไหม
+  // เช็คว่ามี booking ที่ยังไม่ CONFIRMED ไหม
   const pendingBooking = await prisma.booking.findFirst({
     where: {
       routeId,
