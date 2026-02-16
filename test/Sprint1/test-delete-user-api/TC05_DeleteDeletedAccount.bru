@@ -1,0 +1,47 @@
+meta {
+  name: TC05_DeleteDeletedAccount
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:3000/api/users/me?permanent=true
+  body: none
+  auth: bearer
+}
+
+params:query {
+  permanent: true
+}
+
+script:pre-request {
+  const token = bru.getEnvVar("token")
+  console.log(token)
+  const headerVar = "Bearer "+ token
+  req.setHeader("Authorization", headerVar)
+}
+
+tests {
+  test("resposne status should return 404", function(){
+    const status = res.getStatus();
+    const expected = 404;
+    expect(status).to.equal(expected);
+  });
+  
+  
+  test('response body should contain message', function(){
+    const body = res.getBody();
+    const message = body.message
+    const expected = "ไม่พบข้อมูลที่ต้องการ"
+    bru.setEnvVar("token", "")
+    console.log(bru.getEnvVar("token"))
+    expect(body).to.have.property("message")
+    expect(message).to.equal(expected)
+  })
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
