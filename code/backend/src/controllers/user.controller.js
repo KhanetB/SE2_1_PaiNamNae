@@ -212,7 +212,7 @@ const deleteUserController = asyncHandler(async (req, res) => {
 		const deletedUser = await userService.deleteUser(userId);
 		return res.status(200).json({
 			success: true,
-			message: "User account permanently deleted.",
+			message: "User account deleted successfully.",
 			data: { deletedUserId: deletedUser.id },
 		});
 	}
