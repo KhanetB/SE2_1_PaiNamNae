@@ -153,6 +153,44 @@
 
 /**
  * @swagger
+ * /api/users/me:
+ *   delete:
+ *     summary: Delete the authenticated user's account (Soft Delete)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User account deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: User account deleted successfully.
+ *               data:
+ *                 deletedUserId: cmlj5daul00015nn9zxneqn5w
+ *       404:
+ *         description: User not found or already deleted
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: User not found or already deleted
+ *               data: null
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *              success: false
+ *              message: Not authorized, token failed
+ *              data: null
+ * 
+ */
+
+
+/**
+ * @swagger
  * /api/users/admin:
  *   get:
  *     summary: Get all users (Admin only)

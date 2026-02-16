@@ -2,6 +2,7 @@ const express = require('express');
 const userController = require("../controllers/user.controller");
 const validate = require('../middlewares/validate');
 const upload = require('../middlewares/upload.middleware');
+const { anonymizeDeletedUsers } = require('../middlewares/anonymizeDeletedUsers');
 const { idParamSchema, createUserSchema, updateMyProfileSchema, updateUserByAdminSchema, updateUserStatusSchema, listUsersQuerySchema } = require('../validations/user.validation');
 const { protect, requireAdmin } = require('../middlewares/auth');
 
@@ -65,11 +66,18 @@ router.get(
     protect,
     userController.getMyUser
 );
+// GET /api/users/check-deletion-status
+router.get(
+    '/check-deletion-status',
+    protect,
+    userController.checkUserDeletionStatus
+);
 
 // GET /api/users/:id
 router.get(
     '/:id',
     validate({ params: idParamSchema }),
+    anonymizeDeletedUsers,
     userController.getUserPublicById
 );
 
@@ -96,5 +104,14 @@ router.put(
     validate({ body: updateMyProfileSchema }),
     userController.updateCurrentUserProfile
 );
+
+// DELETE /api/users/me
+router.delete(
+    '/me',
+    protect,
+    userController.deleteUserController
+);
+
+
 
 module.exports = router;
