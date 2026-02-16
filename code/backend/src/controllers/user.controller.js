@@ -1,8 +1,9 @@
-const asyncHandler = require('express-async-handler');
+const asyncHandler = require("express-async-handler");
 const userService = require("../services/user.service");
-const ApiError = require('../utils/ApiError');
-const { uploadToCloudinary } = require('../utils/cloudinary');
-const notifService = require('../services/notification.service');
+const ApiError = require("../utils/ApiError");
+const { uploadToCloudinary } = require("../utils/cloudinary");
+const notifService = require("../services/notification.service");
+const { runCleanupLogic } = require("../cron/cleanupCron");
 
 const adminListUsers = asyncHandler(async (req, res) => {
 	const result = await userService.searchUsers(req.query);
@@ -129,11 +130,14 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
 });
 
 const adminUpdateUser = asyncHandler(async (req, res) => {
-	const updatedUser = await userService.updateUserProfile(req.params.id, req.body);
+	const updatedUser = await userService.updateUserProfile(
+		req.params.id,
+		req.body,
+	);
 	res.status(200).json({
 		success: true,
 		message: "User updated by admin",
-		data: updatedUser
+		data: updatedUser,
 	});
 });
 
@@ -142,88 +146,89 @@ const adminDeleteUser = asyncHandler(async (req, res) => {
 	res.status(200).json({
 		success: true,
 		message: "User deleted successfully.",
-		data: { deletedUserId: deletedUser.id }
+		data: { deletedUserId: deletedUser.id },
 	});
 });
 
 const setUserStatus = asyncHandler(async (req, res) => {
-	const { isActive, isVerified } = req.body
+	const { isActive, isVerified } = req.body;
 
-	if (typeof isActive !== 'boolean' && typeof isVerified !== 'boolean') {
-		throw new ApiError(400, 'Provide at least one of isActive or isVerified as boolean');
+	if (typeof isActive !== "boolean" && typeof isVerified !== "boolean") {
+		throw new ApiError(
+			400,
+			"Provide at least one of isActive or isVerified as boolean",
+		);
 	}
 
 	let updatedUser = await userService.updateUserProfile(req.params.id, {
-		...(typeof isActive === 'boolean' ? { isActive } : {}),
-		...(typeof isVerified === 'boolean' ? { isVerified } : {}),
+		...(typeof isActive === "boolean" ? { isActive } : {}),
+		...(typeof isVerified === "boolean" ? { isVerified } : {}),
 	});
 
-	if (typeof isVerified === 'boolean') {
+	if (typeof isVerified === "boolean") {
 		try {
 			if (isVerified === true) {
 				await notifService.createNotificationByAdmin({
 					userId: updatedUser.id,
-					type: 'VERIFICATION',
-					title: 'ยืนยันตัวตนสำเร็จ',
-					body: 'แอดมินได้ตรวจสอบบัญชีของคุณแล้ว ตอนนี้คุณสามารถใช้งานได้เต็มรูปแบบ',
-					link: '/profile/verification',
+					type: "VERIFICATION",
+					title: "ยืนยันตัวตนสำเร็จ",
+					body: "แอดมินได้ตรวจสอบบัญชีของคุณแล้ว ตอนนี้คุณสามารถใช้งานได้เต็มรูปแบบ",
+					link: "/profile/verification",
 					metadata: {
-						kind: 'user_verification',
+						kind: "user_verification",
 						userId: updatedUser.id,
-						initiatedBy: 'system'
-					}
+						initiatedBy: "system",
+					},
 				});
-			}
-			else if (isVerified === false) {
+			} else if (isVerified === false) {
 				await notifService.createNotificationByAdmin({
 					userId: updatedUser.id,
-					type: 'VERIFICATION',
-					title: 'ยืนยันตัวตนไม่สำเร็จ',
-					body: 'ข้อมูลบัตรประชาชน/รูปถ่ายของคุณไม่ผ่านการตรวจสอบ กรุณาตรวจสอบและส่งใหม่อีกครั้ง',
-					link: '/profile/verification',
+					type: "VERIFICATION",
+					title: "ยืนยันตัวตนไม่สำเร็จ",
+					body: "ข้อมูลบัตรประชาชน/รูปถ่ายของคุณไม่ผ่านการตรวจสอบ กรุณาตรวจสอบและส่งใหม่อีกครั้ง",
+					link: "/profile/verification",
 					metadata: {
-						kind: 'user_verification',
+						kind: "user_verification",
 						userId: updatedUser.id,
-						initiatedBy: 'system'
-					}
+						initiatedBy: "system",
+					},
 				});
 			}
 		} catch (e) {
-			console.error('Failed to create verification notification:', e);
+			console.error("Failed to create verification notification:", e);
 		}
 	}
 
-	res.status(200).json({ success: true, message: "User status updated", data: updatedUser });
+	res
+		.status(200)
+		.json({ success: true, message: "User status updated", data: updatedUser });
 });
 
 // Delete user controller (soft delete by user themselves)
 const deleteUserController = asyncHandler(async (req, res) => {
-	const permanentDelete = req.query.permanent === 'true';
+	const permanentDelete = req.query.permanent === "true";
 	const userId = req.user.sub;
 	if (permanentDelete) {
 		const deletedUser = await userService.deleteUser(userId);
 		return res.status(200).json({
 			success: true,
-			message: "User account deleted successfully.",
-			data: { deletedUserId: deletedUser.id }
+			message: "User account permanently deleted.",
+			data: { deletedUserId: deletedUser.id },
 		});
 	}
-	const deletedUser = await userService.softDeleteUser(userId, 'USER');
+	const deletedUser = await userService.softDeleteUser(userId, "USER");
 	res.status(200).json({
 		success: true,
 		message: "User account deleted successfully.",
-		data: { deletedUserId: deletedUser.id }
+		data: { deletedUserId: deletedUser.id },
 	});
-
-})
+});
 
 // Check trip routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
 const checkUserDeletionStatus = asyncHandler(async (req, res) => {
 	const userId = req.user.sub;
 	const statusResult = await userService.checkUserDeletionStatus(userId);
-	res.status(200).json(
-		statusResult
-	);
+	res.status(200).json(statusResult);
 });
 
 module.exports = {
@@ -238,5 +243,5 @@ module.exports = {
 	adminDeleteUser,
 	setUserStatus,
 	deleteUserController,
-	checkUserDeletionStatus
+	checkUserDeletionStatus,
 };
