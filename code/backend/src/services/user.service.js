@@ -132,7 +132,6 @@ const getUserById = async (id) => {
 };
 
 const getUserPublicById = async (id) => {
-<<<<<<< HEAD
   const user = await prisma.user.findUnique({
     where: { id },
     select: {
@@ -143,22 +142,11 @@ const getUserPublicById = async (id) => {
       role: true,
       isVerified: true,
       createdAt: true,
+      deletedAt: true,
     },
   });
   if (!user) throw new ApiError(404, "User not found");
   return user;
-=======
-    const user = await prisma.user.findUnique({
-        where: { id },
-        select: {
-            id: true, firstName: true, lastName: true,
-            profilePicture: true, role: true, isVerified: true,
-            createdAt: true, deletedAt: true
-        }
-    });
-    if (!user) throw new ApiError(404, 'User not found');
-    return user;
->>>>>>> origin/Phuri_2283
 };
 
 // const getMyUser = async (id) => {
@@ -247,73 +235,74 @@ const deleteUser = async (id) => {
 };
 // Service for user deletion
 
-// Soft delete by User 
-const softDeleteUser = async (id, deletedBy = 'USER') => {
-    const checkDeletionStatus = await checkUserDeletionStatus(id);
-    if (!checkDeletionStatus.canDelete) {
-        throw new ApiError(400, `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`);
-    }
-    // if user already soft deleted
-    const existingUser = await prisma.user.findUnique({ where: { id } });
-    if (!existingUser || existingUser.deletedAt) {
-        throw new ApiError(404, 'User not found or already deleted');
-    }
-    const user = await prisma.user.update({
-        where: { id },
-        data: {
-            deletedAt: new Date(),
-            deletedBy,
-            isActive: false
-        }
-    });
+// Soft delete by User
+const softDeleteUser = async (id, deletedBy = "USER") => {
+  const checkDeletionStatus = await checkUserDeletionStatus(id);
+  if (!checkDeletionStatus.canDelete) {
+    throw new ApiError(
+      400,
+      `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`,
+    );
+  }
+  // if user already soft deleted
+  const existingUser = await prisma.user.findUnique({ where: { id } });
+  if (!existingUser || existingUser.deletedAt) {
+    throw new ApiError(404, "User not found or already deleted");
+  }
+  const user = await prisma.user.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+      deletedBy,
+      isActive: false,
+    },
+  });
   const { password, ...safeUser } = user;
   return safeUser;
 };
 
-
 // Check routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
-const ACTIVE_ROUTE_STATUSES = ['AVAILABLE', 'FULL', 'IN_TRANSIT'];
-const ACTIVE_BOOKING_STATUSES = ['PENDING', 'CONFIRMED'];
+const ACTIVE_ROUTE_STATUSES = ["AVAILABLE", "FULL", "IN_TRANSIT"];
+const ACTIVE_BOOKING_STATUSES = ["PENDING", "CONFIRMED"];
 
 const checkUserDeletionStatus = async (userId) => {
-    // Check if user has any active driver routes or passenger bookings
-    const [driverRouteCount, passengerBookingCount] = await Promise.all([
-        prisma.route.count({
-            where: {
-                driverId: userId,
-                status: { in: ACTIVE_ROUTE_STATUSES },
-            },
-        }),
-        prisma.booking.count({
-            where: {
-                passengerId: userId,
-                status: { in: ACTIVE_BOOKING_STATUSES },
-                route: {
-                    status: { in: ACTIVE_ROUTE_STATUSES },
-                },
-            },
-        })
-    ]);
-    // Return result
-    let messages = [];
-    if (driverRouteCount > 0) {
-        messages.push('คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด');
-    }
-    if (passengerBookingCount > 0) {
-        messages.push('คุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด');
-    }
-    if (messages.length > 0) {
-        return {
-            canDelete: false,
-            message: messages.join(' และ '),
-        };
-    }
+  // Check if user has any active driver routes or passenger bookings
+  const [driverRouteCount, passengerBookingCount] = await Promise.all([
+    prisma.route.count({
+      where: {
+        driverId: userId,
+        status: { in: ACTIVE_ROUTE_STATUSES },
+      },
+    }),
+    prisma.booking.count({
+      where: {
+        passengerId: userId,
+        status: { in: ACTIVE_BOOKING_STATUSES },
+        route: {
+          status: { in: ACTIVE_ROUTE_STATUSES },
+        },
+      },
+    }),
+  ]);
+  // Return result
+  let messages = [];
+  if (driverRouteCount > 0) {
+    messages.push("คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด");
+  }
+  if (passengerBookingCount > 0) {
+    messages.push("คุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด");
+  }
+  if (messages.length > 0) {
     return {
-        canDelete: true,
-        message: 'ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้',
+      canDelete: false,
+      message: messages.join(" และ "),
     };
+  }
+  return {
+    canDelete: true,
+    message: "ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้",
+  };
 };
-
 
 // const setUserStatusActive = async (id, isActive) => {
 //     const updatedUser = await prisma.user.update({
@@ -336,7 +325,6 @@ const checkUserDeletionStatus = async (userId) => {
 // };
 
 module.exports = {
-<<<<<<< HEAD
   searchUsers,
   getAllUsers,
   getUserById,
@@ -348,20 +336,6 @@ module.exports = {
   deleteUser,
   updateUserProfile,
   getUserPublicById,
+  softDeleteUser,
+  checkUserDeletionStatus,
 };
-=======
-    searchUsers,
-    getAllUsers,
-    getUserById,
-    createUser,
-    getUserByEmail,
-    getUserByUsername,
-    comparePassword,
-    updatePassword,
-    deleteUser,
-    updateUserProfile,
-    getUserPublicById,
-    softDeleteUser,
-    checkUserDeletionStatus,
-};
->>>>>>> origin/Phuri_2283

@@ -212,37 +212,33 @@ const setUserStatus = asyncHandler(async (req, res) => {
 });
 
 // Delete user controller (soft delete by user themselves)
-const deleteUserController = asyncHandler(async(req,res) => {
-    const permanentDelete = req.query.permanent === 'true';
-    const userId = req.user.sub;
-    if (permanentDelete) {
-        const deletedUser = await userService.deleteUser(userId);
-        return res.status(200).json({
-            success: true,
-            message: "User account permanently deleted.",
-            data: { deletedUserId: deletedUser.id }
-        });
-    }
-    const deletedUser = await userService.softDeleteUser(userId, 'USER');
-    res.status(200).json({
-        success: true,
-        message: "User account deleted successfully.",
-        data: { deletedUserId: deletedUser.id }
+const deleteUserController = asyncHandler(async (req, res) => {
+  const permanentDelete = req.query.permanent === "true";
+  const userId = req.user.sub;
+  if (permanentDelete) {
+    const deletedUser = await userService.deleteUser(userId);
+    return res.status(200).json({
+      success: true,
+      message: "User account permanently deleted.",
+      data: { deletedUserId: deletedUser.id },
     });
-
-})
+  }
+  const deletedUser = await userService.softDeleteUser(userId, "USER");
+  res.status(200).json({
+    success: true,
+    message: "User account deleted successfully.",
+    data: { deletedUserId: deletedUser.id },
+  });
+});
 
 // Check trip routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
-const checkUserDeletionStatus = asyncHandler(async(req,res) => {
-    const userId = req.user.sub;
-    const statusResult = await userService.checkUserDeletionStatus(userId);
-    res.status(200).json(
-        statusResult
-    );
+const checkUserDeletionStatus = asyncHandler(async (req, res) => {
+  const userId = req.user.sub;
+  const statusResult = await userService.checkUserDeletionStatus(userId);
+  res.status(200).json(statusResult);
 });
 
 module.exports = {
-<<<<<<< HEAD
   adminListUsers,
   getAllUsers,
   getUserById,
@@ -253,19 +249,6 @@ module.exports = {
   adminUpdateUser,
   adminDeleteUser,
   setUserStatus,
+  deleteUserController,
+  checkUserDeletionStatus,
 };
-=======
-    adminListUsers,
-    getAllUsers,
-    getUserById,
-    getMyUser,
-    getUserPublicById,
-    createUser,
-    updateCurrentUserProfile,
-    adminUpdateUser,
-    adminDeleteUser,
-    setUserStatus,
-    deleteUserController,
-    checkUserDeletionStatus
-};
->>>>>>> origin/Phuri_2283
