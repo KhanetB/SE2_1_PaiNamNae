@@ -91,8 +91,8 @@ const runCleanupLogic = async () => {
   console.log("Account Cleanup Cron Job scheduled.");
 };
 const startCleanuoCron = () => {
-  // cron.schedule("0 0 * * *", runCleanupLogic);
-  cron.schedule("*/30 * * * * *", runCleanupLogic);
+  cron.schedule("0 0 * * *", runCleanupLogic);
+  // cron.schedule("*/30 * * * * *", runCleanupLogic);
 };
 
 module.exports = { startCleanuoCron, runCleanupLogic };
