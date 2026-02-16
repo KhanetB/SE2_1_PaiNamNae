@@ -48,6 +48,8 @@
                                                 class="status-badge status-rejected">ปฏิเสธ</span>
                                             <span v-else-if="trip.status === 'cancelled'"
                                                 class="status-badge status-cancelled">ยกเลิก</span>
+                                            <span v-else-if="trip.status === 'mytrip'"
+                                                class="status-badge status-mytrip">เส้นทางของฉัน</span>
                                         </div>
                                         <p class="mt-1 text-sm text-gray-600">จุดนัดพบ: {{ trip.pickupPoint }}</p>
                                         <p class="text-sm text-gray-600">
@@ -263,7 +265,8 @@ const tabs = [
     { status: 'confirmed', label: 'ยืนยันแล้ว' },
     { status: 'rejected', label: 'ปฏิเสธ' },
     { status: 'cancelled', label: 'ยกเลิก' },
-    { status: 'all', label: 'ทั้งหมด' }
+    { status: 'all', label: 'ทั้งหมด' },
+    { status: 'mytrip', label: 'เส้นทางของฉัน' }
 ]
 
 definePageMeta({ middleware: 'auth' })

@@ -195,7 +195,7 @@
                                             <span v-else-if="trip.status === 'rejected'"
                                                 class="status-badge status-rejected">ปฏิเสธ</span>
                                             <span v-else-if="trip.status === 'cancelled'"
-                                                class="status-badge status-cancelled">ยกเลิก</span>
+                                                class="status-badge status-cancelled">ยกเลิก</span>                                                
                                         </div>
                                         <p class="mt-1 text-sm text-gray-600">จุดนัดพบ: {{ trip.pickupPoint }}</p>
                                         <p class="text-sm text-gray-600">
@@ -347,6 +347,11 @@
                                             ปฏิเสธ
                                         </button>
                                     </template>
+
+                                    <button v-else-if="trip.status === 'confirmed'"
+                                        class="px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700">
+                                        กำลังเดินทางไปรับผู้โดยสาร
+                                    </button>
 
                                     <button v-else-if="trip.status === 'confirmed'"
                                         class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">
