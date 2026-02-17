@@ -153,7 +153,7 @@
                                     </button>
 
                                     <!-- CONFIRMED: เพิ่มปุ่มยกเลิก + คงปุ่มแชท -->
-                                    <template v-else-if="trip.status === 'confirmed'">
+                                    <template v-else-if="trip.status === 'confirmed' && trip.routeStatus !== 'in_transit'">
                                         <button @click.stop="openCancelModal(trip)"
                                             class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50">
                                             ยกเลิกการจอง
@@ -424,6 +424,7 @@ async function fetchMyTrips() {
             return {
                 id: b.id,
                 status: String(b.status || '').toLowerCase(),
+                routeStatus: String(b.route?.status || '').toLowerCase(),
                 origin: start?.name || `(${Number(start.lat).toFixed(2)}, ${Number(start.lng).toFixed(2)})`,
                 destination: end?.name || `(${Number(end.lat).toFixed(2)}, ${Number(end.lng).toFixed(2)})`,
                 originAddress: start?.address ? cleanAddr(start.address) : null,

@@ -164,12 +164,13 @@
 
                                 <!-- ปุ่มขวาล่าง -->
                                 <div class="flex justify-end space-x-2" :class="{ 'mt-4': selectedTripId !== route.id }">
-                                    <NuxtLink v-if="route.status === 'available'"
-                                        :to="`/myTrip/${route.id}/passengers`"
+                                    <button
+                                        v-if="route.status === 'available'"
+                                        @click.stop="confirmTrip(route.id)"
                                         class="px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700"
-                                        @click.stop>
+                                        >
                                         ยืนยันการเดินทาง
-                                    </NuxtLink>
+                                    </button>
                                     <NuxtLink :to="`/myRoute/${route.id}/edit`"
                                         class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700"
                                         @click.stop>
@@ -198,6 +199,9 @@
                                                 class="status-badge status-pending">รอดำเนินการ</span>
                                             <span v-else-if="trip.status === 'confirmed'"
                                                 class="status-badge status-confirmed">ยืนยันแล้ว</span>
+                                            <span
+                                                v-if="trip.routeStatus === 'in_transit'"
+                                                class="status-badge status-transit">กำลังเดินทางมารับคุณ</span>
                                             <span v-else-if="trip.status === 'rejected'"
                                                 class="status-badge status-rejected">ปฏิเสธ</span>
                                             <span v-else-if="trip.status === 'cancelled'"
@@ -353,12 +357,6 @@
                                             ปฏิเสธ
                                         </button>
                                     </template>
-                                    <!-- ปุ่มสำหรับแจ้งว่ากำลังไปรับผู้โดยสาร -->
-                                    <button v-if="trip.status === 'confirmed'"
-                                        @click.stop="openConfirmModal(trip, 'start')"
-                                        class="px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700">
-                                        กำลังเดินทางไปรับผู้โดยสาร
-                                    </button>
 
                                     <button v-if="trip.status === 'confirmed'"
                                         class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">
@@ -801,14 +799,7 @@ const openConfirmModal = (trip, action) => {
             action: 'delete',
             variant: 'danger',
         }
-    } else if (action === 'start') {
-        modalContent.value = {
-            title: 'กำลังเดินทางไปรับผู้โดยสาร',
-            message: `คุณกำลังจะเริ่มเดินทางไปรับ "${trip.passenger.name}" ใช่หรือไม่?`,
-            confirmText: 'เริ่มเดินทาง',
-            action: 'start',
-            variant: 'success',
-        }
+    
     } else if (action === 'complete') {
         modalContent.value = {
             title: 'ยืนยันการเดินทางเสร็จสิ้น',
@@ -963,6 +954,21 @@ watch(activeTab, () => {
         if (filteredTrips.value.length > 0) updateMap(filteredTrips.value[0])
     }
 })
+
+const confirmTrip = async (routeId) => {
+  try {
+    await $api(`/routes/${routeId}/start`, {
+      method: 'PATCH',
+    })
+    toast.success('สำเร็จ', 'แจ้งผู้โดยสารว่ากำลังเดินทางแล้ว')
+    await fetchMyRoutes()
+
+  } catch (error) {
+    console.error('Failed to start trip:', error)
+    toast.error('เกิดข้อผิดพลาด', 'ไม่สามารถเริ่มการเดินทางได้')
+  }
+}
+
 </script>
 
 <style scoped>
@@ -1032,6 +1038,11 @@ watch(activeTab, () => {
     background-color: #f3f4f6;
     color: #6b7280;
 }
+.status-transit {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
 
 @keyframes slide-in-from-top {
     from {

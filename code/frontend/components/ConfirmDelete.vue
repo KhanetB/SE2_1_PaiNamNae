@@ -121,7 +121,7 @@
           </ol>
         </div>
         <div class="flex items-center mb-4">
-          <input type="checkbox" v-model="acceptTerms" class="mr-2" />
+          <input id="confirmCheckbox" type="checkbox" v-model="acceptTerms" class="mr-2" />
           <span>ยอมรับข้อกำหนดและเงื่อนไข</span>
         </div>
 
@@ -134,6 +134,7 @@
           </button>
 
           <button
+            id="confirmDeleteButton"
             class="bg-red-600 text-white px-4 py-2 rounded-md
                    disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="!acceptTerms"
@@ -151,6 +152,7 @@
         </h3>
         <p class="text-red-600 text-center text-sm">ข้อมูลจะถูกส่งไปยังอีเมลที่คุณระบุ กรุณาระบุอีเมลให้ถูกต้อง</p>
         <input
+          id=confirmEmailInput
           type="email"
           v-model="email"
           placeholder="กรอกอีเมลของคุณ"
@@ -166,6 +168,7 @@
           </button>
 
           <button
+            id="confirmEmailButton"
             class="bg-red-600 text-white px-4 py-2 rounded-md
                    disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="!isValidEmail"

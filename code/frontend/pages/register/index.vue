@@ -59,7 +59,7 @@
               :class="{ 'border-red-500 ring-1 ring-red-500': errors.confirmPassword }">
             <p v-if="errors.confirmPassword" class="mt-1 text-xs text-red-600">{{ errors.confirmPassword }}</p>
           </div>
-          <button type="button" @click="nextStep"
+          <button id="nextStep1" type="button" @click="nextStep"
             class="w-full py-3 font-medium text-white transition bg-blue-600 rounded-md hover:bg-blue-700">ถัดไป</button>
         </div>
 
@@ -103,7 +103,7 @@
           <div class="flex gap-4">
             <button type="button" @click="prevStep"
               class="w-full py-3 font-medium text-white transition bg-gray-600 rounded-md hover:bg-gray-700">ย้อนกลับ</button>
-            <button type="button" @click="nextStep"
+            <button id="nextStep2" type="button" @click="nextStep"
               class="w-full py-3 font-medium text-white transition bg-blue-600 rounded-md hover:bg-blue-700">ถัดไป</button>
           </div>
         </div>
@@ -189,7 +189,7 @@
             <p v-if="errors.pdpa" class="mt-1 text-xs text-red-600">{{ errors.pdpa }}</p>
           </div>
           <div class="flex gap-4">
-            <button type="button" @click="prevStep"
+            <button id="Prove" type="button" @click="prevStep"
               class="w-full py-3 font-medium text-white transition bg-gray-600 rounded-md hover:bg-gray-700">ย้อนกลับ</button>
             <button type="submit" :disabled="isLoading"
               class="flex items-center justify-center w-full py-3 font-medium text-white transition bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed">

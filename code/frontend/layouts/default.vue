@@ -206,7 +206,7 @@
                             </div>
                             <div
                                 class="absolute right-0 w-40 py-2 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg dropdown-menu top-full user-dropdown-arrow">
-                                <NuxtLink to="/profile"
+                                <NuxtLink to="/profile" id="profileDropdown"
                                     class="flex items-center block w-full px-4 py-2 text-left text-gray-700 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600">
                                     บัญชีของฉัน
                                 </NuxtLink>
