@@ -25,6 +25,7 @@ const corsOptions = {
     "http://localhost:3001",
     "https://amazing-crisp-9bcb1a.netlify.app",
     "https://backend-se.pasitlab.com",
+    "https://csse1669.cpkku.com",
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -95,6 +96,8 @@ const PORT = process.env.PORT || 3000;
     console.log(
       `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
     );
+
+    startCleanuoCron();
   });
 })();
 // Graceful Shutdown
