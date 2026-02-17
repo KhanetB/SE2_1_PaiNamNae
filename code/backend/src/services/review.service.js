@@ -1,6 +1,7 @@
 const prisma = require('../utils/prisma');
 const ApiError = require('../utils/ApiError');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
+const { get } = require('../routes/booking.routes');
 
 // get all reviews for user 
 const getReviewsForUser = async (userId) => {
@@ -30,6 +31,31 @@ const getReviewById = async (reviewId, userId) => {
     }
     return review;
 };
+
+// GET review from bookingId
+const getReviewByBookingId = async (bookingId, userId) => {
+  const review = await prisma.review.findFirst({
+    where: {
+      bookingId,
+      passengerId: userId,
+    },
+  });
+
+  // ยังไม่เคยรีวิว
+  if (!review) {
+    return {
+      hasReview: false,
+      review: null,
+    };
+  }
+
+  // มีรีวิว และเป็นของ user นี้แน่นอน
+  return {
+    hasReview: true,
+    review,
+  };
+};
+
 
 const createReview = async ({
     bookingId,
@@ -230,5 +256,6 @@ module.exports = {
     getReviewsForUser,
     deleteReview,
     editReview,
-    getReviewById
+    getReviewById,
+    getReviewByBookingId
 };
