@@ -3,72 +3,79 @@ const userService = require("../services/user.service");
 const ApiError = require('../utils/ApiError');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 const reviewService = require('../services/review.service');
+const { success } = require('zod/v4-mini');
 
 // GET /reviews/user
 const getReviewsForUser = asyncHandler(async (req, res) => {
-    const userId = req.user.sub;
-    const reviews = await reviewService.getReviewsForUser(userId);
-    res.json(reviews);
+  const userId = req.user.sub;
+  const reviews = await reviewService.getReviewsForUser(userId);
+  res.json(reviews);
 });
 
 // POST /reviews
 const createReview = async (req, res, next) => {
-    try {
-        const review = await reviewService.createReview({
-            bookingId: req.body.bookingId,
-            rating: req.body.rating,
-            comment: req.body.comment,
-            files: req.files,
-            userId: req.user.sub,
-            labels: req.body.labels,
-        });
+  try {
+    const review = await reviewService.createReview({
+      bookingId: req.body.bookingId,
+      rating: req.body.rating,
+      comment: req.body.comment,
+      files: req.files,
+      userId: req.user.sub,
+      labels: req.body.labels,
+    });
 
-        res.status(201).json({
-            success: true,
-            data: review,
-        });
-    } catch (error) {
-        throw new ApiError(error.statusCode || 500, error.message || 'An error occurred while creating the review')
-    }
+    res.status(201).json({
+      success: true,
+      data: review,
+    });
+  } catch (error) {
+    next(new ApiError(error.statusCode || 500, error.message || 'An error occurred while creating the review'))
+  }
 };
 
 // DELETE /reviews/:reviewId
 const deleteReview = async (req, res, next) => {
-    try {
-        const reviewId = req.params.reviewId;
-        await reviewService.deleteReview(reviewId, req.user.sub);
-        res.json({
-            success: true,
-            message: 'Review deleted successfully',
-        });
-    } catch (error) {
-        throw new ApiError(error.statusCode || 500, error.message || 'An error occurred while deleting the review')
-    }
+  try {
+    const reviewId = req.params.reviewId;
+    await reviewService.deleteReview(reviewId, req.user.sub);
+    res.json({
+      success: true,
+      message: 'Review deleted successfully',
+    });
+  } catch (error) {
+    next(new ApiError(error.statusCode || 500, error.message || 'An error occurred while deleting the review'))
+  }
 };
 // PUT /reviews/:reviewId
 const editReview = async (req, res) => {
-    const reviewId = req.params.reviewId;
+  const reviewId = req.params.reviewId;
 
+  try {
     const updatedReview = await reviewService.editReview(
-        reviewId,
-        req.user.sub,
-        {
-            rating: req.body.rating,
-            comment: req.body.comment,
-            labels: req.body.labels,
-        },
-        req.files // 👈 สำคัญมาก
+      reviewId,
+      req.user.sub,
+      {
+        rating: req.body.rating,
+        comment: req.body.comment,
+        labels: req.body.labels,
+      },
+      req.files // 👈 สำคัญมาก
     );
 
     res.json({
-        success: true,
-        data: updatedReview,
+      success: true,
+      data: updatedReview,
     });
+  } catch (error) {
+    res.status(error.statusCode).json({
+      success: false,
+    })
+  }
 };
 
 module.exports = {
-    getReviewsForUser,
-    createReview,
-    deleteReview,
-    editReview
+  getReviewsForUser,
+  createReview,
+  deleteReview,
+  editReview
 }

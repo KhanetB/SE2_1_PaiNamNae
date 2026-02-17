@@ -17,6 +17,16 @@ headers {
   Authorization: Bearer {{admin_token}}
 }
 
+script:post-response {
+  bru.setEnvVar("passenger_token","")
+  bru.setEnvVar("driver_token","")
+  bru.setEnvVar("admin_token","")
+  bru.setEnvVar("driver_id","")
+  bru.setEnvVar("review_id","")
+  bru.setEnvVar("route_id","")
+  bru.setEnvVar("booking_id","")
+}
+
 settings {
   encodeUrl: true
   timeout: 0
