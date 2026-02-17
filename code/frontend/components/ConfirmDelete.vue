@@ -256,6 +256,13 @@
                     <p class="text-gray-600 mb-6">
                         บัญชีของคุณถูกลบเรียบร้อยแล้ว
                     </p>
+                    <p class="text-gray-600 mb-2">
+                        ระบบจะนำคุณออกจากระบบอัตโนมัติใน
+                        <span class="font-bold text-red-500">
+                            {{ countDown }}
+                        </span>
+                        วินาที
+                    </p>
 
                     <button
                         class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 transition"
@@ -293,10 +300,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { ExclamationCircleIcon } from "@heroicons/vue/24/solid";
+import { useAuth } from "~/composables/useAuth";
 
+const { token, logout } = useAuth();
 const { $api } = useNuxtApp();
 
 const config = useRuntimeConfig();
@@ -313,6 +322,34 @@ const email = ref("");
 
 const isLoading = ref(false);
 
+const countDown = ref(5);
+let intervalId = null;
+
+onBeforeUnmount(() => {
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+});
+watch(step, (newStep) => {
+    if (newStep == 3) {
+        startCountdown();
+    }
+});
+
+const startCountdown = () => {
+    countDown.value = 5;
+
+    intervalId = setInterval(async () => {
+        countDown.value--;
+        if (countDown.value <= 0) {
+            clearInterval(intervalId);
+            intervalId = null;
+
+            await logout();
+            closeModal();
+        }
+    }, 1000);
+};
 const closeModal = () => {
     step.value = 1;
     acceptTerms.value = false;
@@ -326,17 +363,13 @@ const goToEmailStep = () => {
 };
 
 const downloadMyData = async () => {
-    const token =
-        useCookie("token").value ||
-        (process.client ? localStorage.getItem("token") : "");
-
-    if (!token) {
+    if (!token.value) {
         throw new Error("Unauthorized: token not found in download my data");
     }
     const response = await fetch(`${config.public.apiBase}export/me`, {
         method: "GET",
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token.value}`,
         },
     });
 
@@ -369,11 +402,7 @@ const downloadMyData = async () => {
 };
 
 const sendBackupToEmail = async () => {
-    const token =
-        useCookie("token").value ||
-        (process.client ? localStorage.getItem("token") : "");
-
-    if (!token) {
+    if (!token.value) {
         throw new Error(
             "Unauthorized: token not found in send backup to email",
         );
@@ -382,7 +411,7 @@ const sendBackupToEmail = async () => {
         method: "POST",
         baseURL: config.public.apiBase,
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token.value}`,
         },
         body: {
             email: email.value,
@@ -395,11 +424,8 @@ const confirmDelete = async () => {
     const router = useRouter();
     try {
         isLoading.value = true;
-        const token =
-            useCookie("token").value ||
-            (process.client ? localStorage.getItem("token") : "");
 
-        if (!token) {
+        if (!token.value) {
             throw new Error("Unauthorized");
         }
         // await Promise.all([downloadMyData(), sendBackupToEmail()]);
@@ -410,14 +436,14 @@ const confirmDelete = async () => {
             // query: { permanent: parmanent: "true" : "false "},
             headers: {
                 Accept: "application/json",
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token.value}`,
             },
         });
         console.log("Delete success: ", response);
         await sendBackupToEmail();
-        useCookie("token").value = null;
-        useCookie("user").value = null;
-        useCookie("session").value = null;
+        // useCookie("token").value = null;
+        // useCookie("user").value = null;
+        // useCookie("session").value = null;
 
         if (process.client) {
             localStorage.removeItem("token");
@@ -437,9 +463,13 @@ const confirmDelete = async () => {
 };
 
 const finishDelete = async () => {
+    if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+    }
+
     emit("confirm");
-    const router = useRouter();
-    await router.push("/");
+    logout();
     closeModal();
 };
 
