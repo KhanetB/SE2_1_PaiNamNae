@@ -1,9 +1,4 @@
-if (process.env.NODE_ENV === "test") {
-  require("dotenv").config({ path: ".env.test" });
-  console.log("Test Server")
-} else {
-  require("dotenv").config();
-}
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -87,9 +82,6 @@ app.use((req, res, next) => {
 // --- Error Handling Middleware ---
 app.use(errorHandler);
 
-// --- Cron job for hard delete ---
-// startCleanuoCron();
-
 // --- Start Server ---
 const PORT = process.env.PORT || 3000;
 (async () => {
@@ -103,8 +95,6 @@ const PORT = process.env.PORT || 3000;
     console.log(
       `🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
     );
-
-    startCleanuoCron();
   });
 })();
 // Graceful Shutdown
