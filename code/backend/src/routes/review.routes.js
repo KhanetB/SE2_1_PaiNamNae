@@ -21,6 +21,13 @@ router.get(
     reviewController.getReviewById
 );
 
+// GET /api/reviews/booking/:bookingId
+router.get(
+    '/booking/:bookingId',
+    protect,
+    reviewController.getReviewByBookingId
+);
+
 // POST /api/reviews
 router.post(
     '/',
