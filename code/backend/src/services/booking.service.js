@@ -89,11 +89,11 @@ const searchBookingsAdmin = async (opts = {}) => {
       skip, take,
       include: {
         passenger: {
-          select: { id: true, firstName: true, lastName: true, email: true, username: true, profilePicture: true }
+          select: { id: true, firstName: true, lastName: true, email: true, username: true, profilePicture: true, deletedAt: true }
         },
         route: {
           include: {
-            driver: { select: { id: true, firstName: true, lastName: true, email: true, isVerified: true } },
+            driver: { select: { id: true, firstName: true, lastName: true, email: true, isVerified: true, deletedAt: true } },
             vehicle: { select: { licensePlate: true, vehicleModel: true, vehicleType: true } },
           }
         }
@@ -294,7 +294,8 @@ const getMyBookings = async (passengerId) => {
               lastName: true,
               gender: true,
               profilePicture: true,
-              isVerified: true
+              isVerified: true,
+              deletedAt: true
             }
           },
           vehicle: {
@@ -316,7 +317,32 @@ const getMyBookings = async (passengerId) => {
 const getBookingById = async (id) => {
   return prisma.booking.findUnique({
     where: { id },
-    include: { route: true, passenger: true },
+    include: { 
+      route: {
+        include: {
+          driver: { 
+            select: { 
+              id: true, 
+              firstName: true, 
+              lastName: true, 
+              email: true, 
+              isVerified: true,
+              deletedAt: true 
+            } 
+          }
+        }
+      }, 
+      passenger: { 
+        select: { 
+          id: true, 
+          firstName: true, 
+          lastName: true, 
+          email: true, 
+          profilePicture: true,
+          deletedAt: true 
+        }
+      } 
+    },
   });
 };
 
