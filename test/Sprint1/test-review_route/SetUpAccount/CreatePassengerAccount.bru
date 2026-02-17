@@ -1,7 +1,10 @@
 meta {
-  name: CreateDriverAccount
+  name: CreatePassengerAccount
   type: http
   seq: 1
+  tags: [
+    create
+  ]
 }
 
 post {
@@ -18,9 +21,9 @@ body:multipart-form {
   lastName: {{passenger_lastName}}
   phoneNumber: {{passenger_phoneNumber}}
   gender: {{passenger_gender}}
-  natiaonalIdNumber: {{passenger_nationalIdNumber}}
+  nationalIdNumber: {{passenger_nationalIdNumber}}
   nationalIdExpiryDate: {{passenger_nationalIdExpiryDate}}
-  nationalPhotoUrl: @file(person.jpg)
+  nationalIdPhotoUrl: @file(person.jpg)
   selfiePhotoUrl: @file(person.jpg)
 }
 

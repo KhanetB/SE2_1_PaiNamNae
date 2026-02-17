@@ -1,0 +1,23 @@
+meta {
+  name: TC15_GetReviewWithoutAuthorize
+  type: http
+  seq: 17
+}
+
+get {
+  url: http://localhost:3000/api/reviews/me
+  body: none
+  auth: inherit
+}
+
+tests {
+  test("get HTTP 401",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(401)
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

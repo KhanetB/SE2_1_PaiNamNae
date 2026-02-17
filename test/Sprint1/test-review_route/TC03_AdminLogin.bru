@@ -1,0 +1,42 @@
+meta {
+  name: TC03_AdminLogin
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:3000/api/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email":"{{admin_email}}",
+    "password":"{{admin_password}}"
+  }
+}
+
+script:pre-request {
+  const adminToken = bru.getEnvVar("admin_token")
+  if(adminToken){
+    bru.runner.skipRequest();
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("admin_token",body.data.token)
+}
+
+tests {
+  test("get HTTP 200",function(){
+    const status = res.getStatus()
+    expect(status).to.equal(200)
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
