@@ -1,16 +1,10 @@
-<<<<<<< HEAD
 const prisma = require("../utils/prisma");
 const ApiError = require("../utils/ApiError");
 const {
   uploadToCloudinary,
   deleteFromCloudinary,
 } = require("../utils/cloudinary");
-=======
-const prisma = require('../utils/prisma');
-const ApiError = require('../utils/ApiError');
-const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
-const { get } = require('../routes/booking.routes');
->>>>>>> origin/Phuri_2283
+const { get } = require("../routes/booking.routes");
 
 // get all reviews for user
 const getReviewsForUser = async (userId) => {
@@ -59,7 +53,6 @@ const getReviewByBookingId = async (bookingId, userId) => {
     review,
   };
 };
-
 
 const createReview = async ({
   bookingId,
@@ -248,19 +241,10 @@ const editReview = async (
 };
 
 module.exports = {
-<<<<<<< HEAD
   createReview,
   getReviewsForUser,
   deleteReview,
   editReview,
   getReviewById,
+  getReviewByBookingId,
 };
-=======
-    createReview,
-    getReviewsForUser,
-    deleteReview,
-    editReview,
-    getReviewById,
-    getReviewByBookingId
-};
->>>>>>> origin/Phuri_2283
