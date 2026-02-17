@@ -14,6 +14,13 @@ router.get(
     reviewController.getReviewsForUser
 );
 
+// GET /api/reviews/:reviewId
+router.get(
+    '/:reviewId',
+    protect,
+    reviewController.getReviewById
+);
+
 // POST /api/reviews
 router.post(
     '/',
