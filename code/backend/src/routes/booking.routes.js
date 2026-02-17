@@ -116,4 +116,19 @@ router.delete(
   bookingController.deleteBooking
 );
 
+// PATCH /bookings/:id/passenger-confirm-dropoff (passenger confirms drop-off)
+router.patch(
+  '/:id/passenger-confirm-dropoff',
+  protect,
+  validate({ params: idParamSchema }),
+  bookingController.passengerConfirmDropOff
+);
+
+// PATCH /bookings/:id/driver-confirm-dropoff/ (driver confirms drop-off)
+router.patch(
+  '/:id/driver-confirm-dropoff',
+  protect,
+  validate({ params: idParamSchema }),
+  bookingController.driverConfirmDropOff
+);
 module.exports = router;

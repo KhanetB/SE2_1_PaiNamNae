@@ -97,6 +97,24 @@ const adminDeleteBooking = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: result });
 });
 
+// Passenger confirms drop-off
+const passengerConfirmDropOff = asyncHandler(async (req, res) => {
+  const passengerId = req.user.sub;
+  const { id } = req.params;
+  const updated = await bookingService.passengerConfirmDropOff(id, passengerId);
+  res.status(200).json({ success: true, data: updated });
+});
+
+// Driver confirms drop-off
+const driverConfirmDropOff = asyncHandler(async (req, res) => {
+  const driverId = req.user.sub;
+  const { id } = req.params;
+  // driverConfirmDropOff (bookingId, driverId)
+  const updated = await bookingService.driverConfirmDropOff(id, driverId);
+  res.status(200).json({ success: true, data: updated });
+}); 
+
+
 module.exports = {
   adminListBookings,
   createBooking,
@@ -108,5 +126,8 @@ module.exports = {
   adminGetBookingById,
   adminCreateBooking,
   adminUpdateBooking,
-  adminDeleteBooking
+  adminDeleteBooking,
+  passengerConfirmDropOff,
+  driverConfirmDropOff,
+
 };

@@ -516,6 +516,63 @@ const adminDeleteBooking = async (id) => {
   });
 };
 
+// Passenger confirms arrival
+const passengerConfirmDropOff = async (bookingId, passengerId) => {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+  });
+
+  if (!booking) throw new ApiError(404, 'Booking not found');
+  if (booking.passengerId !== passengerId) throw new ApiError(403, 'Forbidden - not the passenger of this booking');
+  if (booking.status !== BookingStatus.IN_TRANSIT) {
+    throw new ApiError(400, 'Only in-transit bookings can be marked as dropped off');
+  }
+
+  return prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: BookingStatus.PASSENGER_CONFIRMED_ARRIVAL,
+    }
+  });
+};
+
+// Driver confirms drop-off (official time)
+const driverConfirmDropOff = async (bookingId, driverId) => {
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { route: true },
+  });
+
+  if (!booking) throw new ApiError(404, 'Booking not found');
+  if (booking.route.driverId !== driverId) {
+    throw new ApiError(403, 'Forbidden - not the driver of this booking');
+  }
+
+  if (booking.status !== BookingStatus.PASSENGER_CONFIRMED_ARRIVAL) {
+    throw new ApiError(
+      400,
+      'Passenger must confirm arrival before driver can confirm'
+    );
+  }
+  if (booking.status === BookingStatus.COMPLETED) {
+    throw new ApiError(400, 'Booking is already completed');
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const now = new Date();
+
+    const updatedBooking = await tx.booking.update({
+      where: { id: bookingId },
+      data: {
+        status: BookingStatus.COMPLETED,
+        completedAt: now,
+      },
+    }); 
+    return updatedBooking;
+  });
+};
+
+
 module.exports = {
   searchBookingsAdmin,
   adminCreateBooking,
@@ -527,5 +584,8 @@ module.exports = {
   updateBookingStatus,
   cancelBooking,
   deleteBooking,
-  adminDeleteBooking
+  adminDeleteBooking,
+  passengerConfirmDropOff,
+  driverConfirmDropOff,
+  
 };
