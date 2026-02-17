@@ -284,7 +284,7 @@
                     </h2>
 
                     <p class="text-gray-600 mb-6">
-                        คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด
+                        {{ errorMessage }}
                     </p>
 
                     <button
@@ -319,7 +319,7 @@ const emit = defineEmits(["close", "confirm"]);
 const step = ref(1);
 const acceptTerms = ref(false);
 const email = ref("");
-
+const errorMessage = ref("");
 const isLoading = ref(false);
 
 const countDown = ref(5);
@@ -451,9 +451,16 @@ const confirmDelete = async () => {
 
         step.value = 3;
     } catch (error) {
-        console.error("Error deleting account: ", error);
+        console.error("Error deleting account: ", error.data);
         if (error?.data?.message) {
             console.error("Backend message: ", error.data.message);
+            if (error.data.message.includes(":")) {
+                errorMessage.value = error.data.message.split(":")[1].trim();
+            } else {
+                errorMessage.value = error.data.message;
+            }
+        } else {
+            errorMessage.value = "เกิดข้อผิดพลาด ไม่สามารถลบบัญชีผู้ใช้ได้";
         }
 
         step.value = 4;
