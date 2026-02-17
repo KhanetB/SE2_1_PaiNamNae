@@ -213,15 +213,6 @@
                                         >
                                             ถึงแล้วจ้า
                                         </button>
-                                        <button
-                                            v-if="trip.status === 'completed'"
-                                            @click.stop="
-                                                confirmDropoff(trip.id)
-                                            "
-                                            class="mt-2 px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700"
-                                        >
-                                            เขียนรีวิว
-                                        </button>
                                     </div>
                                 </div>
 
@@ -719,7 +710,7 @@
                     </button>
 
                     <button
-                        @click="submitReview"
+                        @click="submitReview(tripToReview)"
                         :disabled="isSubmittingReview"
                         class="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
                     >
@@ -1419,6 +1410,43 @@ function initializeMap() {
     mapReady.value = true;
 }
 
+const submitReview = async (trip) => {
+    if (reviewRating.value <= 0) {
+        toast.error("กรุณากรอกข้อมูล", "คุณยังไม่ได้เลือกดาว");
+        return;
+    }
+    const formData = new FormData();
+
+    formData.append("bookingId", trip.id);
+    formData.append("rating", reviewRating.value);
+    formData.append("comment", reviewComment.value);
+    formData.append(
+        "labels",
+        selectedTags.value.map((tag) => reviewMaps[tag]).join(","),
+    );
+
+    reviewImages.value.forEach((file) => {
+        formData.append("files", file);
+    });
+    try {
+        isSubmittingReview.value = true;
+        const res = await $fetch(`/reviews`, {
+            method: "POST",
+            baseURL: config.public.apiBase,
+            body: formData,
+            headers: { Authorization: `Bearer ${token.value}` },
+        });
+        console.log("Res: ", res);
+        isReviewModalVisible.value = false;
+        tripToReview.value = null;
+        toast.success("เสร็จแล้วจ้าา", "ส่งรีวิวแล้วจ้าา");
+    } catch (error) {
+        console.error("Error send review: ", error.response);
+        toast.error("รีวิวไม่สำเร็จ", `${error.response._data.message}`);
+    } finally {
+        isSubmittingReview.value = false;
+    }
+};
 // รีวิว
 // ---- modal ----
 const isReviewModalVisible = ref(false);
@@ -1449,6 +1477,12 @@ const reviewTags = [
     "ชอบเพลงที่เปิด",
 ];
 
+const reviewMaps = {
+    ขับขี่ปลอดภัย: "SAFE_DRIVING",
+    รถสะอาดน่านั่ง: "CLEAN_CAR",
+    คนขับอัธยาศัยดี: "FRIENDLY_DRIVER",
+    ชอบเพลงที่เปิด: "GOOD_MUSIC",
+};
 const selectedTags = ref([]);
 
 function toggleTag(tag) {
