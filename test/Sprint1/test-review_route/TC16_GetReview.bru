@@ -1,0 +1,27 @@
+meta {
+  name: TC16_GetReview
+  type: http
+  seq: 18
+}
+
+get {
+  url: http://localhost:3000/api/reviews/me
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+tests {
+  test("get HTTP 200",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(200)
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

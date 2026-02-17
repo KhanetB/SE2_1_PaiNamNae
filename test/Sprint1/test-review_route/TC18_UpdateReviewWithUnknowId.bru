@@ -1,0 +1,35 @@
+meta {
+  name: TC18_UpdateReviewWithUnknowId
+  type: http
+  seq: 20
+}
+
+put {
+  url: http://localhost:3000/api/reviews/cmlqnzh3l0001356q5xvda8b3
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+body:json {
+  {
+    "rating": 3.5,
+    "comment": "บริการดีมาก"
+  }
+}
+
+tests {
+  test("get HTTP 404", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(404)
+  })
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
