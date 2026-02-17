@@ -55,8 +55,6 @@ module.exports = async function ensureAdmin() {
                 role: 'ADMIN',
                 isVerified: true,
                 isActive: true,
-                deletedAt: null,
-                deletedBy: null,
             },
         });
         console.log(`🔐 Created initial ADMIN account (${ADMIN_EMAIL}).`);
