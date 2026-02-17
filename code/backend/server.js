@@ -1,4 +1,9 @@
-require("dotenv").config();
+if (process.env.NODE_ENV === "test") {
+  require("dotenv").config({ path: ".env.test" });
+  console.log("Test Server")
+} else {
+  require("dotenv").config();
+}
 
 const express = require("express");
 const cors = require("cors");
