@@ -115,6 +115,14 @@ router.put(
   validate({ params: idParamSchema, body: updateRouteSchema }),
   routeController.updateRoute
 );
+// PATCH /routes/:id/start
+router.patch(
+  "/:id/start",
+  protect,
+  requireDriverVerified,
+  validate({ params: idParamSchema }),
+  routeController.startRoute
+);
 
 // PATCH /routes/:id/cancel
 router.patch(
@@ -123,6 +131,15 @@ router.patch(
   requireDriverVerified,
   validate({ params: idParamSchema, body: cancelRouteSchema }),
   routeController.cancelRoute
+);
+
+// PATCH /routes/:id/complete
+router.patch(
+  "/:id/complete",
+  protect,
+  requireDriverVerified,
+  validate({ params: idParamSchema }),
+  routeController.completeRoute
 );
 
 // DELETE /routes/:id
