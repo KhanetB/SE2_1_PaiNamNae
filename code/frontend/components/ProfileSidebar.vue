@@ -48,6 +48,7 @@
                 <ul class="space-y-1">
                     <li>
                        <button
+                            id="deleteAccountButton"
                             @click="openConfirmDelete"
                             class="block w-full text-left px-4 py-2 text-sm rounded-md text-red-700 hover:bg-red-100"
                             >
