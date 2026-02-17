@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - 'code/frotnend/**'
+      - "code/frontend/**"
 
 jobs:
   build-and-deploy:
@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: 'code/frontend'
+        working-directory: "code/frontend"
 
     steps:
       - name: Checkout
@@ -26,8 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env
+        run: |
+          echo "NUXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY}}" >> .env
+
       - name: Build Nuxt
-        run: npm run generate
+        run: npm run build
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -36,6 +40,6 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: ${{ secrets.FTP_PORT }}
-          local-dir: code/frontend/.output/public/
+          local-dir: ./code/frontend/.output/public/
           server-dir: /home/csse1669/web/csse1669.cpkku.com/public_html/
           dangerous-clean-slate: true
