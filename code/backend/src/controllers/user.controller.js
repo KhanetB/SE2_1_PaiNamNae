@@ -268,20 +268,6 @@ const handleAccountDeletion = async (req, res, next) => {
 };
 
 module.exports = {
-<<<<<<< HEAD
-	adminListUsers,
-	getAllUsers,
-	getUserById,
-	getMyUser,
-	getUserPublicById,
-	createUser,
-	updateCurrentUserProfile,
-	adminUpdateUser,
-	adminDeleteUser,
-	setUserStatus,
-	deleteUserController,
-	checkUserDeletionStatus,
-=======
   adminListUsers,
   getAllUsers,
   getUserById,
@@ -295,5 +281,4 @@ module.exports = {
   deleteUserController,
   checkUserDeletionStatus,
   handleAccountDeletion,
->>>>>>> origin/Pasit_0207
 };
