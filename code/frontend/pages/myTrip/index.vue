@@ -389,6 +389,28 @@
                                     >
                                         เขียนรีวิว
                                     </button>
+                                    <button
+                                        v-if="
+                                            trip.status === 'completed' &&
+                                            trip.hasReview
+                                        "
+                                        @click.stop="openEditReviewModal(trip)"
+                                        class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50"
+                                    >
+                                        แก้ไขรีวิว
+                                    </button>
+                                    <button
+                                        v-if="
+                                            trip.status === 'completed' &&
+                                            trip.hasReview
+                                        "
+                                        @click.stop="
+                                            openDeleteReviewModal(trip)
+                                        "
+                                        class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50"
+                                    >
+                                        ลบรีวิว
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -775,14 +797,7 @@ function within7Days(completedDate) {
     const completed = dayjs(completedDate);
     return now.isAfter(completed) && now.diff(completed, "day") < 7;
 }
-// --- Review Modal Actions ---
-function openEditReviewModal(trip) {
-    toast.info("ฟีเจอร์แก้ไขรีวิว ยังไม่เปิดใช้งาน");
-}
 
-function openDeleteReviewModal(trip) {
-    toast.info("ฟีเจอร์ลบรีวิว ยังไม่เปิดใช้งาน");
-}
 async function fetchMyTrips() {
     isLoading.value = true;
     try {
@@ -858,6 +873,7 @@ async function fetchMyTrips() {
 
             return {
                 hasReview: false,
+                reviewId: "",
                 id: b.id,
                 status: String(b.status || "").toLowerCase(),
                 routeStatus: String(b.route?.status || "").toLowerCase(),
@@ -910,6 +926,7 @@ async function fetchMyTrips() {
         await Promise.all(
             allTrips.value.map(async (trip) => {
                 trip.hasReview = await hasReview(trip.id);
+                trip.reviewId = await getReview(trip.id);
             }),
         );
         // รอให้แผนที่พร้อมก่อน แล้วค่อย reverse geocode เพื่อได้ "ชื่อสถานที่" สวยๆ
@@ -1132,6 +1149,70 @@ async function updateMap(trip) {
     }
 }
 
+const isEditingReview = ref(false);
+const currentReviewId = ref(null);
+const existingImages = ref([]);
+
+const reviewMapReverse = {
+    SAFE_DRIVING: "ขับขี่ปลอดภัย",
+    CLEAN_CAR: "รถสะอาดน่านั่ง",
+    FRIENDLY_DRIVER: "คนขับอัธยาศัยดี",
+    GOOD_MUSIC: "ชอบเพลงที่เปิด",
+};
+
+// --- Review Modal Actions ---
+async function openEditReviewModal(trip) {
+    console.log("Edit Review has called");
+    try {
+        const res = await $fetch(`/reviews/booking/${trip.id}`, {
+            method: "GET",
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${token.value}` },
+        });
+        console.log("Res Edit: ", res);
+        const reviewData = res.review;
+        if (!reviewData) {
+            toast.error("ไม่พบข้อมูลรีวิว");
+            return;
+        }
+
+        tripToReview.value = trip;
+        isEditingReview.value = true;
+        currentReviewId.value = reviewData.id;
+
+        reviewRating.value = reviewData.rating || 0;
+        reviewComment.value = reviewData.comment || "";
+
+        selectedTags.value = (reviewData.labels || [])
+            .map((label) => reviewMapReverse[label])
+            .filter(Boolean);
+
+        reviewImages.value = [];
+        existingImages.value = reviewData.images || [];
+        previewImages.value = [...existingImages.value];
+
+        isReviewModalVisible.value = true;
+    } catch (error) {
+        console.error("Error fetch review: ", error);
+        toast.error("เกิดข้อผิดพลาด", "ไม่สามารถดึงข้อมูลรีวิวได้");
+    } finally {
+        isLoading.value = false;
+    }
+}
+
+function openDeleteReviewModal(trip) {
+    tripToAction.value = trip;
+    modalContent.value = {
+        title: "ยืนยันการลบรีวิว",
+        message: `คุณต้องการลบรีวิวที่คุณเขียนให้ "${trip.driver.name}" ใช่หรือไม่`,
+        confirmText: "ลบรีวิว",
+        action: "deleteReview",
+        variant: "danger",
+    };
+    isModalVisible.value = true;
+    // toast.info("ฟีเจอร์ลบรีวิว");
+}
+
 // --- Modal Logic ---
 const isModalVisible = ref(false);
 const tripToAction = ref(null);
@@ -1175,6 +1256,7 @@ const handleConfirmAction = async () => {
     if (!tripToAction.value) return;
     const action = modalContent.value.action;
     const tripId = tripToAction.value.id;
+    console.log("Review ID: ", tripToAction.value);
     try {
         if (action === "cancel") {
             // ไม่ยิง PATCH ตรง ๆ — ต้องให้ผู้ใช้เลือกเหตุผลก่อน
@@ -1184,6 +1266,11 @@ const handleConfirmAction = async () => {
         } else if (action === "delete") {
             await $api(`/bookings/${tripId}`, { method: "DELETE" });
             toast.success("ลบรายการสำเร็จ", "รายการได้ถูกลบออกจากประวัติแล้ว");
+        } else if (action == "deleteReview") {
+            await $api(`/reviews/${tripToAction.value.reviewId}`, {
+                method: "DELETE",
+            });
+            toast.success("ลบรีวิวสำเร็จ", "รีวิวของคุณได้ถูกลบแล้ว");
         }
         closeConfirmModal();
         await fetchMyTrips();
@@ -1349,6 +1436,22 @@ const hasReview = async (trip) => {
         return false;
     }
 };
+
+const getReview = async (trip) => {
+    console.log("Get Review has called");
+    try {
+        const res = await $fetch(`/reviews/booking/${trip}`, {
+            method: "GET",
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${token.value}` },
+        });
+        console.log("Res: ", res.review.id);
+        return res.review.id;
+    } catch (error) {
+        console.error("Error fetch review: ", error);
+        return "";
+    }
+};
 const submitReview = async (trip) => {
     if (reviewRating.value <= 0) {
         toast.error("กรุณากรอกข้อมูล", "คุณยังไม่ได้เลือกดาว");
@@ -1361,33 +1464,50 @@ const submitReview = async (trip) => {
     }
     const formData = new FormData();
 
-    formData.append("bookingId", trip.id);
+    // formData.append("bookingId", trip.id);
     formData.append("rating", reviewRating.value);
     formData.append("comment", reviewComment.value);
-    formData.append(
-        "labels",
-        selectedTags.value.map((tag) => reviewMaps[tag]).join(","),
-    );
+    const labelsEnum = selectedTags.value
+        .map((tag) => reviewMaps[tag])
+        .join(",");
+
+    console.log("Label: ", labelsEnum);
+    formData.append("labels", labelsEnum.toString());
 
     reviewImages.value.forEach((file) => {
         formData.append("files", file);
     });
+
     try {
         isSubmittingReview.value = true;
-        const res = await $fetch(`/reviews`, {
-            method: "POST",
-            baseURL: config.public.apiBase,
-            body: formData,
-            headers: { Authorization: `Bearer ${token.value}` },
-        });
-        console.log("Res: ", res);
-        isReviewModalVisible.value = false;
-        tripToReview.value = null;
-        toast.success("เสร็จแล้วจ้าา", "ส่งรีวิวแล้วจ้าา");
+
+        if (isEditingReview.value) {
+            await $fetch(`/reviews/${currentReviewId.value}`, {
+                method: "PUT",
+                baseURL: config.public.apiBase,
+                body: formData,
+                headers: { Authorization: `Bearer ${token.value}` },
+            });
+
+            toast.success("แก้ไขรีวิวสำเร็จ", "ข้อมูลของคุณถูกบันทึกแล้ว");
+        } else {
+            formData.append("bookingId", trip.id);
+            const res = await $fetch(`/reviews`, {
+                method: "POST",
+                baseURL: config.public.apiBase,
+                body: formData,
+                headers: { Authorization: `Bearer ${token.value}` },
+            });
+            toast.success("เสร็จแล้วจ้าา", "ส่งรีวิวแล้วจ้าา");
+            console.log("Res: ", res);
+        }
+        // isReviewModalVisible.value = false;
+        // tripToReview.value = null;
+        closeReviewModal();
         await fetchMyTrips();
     } catch (error) {
         console.error("Error send review: ", error.response);
-        toast.error("รีวิวไม่สำเร็จ", `${error.response._data.message}`);
+        toast.error("บันทึกไม่สำเร็จ", `${error.response._data.message}`);
     } finally {
         isSubmittingReview.value = false;
     }
@@ -1402,6 +1522,9 @@ const isSubmittingReview = ref(false);
 
 function openReviewModal(trip) {
     tripToReview.value = trip;
+    isEditingReview.value = false;
+    currentReviewId.value = null;
+    existingImages.value = [];
     reviewRating.value = 0;
     reviewComment.value = "";
     isReviewModalVisible.value = true;
@@ -1462,7 +1585,13 @@ function handleFileChange(event) {
     event.target.value = "";
 }
 function removeImage(index) {
-    reviewImages.value.splice(index, 1);
+    if (index < existingImages.value.length) {
+        existingImages.value.splice(index, 1);
+    } else {
+        const newIndex = index - existingImages.value.length;
+        reviewImages.value.splice(newIndex, 1);
+    }
+    // reviewImages.value.splice(index, 1);
     previewImages.value.splice(index, 1);
 }
 

@@ -12,31 +12,35 @@ const getReviewsForUser = asyncHandler(async (req, res) => {
 });
 
 // GET /reviews/:reviewId
-const getReviewById = asyncHandler(async (req, res) => {
+const getReviewById = asyncHandler(async (req, res, next) => {
   try {
     const reviewId = req.params.reviewId;
     const userId = req.user.sub;
     const review = await reviewService.getReviewById(reviewId, userId);
     res.json(review);
   } catch (error) {
-    throw new ApiError(
-      error.statusCode || 500,
-      error.message || "An error occurred while fetching the review",
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while fetching the review",
+      ),
     );
   }
 });
 
 //GET /reviews/booking/:bookingId
-const getReviewByBookingId = asyncHandler(async (req, res) => {
+const getReviewByBookingId = asyncHandler(async (req, res, next) => {
   try {
     const bookingId = req.params.bookingId;
     const userId = req.user.sub;
     const review = await reviewService.getReviewByBookingId(bookingId, userId);
     res.json(review);
   } catch (error) {
-    throw new ApiError(
-      error.statusCode || 500,
-      error.message || "An error occurred while fetching the review",
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while fetching the review",
+      ),
     );
   }
 });
@@ -77,31 +81,39 @@ const deleteReview = async (req, res, next) => {
       message: "Review deleted successfully",
     });
   } catch (error) {
-    throw new ApiError(
-      error.statusCode || 500,
-      error.message || "An error occurred while deleting the review",
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while deleting the review",
+      ),
     );
   }
 };
 // PUT /reviews/:reviewId
 const editReview = async (req, res) => {
-  const reviewId = req.params.reviewId;
+  try {
+    const reviewId = req.params.reviewId;
 
-  const updatedReview = await reviewService.editReview(
-    reviewId,
-    req.user.sub,
-    {
-      rating: req.body.rating,
-      comment: req.body.comment,
-      labels: req.body.labels,
-    },
-    req.files, // 👈 สำคัญมาก
-  );
+    const updatedReview = await reviewService.editReview(
+      reviewId,
+      req.user.sub,
+      {
+        rating: req.body.rating,
+        comment: req.body.comment,
+        labels: req.body.labels,
+      },
+      req.files, // 👈 สำคัญมาก
+    );
 
-  res.json({
-    success: true,
-    data: updatedReview,
-  });
+    res.json({
+      success: true,
+      data: updatedReview,
+    });
+  } catch (err) {
+    res.status(err.statusCode).json({
+      success: false,
+    });
+  }
 };
 
 module.exports = {

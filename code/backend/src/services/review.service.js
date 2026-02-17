@@ -184,7 +184,9 @@ const editReview = async (
   const review = await prisma.review.findUnique({
     where: { id: reviewId },
   });
-
+  if (typeof labels === "string") {
+    labels = labels.split(",");
+  }
   if (!review) throw new ApiError(404, "Review not found");
   if (review.passengerId !== userId)
     throw new ApiError(403, "You are not allowed to edit this review");

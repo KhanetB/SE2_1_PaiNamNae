@@ -31,7 +31,7 @@ const editReviewSchema = {
     .object({
       rating: z.coerce.number().min(1).max(5).optional(),
       comment: z.string().trim().max(1000).optional(),
-      labels: z.array(reviewLabelEnum).optional(),
+      labels: z.string().optional(),
     })
     .refine((data) => Object.keys(data).length > 0, {
       message: "At least one field must be provided",
