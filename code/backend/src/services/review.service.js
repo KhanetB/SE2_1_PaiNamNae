@@ -15,6 +15,22 @@ const getReviewsForUser = async (userId) => {
     return reviews;
 }
 
+// Get one review from id
+const getReviewById = async (reviewId, userId) => {
+    const review = await prisma.review.findUnique(
+        {
+            where: { id: reviewId }
+        }
+    )
+    if (!review) {
+        throw new ApiError(404, 'Review not found');
+    }
+    if (review.passengerId !== userId){
+        throw new ApiError(403, 'You are not allowed to view this review');
+    }
+    return review;
+};
+
 const createReview = async ({
     bookingId,
     rating,

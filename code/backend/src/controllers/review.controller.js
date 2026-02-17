@@ -11,6 +11,18 @@ const getReviewsForUser = asyncHandler(async (req, res) => {
     res.json(reviews);
 });
 
+// GET /reviews/:reviewId
+const getReviewById = asyncHandler(async(req,res)=> {
+    try{
+            const reviewId = req.params.reviewId;
+            const userId = req.user.sub;
+            const review = await reviewService.getReviewById(reviewId, userId);
+            res.json(review);  
+    }catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || 'An error occurred while fetching the review')
+    }
+})
+
 // POST /reviews
 const createReview = async (req, res, next) => {
     try {
@@ -70,5 +82,6 @@ module.exports = {
     getReviewsForUser,
     createReview,
     deleteReview,
-    editReview
+    editReview,
+    getReviewById
 }
