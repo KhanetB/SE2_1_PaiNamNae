@@ -1,6 +1,7 @@
 const prisma = require('../utils/prisma');
 const ApiError = require('../utils/ApiError');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary');
+
 // get all reviews for user 
 const getReviewsForUser = async (userId) => {
     const reviews = await prisma.review.findMany({
@@ -54,6 +55,17 @@ const createReview = async ({
     if (existingReview) {
         throw new ApiError(409, 'This booking has already been reviewed');
     }
+    // ตรวจสอบว่าเกิน 7 วันหรือยัง
+    const completedAt = booking.route.completedAt;
+    if (!completedAt) {
+        throw new ApiError(400, 'Route completion time not found');
+    }
+    const diffInDays = Math.floor(
+        (Date.now() - completedAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diffInDays > 7) {
+        throw new ApiError(400, 'You can create review only within 7 days');
+    }
 
     const uploadedImages = [];
 
@@ -105,6 +117,21 @@ const deleteReview = async (reviewId, userId) => {
     // ตรวจสอบว่า user นี้เป็นเจ้าของ review
     if (review.passengerId !== userId) {
         throw new ApiError(403, 'You are not allowed to delete this review');
+    }
+    // ตรวจสอบว่าครบ 7 วันหรือยัง
+    const booking = await prisma.booking.findUnique({
+        where: { id: review.bookingId },
+        include: { route: true },
+    });
+    const completedAt = booking.route.completedAt;
+    if (!completedAt) {
+        throw new ApiError(400, 'Route completion time not found');
+    }
+    const diffInDays = Math.floor(
+        (Date.now() - completedAt.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diffInDays > 7) {
+        throw new ApiError(400, 'You can delete review only within 7 days');
     }
     // ลบ review
     await prisma.review.delete({
