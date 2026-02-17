@@ -380,96 +380,15 @@
                                         ยกเลิกการจอง
                                     </button>
                                     <button
-                                        v-if="trip.status === 'completed'"
+                                        v-if="
+                                            trip.status === 'completed' &&
+                                            !trip.hasReview
+                                        "
                                         @click.stop="openReviewModal(trip)"
                                         class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50"
                                     >
                                         เขียนรีวิว
                                     </button>
-
-                                    <!-- CONFIRMED: เพิ่มปุ่มยกเลิก + คงปุ่มแชท -->
-                                    <template
-                                        v-else-if="
-                                            trip.status === 'confirmed' &&
-                                            trip.routeStatus !== 'in_transit'
-                                        "
-                                    >
-                                        <button
-                                            @click.stop="openCancelModal(trip)"
-                                            class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50"
-                                        >
-                                            ยกเลิกการจอง
-                                        </button>
-                                        <button
-                                            class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700"
-                                        >
-                                            แชทกับผู้ขับ
-                                        </button>
-                                    </template>
-
-                                    <!-- REJECTED / CANCELLED: ลบได้ -->
-                                    <button
-                                        v-else-if="
-                                            ['rejected', 'cancelled'].includes(
-                                                trip.status,
-                                            )
-                                        "
-                                        @click.stop="
-                                            openConfirmModal(trip, 'delete')
-                                        "
-                                        class="px-4 py-2 text-sm text-gray-600 transition duration-200 border border-gray-300 rounded-md hover:bg-gray-50"
-                                    >
-                                        ลบรายการ
-                                    </button>
-
-                                    <!-- Active Mytrip: ยืนยันการลง -->
-                                    <button
-                                        v-else-if="trip.status === 'mytrip'"
-                                        class="px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700"
-                                        @click.stop="handleConfirmTrip(trip)"
-                                    >
-                                        ยืนยันการเดินทาง
-                                    </button>
-
-                                    <!-- Completed: รีวิว -->
-                                    <template
-                                        v-else-if="trip.status === 'completed'"
-                                    >
-                                        <!-- ยังไม่รีวิว -->
-                                        <button
-                                            v-if="
-                                                !trip.hasReviewed &&
-                                                within7Days(trip.completed)
-                                            "
-                                            @click.stop="openReviewModal(trip)"
-                                            class="px-4 py-2 text-sm text-blue-600 transition duration-200 bg-white border border-blue-600 rounded-md hover:bg-blue-700 hover:text-white"
-                                        >
-                                            รีวิวการเดินทาง
-                                        </button>
-                                        <!-- รีวิวแล้ว: แก้ไข (7 วัน) -->
-                                        <button
-                                            v-else-if="
-                                                trip.hasReviewed &&
-                                                within7Days(trip.completed)
-                                            "
-                                            @click.stop="
-                                                openEditReviewModal(trip)
-                                            "
-                                            class="px-4 py-2 text-sm text-yellow-600 transition duration-200 bg-white border border-yellow-600 rounded-md hover:bg-yellow-700 hover:text-white"
-                                        >
-                                            แก้ไข
-                                        </button>
-                                        <!-- รีวิวแล้ว: ลบ (ไม่จำกัดเวลา) -->
-                                        <button
-                                            v-if="trip.hasReviewed"
-                                            @click.stop="
-                                                openDeleteReviewModal(trip)
-                                            "
-                                            class="px-4 py-2 text-sm text-red-600 transition duration-200 bg-white border border-red-600 rounded-md hover:bg-red-700 hover:text-white"
-                                        >
-                                            ลบ
-                                        </button>
-                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -938,6 +857,7 @@ async function fetchMyTrips() {
                 .filter(Boolean);
 
             return {
+                hasReview: false,
                 id: b.id,
                 status: String(b.status || "").toLowerCase(),
                 routeStatus: String(b.route?.status || "").toLowerCase(),
@@ -987,7 +907,11 @@ async function fetchMyTrips() {
         });
 
         allTrips.value = formatted;
-
+        await Promise.all(
+            allTrips.value.map(async (trip) => {
+                trip.hasReview = await hasReview(trip.id);
+            }),
+        );
         // รอให้แผนที่พร้อมก่อน แล้วค่อย reverse geocode เพื่อได้ "ชื่อสถานที่" สวยๆ
         await waitMapReady();
 
@@ -1410,9 +1334,29 @@ function initializeMap() {
     mapReady.value = true;
 }
 
+const hasReview = async (trip) => {
+    console.log("Has Review has called");
+    try {
+        const res = await $fetch(`/reviews/booking/${trip}`, {
+            method: "GET",
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${token.value}` },
+        });
+        console.log("Res: ", res);
+        return res.hasReview;
+    } catch (error) {
+        console.error("Error fetch review: ", error);
+        return false;
+    }
+};
 const submitReview = async (trip) => {
     if (reviewRating.value <= 0) {
         toast.error("กรุณากรอกข้อมูล", "คุณยังไม่ได้เลือกดาว");
+        return;
+    }
+
+    if (!reviewComment) {
+        toast.error("กรุณากรอกข้อมูล", "คุณยังไม่ได้เขียน comment");
         return;
     }
     const formData = new FormData();
@@ -1440,6 +1384,7 @@ const submitReview = async (trip) => {
         isReviewModalVisible.value = false;
         tripToReview.value = null;
         toast.success("เสร็จแล้วจ้าา", "ส่งรีวิวแล้วจ้าา");
+        await fetchMyTrips();
     } catch (error) {
         console.error("Error send review: ", error.response);
         toast.error("รีวิวไม่สำเร็จ", `${error.response._data.message}`);
