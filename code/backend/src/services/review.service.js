@@ -230,4 +230,5 @@ module.exports = {
     getReviewsForUser,
     deleteReview,
     editReview,
+    getReviewById
 };
