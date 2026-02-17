@@ -287,6 +287,7 @@
 
                                                 <li class="mt-1">
                                                     • จุดปลายทาง:
+
                                                     <span
                                                         class="font-medium text-gray-900"
                                                         >{{
@@ -386,6 +387,13 @@
                                         class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50"
                                     >
                                         ยกเลิกการจอง
+                                    </button>
+                                    <button
+                                        v-if="trip.status === 'completed'"
+                                        @click.stop="openReviewModal(trip)"
+                                        class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50"
+                                    >
+                                        เขียนรีวิว
                                     </button>
 
                                     <!-- CONFIRMED: เพิ่มปุ่มยกเลิก + คงปุ่มแชท -->
@@ -562,6 +570,164 @@
             @confirm="handleConfirmAction"
             @cancel="closeConfirmModal"
         />
+
+        <!-- Review Modal -->
+        <div
+            v-if="isReviewModalVisible"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            @click.self="closeReviewModal"
+        >
+            <div
+                class="w-4xl p-6 bg-white rounded-lg shadow-xl overflow-y-auto max-h-[90vh]"
+            >
+                <h3 class="text-3xl font-semibold text-gray-900">
+                    รีวิวการเดินทาง
+                </h3>
+
+                <p class="mt-1 text-2xl font-semibold text-gray-700">
+                    {{ tripToReview?.origin }} → {{ tripToReview?.destination }}
+                </p>
+                <p class="mt-1 text-md text-gray-600">
+                    จุดนัดพบ: {{ tripToReview?.pickupPoint }}
+                </p>
+                <p class="text-sm text-gray-600">
+                    วันที่: {{ tripToReview?.date }}
+                    <span class="mx-2 text-gray-300">|</span>
+                    เวลา: {{ tripToReview?.time }}
+                    <span class="mx-2 text-gray-300">|</span>
+                    ระยะเวลา: {{ tripToReview?.durationText }}
+                    <span class="mx-2 text-gray-300">|</span>
+                    ระยะทาง: {{ tripToReview?.distanceText }}
+                </p>
+                <div
+                    class="mt-8 justify-center content-center place-items-center"
+                >
+                    <img
+                        :src="tripToReview?.driver.image"
+                        :alt="tripToReview.driver.name"
+                        class="object-cover w-24 h-24 rounded-full"
+                    />
+                    <h5 class="font-medium text-xl text-gray-900 mt-3">
+                        {{ tripToReview?.driver.name }}
+                    </h5>
+
+                    <!-- Rating -->
+                    <div class="flex text-3xl cursor-pointer select-none">
+                        <span
+                            v-for="star in 5"
+                            :key="star"
+                            class="relative"
+                            @mousemove="setRating($event, star)"
+                            @click="setRating($event, star)"
+                        >
+                            <span class="text-gray-300">★</span>
+
+                            <span
+                                class="absolute left-0 top-0 overflow-hidden text-yellow-400"
+                                :style="{ width: getStarFill(star) }"
+                            >
+                                ★
+                            </span>
+                        </span>
+                    </div>
+
+                    <p class="mt-2 text-sm text-gray-600">
+                        {{ reviewRating }} ดาว
+                    </p>
+
+                    <div class="m-3 flex flex-wrap gap-2">
+                        <button
+                            v-for="tag in reviewTags"
+                            :key="tag"
+                            @click="toggleTag(tag)"
+                            type="button"
+                            :class="[
+                                'px-3 py-1 text-sm rounded-full border transition',
+                                selectedTags.includes(tag)
+                                    ? 'bg-blue-600 text-white border-blue-600'
+                                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50',
+                            ]"
+                        >
+                            {{ tag }}
+                        </button>
+                    </div>
+                </div>
+                <!-- Comment -->
+                <div class="mt-4">
+                    <label class="block mb-1 text-md">ความคิดเห็น</label>
+                    <textarea
+                        v-model="reviewComment"
+                        rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        placeholder="เขียนรีวิวที่นี่"
+                    />
+                </div>
+                <!-- photo upload -->
+                <div class="mt-4">
+                    <label class="block mb-1 text-md"
+                        >เพิ่มรูปภาพ (สูงสุด 3 รูป)</label
+                    >
+
+                    <div class="flex gap-3">
+                        <!-- Preview images -->
+                        <div
+                            v-for="(url, index) in previewImages"
+                            :key="index"
+                            class="relative w-48 h-48"
+                        >
+                            <img
+                                :src="url"
+                                class="object-cover w-full h-full rounded-lg border"
+                            />
+
+                            <!-- remove button -->
+                            <button
+                                @click="removeImage(index)"
+                                class="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-2 -right-2"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <!-- upload box -->
+                        <div
+                            v-if="previewImages.length < 3"
+                            @click="triggerFileInput"
+                            class="flex items-center justify-center w-48 h-48 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 hover:border-blue-400"
+                        >
+                            <p class="text-3xl text-gray-600">+</p>
+                            <br />
+                        </div>
+
+                        <input
+                            type="file"
+                            ref="fileInput"
+                            class="hidden"
+                            accept="image/*"
+                            multiple
+                            @change="handleFileChange"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-6">
+                    <button
+                        @click="closeReviewModal"
+                        class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    >
+                        ยกเลิก
+                    </button>
+
+                    <button
+                        @click="submitReview"
+                        :disabled="isSubmittingReview"
+                        class="px-4 py-2 text-sm text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                        {{ isSubmittingReview ? "กำลังส่ง..." : "ส่งรีวิว" }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -1251,6 +1417,92 @@ function initializeMap() {
     geocoder = new google.maps.Geocoder();
     placesService = new google.maps.places.PlacesService(gmap);
     mapReady.value = true;
+}
+
+// รีวิว
+// ---- modal ----
+const isReviewModalVisible = ref(false);
+const tripToReview = ref(null);
+const reviewRating = ref(0);
+const reviewComment = ref("");
+const isSubmittingReview = ref(false);
+
+function openReviewModal(trip) {
+    tripToReview.value = trip;
+    reviewRating.value = 0;
+    reviewComment.value = "";
+    isReviewModalVisible.value = true;
+    selectedTags.value = [];
+    reviewImages.value = [];
+    previewImages.value = [];
+}
+
+function closeReviewModal() {
+    isReviewModalVisible.value = false;
+    tripToReview.value = null;
+}
+//---- tags ----
+const reviewTags = [
+    "ขับขี่ปลอดภัย",
+    "รถสะอาดน่านั่ง",
+    "คนขับอัธยาศัยดี",
+    "ชอบเพลงที่เปิด",
+];
+
+const selectedTags = ref([]);
+
+function toggleTag(tag) {
+    if (selectedTags.value.includes(tag)) {
+        selectedTags.value = selectedTags.value.filter((t) => t !== tag);
+    } else {
+        selectedTags.value.push(tag);
+    }
+}
+
+// photo
+const fileInput = ref(null);
+
+const reviewImages = ref([]); // files
+const previewImages = ref([]); // preview url
+
+function triggerFileInput() {
+    fileInput.value.click();
+}
+function handleFileChange(event) {
+    const files = Array.from(event.target.files);
+
+    for (const file of files) {
+        if (!file.type.startsWith("image/")) continue;
+
+        if (reviewImages.value.length >= 3) break;
+
+        reviewImages.value.push(file);
+        previewImages.value.push(URL.createObjectURL(file));
+    }
+
+    event.target.value = "";
+}
+function removeImage(index) {
+    reviewImages.value.splice(index, 1);
+    previewImages.value.splice(index, 1);
+}
+
+// rating
+function setRating(event, star) {
+    const { left, width } = event.target.getBoundingClientRect();
+    const clickX = event.clientX - left;
+
+    if (clickX < width / 2) {
+        reviewRating.value = star - 0.5;
+    } else {
+        reviewRating.value = star;
+    }
+}
+
+function getStarFill(star) {
+    if (reviewRating.value >= star) return "100%";
+    if (reviewRating.value >= star - 0.5) return "50%";
+    return "0%";
 }
 </script>
 
