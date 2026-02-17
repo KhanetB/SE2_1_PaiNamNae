@@ -223,7 +223,7 @@
                         :disabled="!isValidEmail || isLoading"
                         @click="confirmDelete"
                     >
-                        <span v-if="!isLoading">ยืนยันการลบัญชี</span>
+                        <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
                         <span v-else class="flex items-center gap-2"
                             ><svg
                                 width="24"
