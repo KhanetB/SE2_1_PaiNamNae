@@ -121,7 +121,7 @@
           </ol>
         </div>
         <div class="flex items-center mb-4">
-          <input id="confirmCheckbox" type="checkbox" v-model="acceptTerms" class="mr-2" />
+          <input id="acceptPolicyCheckbox" type="checkbox" v-model="acceptTerms" class="mr-2" />
           <span>ยอมรับข้อกำหนดและเงื่อนไข</span>
         </div>
 
@@ -192,13 +192,14 @@
           </p>
 
           <button
+            id=closeButton
             class="bg-blue-600 text-white px-6 py-3 rounded-md
                    hover:bg-blue-700 transition"
             @click="finishDelete"
           >
             เสร็จสิ้น
           </button>
-        </div>
+        </div> 
       </div> -->
 
       <!-- STEP 4 ถ้้ายังมีพันธะอยู่ ถ้าจะใช้ตรงคอมเม้นอันนี้ก่อนค่อยใช้อันก่อนหน้า-->
@@ -214,6 +215,7 @@
           </p>
 
           <button
+            id="closeButton"
             class="bg-red-600 text-white px-6 py-3 rounded-md
                    hover:bg-red-700 transition"
             @click="finishDelete"
