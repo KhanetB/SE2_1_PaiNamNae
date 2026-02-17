@@ -2,7 +2,6 @@ const express = require("express");
 const validate = require("../middlewares/validate");
 const { protect, requireAdmin } = require("../middlewares/auth");
 const requireDriverVerified = require('../middlewares/driverVerified');
-const { anonymizeDeletedUsers } = require('../middlewares/anonymizeDeletedUsers');
 const routeController = require("../controllers/route.controller");
 const {
   idParamSchema,
@@ -78,7 +77,6 @@ router.delete(
 router.get(
   "/",
   validate({ query: listRoutesQuerySchema }),
-  anonymizeDeletedUsers,
   routeController.listRoutes
 );
 
@@ -86,7 +84,6 @@ router.get(
 router.get(
   "/me",
   protect,
-  anonymizeDeletedUsers,
   routeController.getMyRoutes
 );
 
@@ -94,7 +91,6 @@ router.get(
 router.get(
   "/:id",
   validate({ params: idParamSchema }),
-  anonymizeDeletedUsers,
   routeController.getRouteById
 );
 
