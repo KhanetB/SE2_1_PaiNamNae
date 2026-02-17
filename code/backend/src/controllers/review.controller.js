@@ -27,17 +27,19 @@ const getReviewById = asyncHandler(async (req, res) => {
 });
 
 //GET /reviews/booking/:bookingId
-const getReviewByBookingId = asyncHandler(async(req,res) => {
-    try{
-        const bookingId = req.params.bookingId;
-        const userId = req.user.sub;
-        const review = await reviewService.getReviewByBookingId(bookingId, userId);
-        res.json(review);
-    }catch (error) {
-        throw new ApiError(error.statusCode || 500, error.message || 'An error occurred while fetching the review')
-    }
+const getReviewByBookingId = asyncHandler(async (req, res) => {
+  try {
+    const bookingId = req.params.bookingId;
+    const userId = req.user.sub;
+    const review = await reviewService.getReviewByBookingId(bookingId, userId);
+    res.json(review);
+  } catch (error) {
+    throw new ApiError(
+      error.statusCode || 500,
+      error.message || "An error occurred while fetching the review",
+    );
+  }
 });
-
 
 // POST /reviews
 const createReview = async (req, res, next) => {
@@ -103,19 +105,10 @@ const editReview = async (req, res) => {
 };
 
 module.exports = {
-<<<<<<< HEAD
   getReviewsForUser,
   createReview,
   deleteReview,
   editReview,
   getReviewById,
+  getReviewByBookingId,
 };
-=======
-    getReviewsForUser,
-    createReview,
-    deleteReview,
-    editReview,
-    getReviewById,
-    getReviewByBookingId
-}
->>>>>>> origin/Phuri_2283
