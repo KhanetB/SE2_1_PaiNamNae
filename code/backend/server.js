@@ -18,6 +18,7 @@ const ApiError = require("./src/utils/ApiError");
 const { metricsMiddleware } = require("./src/middlewares/metrics");
 const ensureAdmin = require("./src/bootstrap/ensureAdmin");
 const { startCleanuoCron } = require("./src/cron/cleanupCron");
+const exportRoutes = require("./src/routes/export.routes");
 
 const app = express();
 promClient.collectDefaultMetrics();
@@ -25,7 +26,11 @@ promClient.collectDefaultMetrics();
 app.use(helmet());
 
 const corsOptions = {
-  origin: ["http://localhost:3001", "https://amazing-crisp-9bcb1a.netlify.app"],
+  origin: [
+    "http://localhost:3001",
+    "https://amazing-crisp-9bcb1a.netlify.app",
+    "https://backend-se.pasitlab.com",
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -71,6 +76,9 @@ app.use("/documentation", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Main API Routes
 app.use("/api", routes);
+
+// Export Data Route
+app.use("/api/export", exportRoutes);
 
 app.use((req, res, next) => {
   next(new ApiError(404, `Cannot ${req.method} ${req.originalUrl}`));

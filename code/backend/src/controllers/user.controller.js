@@ -3,7 +3,9 @@ const userService = require("../services/user.service");
 const ApiError = require("../utils/ApiError");
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const notifService = require("../services/notification.service");
-const { runCleanupLogic } = require("../cron/cleanupCron");
+const exportService = require("../services/export.service");
+const emailService = require("../services/email.service");
+const prisma = require("../utils/prisma");
 
 const adminListUsers = asyncHandler(async (req, res) => {
 	const result = await userService.searchUsers(req.query);
@@ -231,7 +233,42 @@ const checkUserDeletionStatus = asyncHandler(async (req, res) => {
 	res.status(200).json(statusResult);
 });
 
+const handleAccountDeletion = async (req, res, next) => {
+  try {
+    const userId = req.user.sub;
+    const { email } = req.body;
+    if (!email) {
+      throw new ApiError(400, "กรุณาระบุอีเมลเพื่อรับไฟล์ข้อมูลส่วนตัว");
+    }
+
+    console.log("Generating PDPA data...");
+    const userData = await exportService.generateUserData(userId);
+
+    console.log(`Sending backup to ${email}...`);
+    await emailService.sendBackupEmail(email, userData);
+
+    // ---------------------------------------------
+    // หลังจากส่งเมลสำเร็จแล้ว ค่อยเรียกฟังก์ชันลบของเพื่อน
+    // ---------------------------------------------
+
+    /*
+        console.log("Deleting user account...");
+        await prisma.user.delete({
+             where: { id: userId }
+        });
+            */
+    res.status(200).json({
+      success: true,
+      message: "ส่งข้อมูลสำรองทางอีเมลและลบบัญชีเรียบร้อยแล้ว",
+    });
+  } catch (error) {
+    // ถ้าส่งเมลไม่ผ่าน ระบบจะไม่ลบ User (Safety)
+    next(error);
+  }
+};
+
 module.exports = {
+<<<<<<< HEAD
 	adminListUsers,
 	getAllUsers,
 	getUserById,
@@ -244,4 +281,19 @@ module.exports = {
 	setUserStatus,
 	deleteUserController,
 	checkUserDeletionStatus,
+=======
+  adminListUsers,
+  getAllUsers,
+  getUserById,
+  getMyUser,
+  getUserPublicById,
+  createUser,
+  updateCurrentUserProfile,
+  adminUpdateUser,
+  adminDeleteUser,
+  setUserStatus,
+  deleteUserController,
+  checkUserDeletionStatus,
+  handleAccountDeletion,
+>>>>>>> origin/Pasit_0207
 };

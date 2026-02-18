@@ -12,6 +12,40 @@ const getReviewsForUser = asyncHandler(async (req, res) => {
   res.json(reviews);
 });
 
+// GET /reviews/:reviewId
+const getReviewById = asyncHandler(async (req, res, next) => {
+  try {
+    const reviewId = req.params.reviewId;
+    const userId = req.user.sub;
+    const review = await reviewService.getReviewById(reviewId, userId);
+    res.json(review);
+  } catch (error) {
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while fetching the review",
+      ),
+    );
+  }
+});
+
+//GET /reviews/booking/:bookingId
+const getReviewByBookingId = asyncHandler(async (req, res, next) => {
+  try {
+    const bookingId = req.params.bookingId;
+    const userId = req.user.sub;
+    const review = await reviewService.getReviewByBookingId(bookingId, userId);
+    res.json(review);
+  } catch (error) {
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while fetching the review",
+      ),
+    );
+  }
+});
+
 // POST /reviews
 const createReview = async (req, res, next) => {
   try {
@@ -29,7 +63,12 @@ const createReview = async (req, res, next) => {
       data: review,
     });
   } catch (error) {
-    next(new ApiError(error.statusCode || 500, error.message || 'An error occurred while creating the review'))
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while creating the review",
+      ),
+    );
   }
 };
 
@@ -40,17 +79,22 @@ const deleteReview = async (req, res, next) => {
     await reviewService.deleteReview(reviewId, req.user.sub);
     res.json({
       success: true,
-      message: 'Review deleted successfully',
+      message: "Review deleted successfully",
     });
   } catch (error) {
-    next(new ApiError(error.statusCode || 500, error.message || 'An error occurred while deleting the review'))
+    next(
+      new ApiError(
+        error.statusCode || 500,
+        error.message || "An error occurred while deleting the review",
+      ),
+    );
   }
 };
 // PUT /reviews/:reviewId
 const editReview = async (req, res) => {
-  const reviewId = req.params.reviewId;
-
   try {
+    const reviewId = req.params.reviewId;
+
     const updatedReview = await reviewService.editReview(
       reviewId,
       req.user.sub,
@@ -59,17 +103,17 @@ const editReview = async (req, res) => {
         comment: req.body.comment,
         labels: req.body.labels,
       },
-      req.files // 👈 สำคัญมาก
+      req.files, // 👈 สำคัญมาก
     );
 
     res.json({
       success: true,
       data: updatedReview,
     });
-  } catch (error) {
-    res.status(error.statusCode).json({
+  } catch (err) {
+    res.status(err.statusCode).json({
       success: false,
-    })
+    });
   }
 };
 
@@ -77,5 +121,7 @@ module.exports = {
   getReviewsForUser,
   createReview,
   deleteReview,
-  editReview
-}
+  editReview,
+  getReviewById,
+  getReviewByBookingId,
+};
