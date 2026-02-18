@@ -1,0 +1,27 @@
+meta {
+  name: TC13_DriverCompleteRoutes
+  type: http
+  seq: 15
+}
+
+patch {
+  url: http://localhost:3000/api/routes/{{route_id}}/complete
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{driver_token}}
+}
+
+tests {
+  test("get HTTP 200", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(200);
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

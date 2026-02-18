@@ -1,0 +1,40 @@
+meta {
+  name: TC19_UpdateReviews
+  type: http
+  seq: 21
+}
+
+put {
+  url: http://localhost:3000/api/reviews/{{review_id}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+body:json {
+  {
+    "rating": 3.5,
+    "comment": "บริการดีมาก"
+  }
+}
+
+tests {
+  test("get HTTP 200", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(200);
+  })
+  
+  test("check rating is 3.5", function(){
+    const body = res.getBody();
+    expect(body.data).to.not.equal(null)
+    expect(body.data.rating).to.equal(3.5)
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

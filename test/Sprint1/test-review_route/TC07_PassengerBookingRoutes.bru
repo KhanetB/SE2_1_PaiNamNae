@@ -1,0 +1,63 @@
+meta {
+  name: TC07_PassengerBookingRoutes
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:3000/api/bookings
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+body:json {
+  {
+    "routeId": "{{route_id}}",
+    "numberOfSeats": 2,
+    "pickupLocation": {
+      "lat": 16.4772,
+      "lng": 102.8141,
+      "name": "หน้ามข.",
+      "address": "ถนนหลังมอ"
+    },
+    "dropoffLocation": {
+      "lat": 16.4755,
+      "lng": 102.8256,
+      "name": "ปลายทางฝั่งตะวันออก",
+      "address": "ถนนสหศาสตร์"
+    }
+  }
+}
+
+script:pre-request {
+  // const bookingId = bru.getEnvVar("booking_id")
+  // if(bookingId){
+  //   bru.runner.skipRequest();
+  // }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("booking_id",body.data.id)
+}
+
+tests {
+  test("get HTTP 201",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(201);
+  })
+  
+  test("get booking id",function(){
+    const body = res.getBody();
+    expect(body.data).to.have.property("id");
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

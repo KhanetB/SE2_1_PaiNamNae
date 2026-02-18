@@ -1,0 +1,54 @@
+meta {
+  name: TC05_DriverAddVehicle
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:3000/api/vehicles
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{driver_token}}
+}
+
+body:multipart-form {
+  vehicleModel: Toyota Corolla Altis
+  licensePlate: กข 1234 ขอนแก่น
+  vehicleType: Sedan
+  color: White
+  seatCapacity: 4
+  amenities[0]: Air Conditioning
+}
+
+script:pre-request {
+  const vehicleId = bru.getEnvVar("vehicle_id")
+  if(vehicleId){
+    bru.runner.skipRequest();
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("vehicle_id", body.data.id)
+}
+
+tests {
+  test("get HTTP 201",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(201);
+  });
+  
+  test("get vehical id",function(){
+    const body = res.getBody();
+    expect(body).to.have.property("data")
+    expect(body.data).to.have.property("id")
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
