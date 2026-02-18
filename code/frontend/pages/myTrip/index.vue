@@ -211,7 +211,7 @@
                                             "
                                             class="mt-2 px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700"
                                         >
-                                            ถึงแล้วจ้า
+                                            ยืนยันถึงจุดหมาย
                                         </button>
                                     </div>
                                 </div>
@@ -1471,8 +1471,8 @@ const submitReview = async (trip) => {
         .map((tag) => reviewMaps[tag])
         .join(",");
 
-    console.log("Label: ", labelsEnum);
-    formData.append("labels", labelsEnum.toString());
+    console.log("Label: ", labelsEnum.length === 0 ? "" : labelsEnum);
+    formData.append("labels", labelsEnum);
 
     reviewImages.value.forEach((file) => {
         formData.append("files", file);
@@ -1492,13 +1492,15 @@ const submitReview = async (trip) => {
             toast.success("แก้ไขรีวิวสำเร็จ", "ข้อมูลของคุณถูกบันทึกแล้ว");
         } else {
             formData.append("bookingId", trip.id);
+            console.log("Booking ID: ", trip.id);
+            console.log("Token: ", token.value);
             const res = await $fetch(`/reviews`, {
                 method: "POST",
                 baseURL: config.public.apiBase,
                 body: formData,
                 headers: { Authorization: `Bearer ${token.value}` },
             });
-            toast.success("เสร็จแล้วจ้าา", "ส่งรีวิวแล้วจ้าา");
+            toast.success("บันทึกรีวิวสำเร็จ", "ข้อมูลของคุณถูกบันทึกแล้ว");
             console.log("Res: ", res);
         }
         // isReviewModalVisible.value = false;
@@ -1506,7 +1508,7 @@ const submitReview = async (trip) => {
         closeReviewModal();
         await fetchMyTrips();
     } catch (error) {
-        console.error("Error send review: ", error.response);
+        console.error("Error send review: ", error);
         toast.error("บันทึกไม่สำเร็จ", `${error.response._data.message}`);
     } finally {
         isSubmittingReview.value = false;

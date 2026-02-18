@@ -116,8 +116,10 @@ const createReview = async ({
     }
     console.log(labels);
     // 6. create review (enum array ใส่ตรงๆ)
-    if (typeof labels === "string") {
-      labels = labels.split(",");
+    if (!labels) {
+      labels = [];
+    } else if (typeof labels === "string") {
+      labels = labels.split(",").map((l) => l.trim());
     }
     const review = await prisma.review.create({
       data: {
