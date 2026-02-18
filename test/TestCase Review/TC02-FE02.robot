@@ -143,6 +143,16 @@ TC03_Create Review Star5 No Label With Text And Image
     Click Button                xpath=//button[contains(.,'ส่งรีวิว')]
     Wait Until Page Contains    แก้ไข    timeout=15s
 
+    Click Button    xpath=//Button[contains(.,'ลบ')]    
+    Wait Until Page Contains    ยืนยันการลบรีวิว
+    Wait Until Element Is Visible
+    ...    xpath=//div[contains(@class,'modal')]//button[normalize-space()='ลบรีวิว']
+
+    Click Button
+    ...    xpath=//div[contains(@class,'modal')]//button[normalize-space()='ลบรีวิว']
+    Wait Until Page Contains  เขียนรีวิว
+    Close Browser
+
 TC04_Create Review Without Comment
     [Documentation]   Star=5, Label มี, Text null, Pic มี -> พยายามบันทึกโดยไม่ใส่ข้อความ
     Open Browser To Login Page
