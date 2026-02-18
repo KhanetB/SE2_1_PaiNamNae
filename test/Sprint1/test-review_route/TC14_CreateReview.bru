@@ -1,0 +1,45 @@
+meta {
+  name: TC14_CreateReview
+  type: http
+  seq: 16
+}
+
+post {
+  url: http://localhost:3000/api/reviews
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+body:json {
+  {
+    "bookingId":"{{booking_id}}",
+    "rating": 4.5,
+    "comment":"{{review_comment}}"
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("review_id",body.data.id);
+}
+
+tests {
+  test("get HTTP 201", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(201)
+  })
+  
+  test("get review id", function(){
+    const body = res.getBody();
+    expect(body.data).to.have.property("id");
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

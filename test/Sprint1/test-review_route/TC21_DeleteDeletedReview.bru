@@ -1,0 +1,27 @@
+meta {
+  name: TC21_DeleteDeletedReview
+  type: http
+  seq: 23
+}
+
+delete {
+  url: http://localhost:3000/api/reviews/{{review_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+tests {
+  test("get HTTP 404", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(404)
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

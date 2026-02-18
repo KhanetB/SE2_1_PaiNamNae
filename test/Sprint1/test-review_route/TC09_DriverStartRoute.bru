@@ -1,0 +1,45 @@
+meta {
+  name: TC09_DriverStartRoute
+  type: http
+  seq: 11
+}
+
+patch {
+  url: http://localhost:3000/api/routes/{{route_id}}/start
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{driver_token}}
+}
+
+script:pre-request {
+  const routeStatus = bru.getEnvVar("route_status")
+  if(routeStatus === "IN_TRANSIT"){
+    bru.runner.skipRequest();
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("route_status",body.data.route.status)
+}
+
+tests {
+  test("get HTTP 200", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(200)
+  })
+  
+  test("route status should be IN_TRANSIT", function(){
+    const body = res.getBody();
+    expect(body.data).to.have.property("route")
+    expect(body.data.route.status).to.equal("IN_TRANSIT")
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
