@@ -671,7 +671,7 @@
                                             "
                                             class="mt-2 px-4 py-2 text-sm text-white transition duration-200 bg-green-600 rounded-md hover:bg-green-700"
                                         >
-                                            ยืนยันจ้าา
+                                            ยืนยันถึงจุดหมาย
                                         </button>
                                     </div>
                                 </div>
@@ -963,7 +963,7 @@ let stopMarkers = [];
 
 const tabs = [
     { status: "pending", label: "รอดำเนินการ" },
-    { status: "passenger_confirmed_arrival", label: "ขอยาดลงนะ" },
+    { status: "passenger_confirmed_arrival", label: "รอยืนยันการถึงจุดหมาย" },
     { status: "confirmed", label: "ยืนยันแล้ว" },
     { status: "rejected", label: "ปฏิเสธ" },
     { status: "cancelled", label: "ยกเลิก" },

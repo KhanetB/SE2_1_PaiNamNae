@@ -41,10 +41,12 @@ const createReview = async ({
         console.log('Booking Passenger ID:', booking.passengerId);
         throw new ApiError(403, 'You are not allowed to review this booking');
     }
-
-    // 3. route ต้อง COMPLETED
-    if (booking.route.status !== 'COMPLETED') {
-        throw new ApiError(400, 'You can review only completed routes');
+    console.log(labels);
+    // 6. create review (enum array ใส่ตรงๆ)
+    if (!labels) {
+      labels = [];
+    } else if (typeof labels === "string") {
+      labels = labels.split(",").map((l) => l.trim());
     }
 
     // 4. booking นี้ต้องยังไม่เคย review
