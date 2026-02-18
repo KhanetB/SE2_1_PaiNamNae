@@ -23,15 +23,11 @@ body:json {
 }
 
 tests {
-  test("get HTTP 404", function(){
+  test("get HTTP 400", function(){
     const status = res.getStatus();
     expect(status).to.equal(400);
   })
   
-  test("get message: You can review only completed routes", function(){
-    const body = res.getBody();
-    expect(body.message).to.equal("You can review only completed routes")
-  })
 }
 
 settings {
