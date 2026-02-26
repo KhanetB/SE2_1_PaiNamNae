@@ -1,0 +1,40 @@
+meta {
+  name: TC04_AdminCreateDriverVefication
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3000/api/driver-verifications/admin
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+body:multipart-form {
+  licenseNumber: {{licenseNumber}}
+  firstNameOnLicense: {{firstNameOnLicense}}
+  lastNameOnLicense: {{lastNameOnLicense}}
+  typeOnLicense: {{typeOfLicense}}
+  licenseIssueDate: {{licenseIssueDate}}
+  licenseExpiryDate: {{licenseExpiryDate}}
+  licensePhotoUrl: @file(person.jpg)
+  selfiePhotoUrl: @file(person.jpg)
+  userId: {{driver_id}}
+  status: APPROVED
+}
+
+tests {
+  test("get HTTP 201",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(201);
+  });
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -277,6 +277,8 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import { useToast } from '~/composables/useToast'
+import { useAdminSidebar } from '~/composables/useAdminSidebar'
+import { formatDate } from '~/utils/date'
 
 dayjs.locale('th'); dayjs.extend(buddhistEra)
 
@@ -287,6 +289,7 @@ useHead({
 })
 
 const { toast } = useToast()
+useAdminSidebar()
 const route = useRoute()
 const config = useRuntimeConfig()
 const token = useCookie('token')?.value || (process.client ? localStorage.getItem('token') : '')
@@ -678,13 +681,6 @@ async function handleSubmit() {
 
 /* ---------- อื่น ๆ ---------- */
 function goBack() { navigateTo(`/admin/routes/${route.params.id}`) }
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
 
 /* Mount */
 const GMAPS_CB = '__gmapsReadyAdminRouteEdit__'

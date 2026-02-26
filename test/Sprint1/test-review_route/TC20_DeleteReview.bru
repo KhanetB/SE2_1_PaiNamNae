@@ -1,0 +1,33 @@
+meta {
+  name: TC20_DeleteReview
+  type: http
+  seq: 22
+}
+
+delete {
+  url: http://localhost:3000/api/reviews/{{review_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+tests {
+  test("get HTTP 200", function(){
+    const status = res.getStatus();
+    expect(status).to.equal(200)
+  })
+  
+  test("get message: Review deleted successfully", function(){
+    const body = res.getBody();
+    expect(body.message).to.not.equal(null)
+    expect(body.message).to.equal("Review deleted successfully")
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,39 @@
+meta {
+  name: TC12_DriverCompleteBooking
+  type: http
+  seq: 14
+}
+
+patch {
+  url: http://localhost:3000/api/bookings/{{booking_id}}/status
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{driver_token}}
+}
+
+body:json {
+  {
+    "status": "COMPLETED"
+  }
+}
+
+tests {
+  test("get HTTP 200",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(200);
+  })
+  
+  test("update booking status success", function(){
+    const body = res.getBody();
+    expect(body.success).to.equal(true);
+    expect(body.data.status).to.equal("COMPLETED")
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

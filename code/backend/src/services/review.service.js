@@ -116,8 +116,10 @@ const createReview = async ({
     }
     console.log(labels);
     // 6. create review (enum array ใส่ตรงๆ)
-    if (typeof labels === "string") {
-      labels = labels.split(",");
+    if (!labels) {
+      labels = [];
+    } else if (typeof labels === "string") {
+      labels = labels.split(",").map((l) => l.trim());
     }
     const review = await prisma.review.create({
       data: {
@@ -184,7 +186,9 @@ const editReview = async (
   const review = await prisma.review.findUnique({
     where: { id: reviewId },
   });
-
+  if (typeof labels === "string") {
+    labels = labels.split(",");
+  }
   if (!review) throw new ApiError(404, "Review not found");
   if (review.passengerId !== userId)
     throw new ApiError(403, "You are not allowed to edit this review");
