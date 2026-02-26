@@ -32,5 +32,5 @@ const verifyUserSchema = z.object({
 module.exports = {
   loginSchema,
   changePasswordSchema,
-  verifyPasswordSchema: verifyUserSchema,
+  verifyUserSchema,
 };
