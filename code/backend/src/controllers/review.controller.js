@@ -1,22 +1,14 @@
 const asyncHandler = require("express-async-handler");
 const userService = require("../services/user.service");
-<<<<<<< HEAD
 const ApiError = require("../utils/ApiError");
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const reviewService = require("../services/review.service");
-=======
-const ApiError = require('../utils/ApiError');
-const { uploadToCloudinary } = require('../utils/cloudinary');
-const reviewService = require('../services/review.service');
-const { success } = require('zod/v4-mini');
->>>>>>> origin/Thanathat_2110-test_review
 
 // GET /reviews/user
 const getReviewsForUser = asyncHandler(async (req, res) => {
   const userId = req.user.sub;
   const reviews = await reviewService.getReviewsForUser(userId);
   res.json(reviews);
-<<<<<<< HEAD
 });
 
 // GET /reviews/:reviewId
@@ -51,8 +43,6 @@ const getReviewByBookingId = asyncHandler(async (req, res, next) => {
       ),
     );
   }
-=======
->>>>>>> origin/Thanathat_2110-test_review
 });
 
 // POST /reviews
@@ -72,16 +62,12 @@ const createReview = async (req, res, next) => {
       data: review,
     });
   } catch (error) {
-<<<<<<< HEAD
     next(
       new ApiError(
         error.statusCode || 500,
         error.message || "An error occurred while creating the review",
       ),
     );
-=======
-    next(new ApiError(error.statusCode || 500, error.message || 'An error occurred while creating the review'))
->>>>>>> origin/Thanathat_2110-test_review
   }
 };
 
@@ -92,7 +78,6 @@ const deleteReview = async (req, res, next) => {
     await reviewService.deleteReview(reviewId, req.user.sub);
     res.json({
       success: true,
-<<<<<<< HEAD
       message: "Review deleted successfully",
     });
   } catch (error) {
@@ -102,24 +87,13 @@ const deleteReview = async (req, res, next) => {
         error.message || "An error occurred while deleting the review",
       ),
     );
-=======
-      message: 'Review deleted successfully',
-    });
-  } catch (error) {
-    next(new ApiError(error.statusCode || 500, error.message || 'An error occurred while deleting the review'))
->>>>>>> origin/Thanathat_2110-test_review
   }
 };
 // PUT /reviews/:reviewId
 const editReview = async (req, res) => {
-<<<<<<< HEAD
   try {
     const reviewId = req.params.reviewId;
-=======
-  const reviewId = req.params.reviewId;
->>>>>>> origin/Thanathat_2110-test_review
 
-  try {
     const updatedReview = await reviewService.editReview(
       reviewId,
       req.user.sub,
@@ -128,28 +102,17 @@ const editReview = async (req, res) => {
         comment: req.body.comment,
         labels: req.body.labels,
       },
-<<<<<<< HEAD
       req.files, // 👈 สำคัญมาก
-=======
-      req.files // 👈 สำคัญมาก
->>>>>>> origin/Thanathat_2110-test_review
     );
 
     res.json({
       success: true,
       data: updatedReview,
     });
-<<<<<<< HEAD
   } catch (err) {
     res.status(err.statusCode).json({
       success: false,
     });
-=======
-  } catch (error) {
-    res.status(error.statusCode).json({
-      success: false,
-    })
->>>>>>> origin/Thanathat_2110-test_review
   }
 };
 
@@ -157,12 +120,7 @@ module.exports = {
   getReviewsForUser,
   createReview,
   deleteReview,
-<<<<<<< HEAD
   editReview,
   getReviewById,
   getReviewByBookingId,
 };
-=======
-  editReview
-}
->>>>>>> origin/Thanathat_2110-test_review

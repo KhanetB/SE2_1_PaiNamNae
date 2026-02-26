@@ -95,20 +95,23 @@
                                         class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50"
                                     >ยกเลิกการจอง</button>
                                     <button
-                                        v-if="trip.status === 'completed' && !trip.hasReview"
+                                        v-if="trip.status === 'completed' && !trip.hasReview &&  (new Date() - new Date(trip.completedAt)) <= 7 * 24 * 60 * 60 * 1000"
                                         @click.stop="openReviewModal(trip)"
                                         class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50"
-                                    >เขียนรีวิว</button>
-                                    <button
-                                        v-if="trip.status === 'completed' && trip.hasReview"
-                                        @click.stop="openEditReviewModal(trip)"
-                                        class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50"
-                                    >แก้ไขรีวิว</button>
-                                    <button
+                                    >เขียนรีวิว </button>
+
+                                    <span v-if="trip.status === 'completed' && trip.hasReview" class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50">
+                                        คุณได้เขียนรีวิวนี้ไปแล้ว
+                                    </span>
+                                    <span v-if="trip.status === 'completed' && !trip.hasReview && (new Date() - new Date(trip.completedAt)) > 7 * 24 * 60 * 60 * 1000" class="px-4 py-2 text-sm text-gray-500 transition duration-200 border border-gray-300 rounded-md hover:bg-gray-50">
+                                        หมดเขตการรีวิวแล้ว (เกิน 7 วัน)
+                                    </span>
+                            
+                                    <!-- <button
                                         v-if="trip.status === 'completed' && trip.hasReview"
                                         @click.stop="openDeleteReviewModal(trip)"
                                         class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50"
-                                    >ลบรีวิว</button>
+                                    >ลบรีวิว</button> -->
                                 </div>
                             </div>
                         </div>

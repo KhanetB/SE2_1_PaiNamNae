@@ -1,9 +1,4 @@
-if (process.env.NODE_ENV === "test") {
-  require("dotenv").config({ path: ".env.test" });
-  console.log("Test Server")
-} else {
-  require("dotenv").config();
-}
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
@@ -30,6 +25,7 @@ const corsOptions = {
     "http://localhost:3001",
     "https://amazing-crisp-9bcb1a.netlify.app",
     "https://backend-se.pasitlab.com",
+    "https://csse1669.cpkku.com",
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -86,9 +82,6 @@ app.use((req, res, next) => {
 
 // --- Error Handling Middleware ---
 app.use(errorHandler);
-
-// --- Cron job for hard delete ---
-// startCleanuoCron();
 
 // --- Start Server ---
 const PORT = process.env.PORT || 3000;

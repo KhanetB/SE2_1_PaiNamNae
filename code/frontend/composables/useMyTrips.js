@@ -103,6 +103,7 @@ export function useMyTrips() {
                 || (typeof b.route.durationSeconds === 'number' ? `${Math.round(b.route.durationSeconds / 60)} นาที` : '-'),
             distanceText: (typeof b.route.distance === 'string' ? formatDistance(b.route.distance) : b.route.distance)
                 || (typeof b.route.distanceMeters === 'number' ? `${(b.route.distanceMeters / 1000).toFixed(1)} กม.` : '-'),
+            completedAt: b.completedAt,
         }
     }
 
@@ -113,6 +114,7 @@ export function useMyTrips() {
                 baseURL: config.public.apiBase,
                 headers: { Authorization: `Bearer ${token.value}` },
             })
+            console.log("Res:", res);
             return { hasReview: res.hasReview, reviewId: res.review?.id ?? '' }
         } catch {
             return { hasReview: false, reviewId: '' }
@@ -125,6 +127,8 @@ export function useMyTrips() {
             const bookings = await $api('/bookings/me')
             allTrips.value = bookings.map(mapBooking)
             await Promise.all(allTrips.value.map(async (trip) => {
+
+                console.log("Trip:", trip);
                 const { hasReview, reviewId } = await fetchReviewStatus(trip.id)
                 trip.hasReview = hasReview
                 trip.reviewId = reviewId
