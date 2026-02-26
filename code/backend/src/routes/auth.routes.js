@@ -1,24 +1,32 @@
-const express = require('express');
-const authController = require('../controllers/auth.controller');
-const validate = require('../middlewares/validate');
-const { loginSchema, changePasswordSchema } = require('../validations/auth.validation');
-const { protect } = require('../middlewares/auth');
+const express = require("express");
+const authController = require("../controllers/auth.controller");
+const validate = require("../middlewares/validate");
+const {
+  loginSchema,
+  changePasswordSchema,
+  verifyPasswordSchema,
+} = require("../validations/auth.validation");
+const { protect } = require("../middlewares/auth");
 
 const router = express.Router();
 
 // POST /api/auth/login
-router.post(
-    '/login',
-    validate({ body: loginSchema }),
-    authController.login
-);
+router.post("/login", validate({ body: loginSchema }), authController.login);
 
 // PUT /api/auth/change-password
 router.put(
-    '/change-password',
-    protect,
-    validate({ body: changePasswordSchema }),
-    authController.changePassword
+  "/change-password",
+  protect,
+  validate({ body: changePasswordSchema }),
+  authController.changePassword,
+);
+
+// POST /api/auth/verify-user
+router.post(
+  "/verify-user",
+  protect,
+  validate({ body: verifyPasswordSchema }),
+  authController.verifyUser,
 );
 
 module.exports = router;

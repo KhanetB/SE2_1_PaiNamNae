@@ -321,6 +321,7 @@ const acceptTerms = ref(false);
 const email = ref("");
 const errorMessage = ref("");
 const isLoading = ref(false);
+const password = ref("");
 
 const countDown = ref(5);
 let intervalId = null;
@@ -401,6 +402,25 @@ const downloadMyData = async () => {
     window.URL.revokeObjectURL(url);
 };
 
+const verifyUser = async () => {
+    if (!token.value) {
+        throw new Error("Unauthorized: token not found in verify user");
+    }
+    if (!password.value) {
+        throw new Error("Password must be not empty");
+    }
+
+    const res = $fetch(`/auth/verify-user`, {
+        method: "POST",
+        baseURL: config.public.apiBase,
+        headers: {
+            Authorization: `Bearer ${token.value}`,
+        },
+        body: {
+            password: password.value,
+        },
+    });
+};
 const sendBackupToEmail = async () => {
     if (!token.value) {
         throw new Error(
