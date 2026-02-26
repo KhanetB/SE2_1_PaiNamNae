@@ -186,7 +186,7 @@
                     </button>
 
                     <button
-                        class="bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="!acceptTerms"
                         @click="goToEmailStep"
                     >
@@ -219,9 +219,9 @@
                     </button>
 
                     <button
-                        class="bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-red-500 hover:bg-red-600  text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="!isValidEmail || isLoading"
-                        @click="confirmDelete"
+                        @click="goToPasswordStep"
                     >
                         <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
                         <span v-else class="flex items-center gap-2"
@@ -242,9 +242,100 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- STEP 3: กรอกรหัสผ่านยืนยันตัวตน -->
+            <div v-else-if="step === 3">
+                <h3 class="text-center font-semibold text-lg">
+                    กรุณากรอกรหัสผ่านเพื่อยืนยันตัวตนก่อนลบบัญชี
+                </h3>
+                <p class="text-red-600 text-center text-sm">
+                    กรุณาระบุรหัสผ่านของคุณเพื่อยืนยันตัวตนก่อนดำเนินการลบบัญชีผู้ใช้
+                </p>
+                 <input
+                    type="password"
+                    v-model="password"
+                    placeholder="กรอกรหัสผ่านของคุณ"
+                    class="w-full border px-3 py-2 rounded-md my-4"
+                />
+                
+                <div class="flex justify-center space-x-4 mt-4">
+                <button
+                    class="border px-4 py-2 rounded-md"
+                    @click="step = 2"
+                    :disabled="isLoading"
+                >
+                    ย้อนกลับ
+                </button>
 
-            <!-- STEP 3: ลบบัญชีสำเร็จ -->
-            <div v-else-if="step === 3" class="text-center">
+                 <button
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    :disabled="!isValidPassword || isLoading"
+                    @click="step = 4"
+                    >
+                        <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
+                         <span v-else class="flex items-center gap-2"
+                            ><svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    fill="white"
+                                    d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+                                    class="spinner_P7sC"
+                                />
+                            </svg>
+                            กำลังดำเนินการ...</span
+                        >
+                    </button>
+                </div>
+             </div>
+            
+            <!-- STEP 4: ปุ่มยืนยันการลบ -->
+             <div v-else-if="step === 4" class="text-center">
+                <ExclamationCircleIcon
+                        class="w-32 h-32 text-red-600 mx-auto mb-4"
+                    />
+                <h3 class="text-red-600 font-bold mb-4">
+                    คุณแน่ใจหรือไม่ว่าต้องการลบบัญชีนี้?
+                </h3>
+                <div class="flex justify-center space-x-4 mt-4">
+                     <button
+                    class="border px-4 py-2 rounded-md"
+                    @click="step = 3"
+                >
+                    ย้อนกลับ
+                </button>
+                <button
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="!password || isLoading"
+                        @click="deleteAccount"
+                    >
+                        <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
+                        <span v-else class="flex items-center gap-2"
+                            ><svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    fill="white"
+                                    d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
+                                    class="spinner_P7sC"
+                                />
+                            </svg>
+                            กำลังดำเนินการ...</span
+                        >
+                    </button>
+               
+                </div>
+             </div>
+
+
+            <!-- STEP 5: ลบบัญชีสำเร็จ -->
+            <div v-else-if="step === 5" class="text-center">
                 <div class="py-6">
                     <CheckCircleIcon
                         class="w-32 h-32 text-green-600 mx-auto mb-4 items-center-safe"
@@ -273,8 +364,8 @@
                 </div>
             </div>
 
-            <!-- STEP 4 ถ้้ายังมีพันธะอยู่ ถ้าจะใช้ตรงคอมเม้นอันนี้ก่อนค่อยใช้อันก่อนหน้า-->
-            <div v-else-if="step === 4" class="text-center">
+            <!-- STEP 6 ถ้้ายังมีพันธะอยู่ ถ้าจะใช้ตรงคอมเม้นอันนี้ก่อนค่อยใช้อันก่อนหน้า-->
+            <div v-else-if="step === 6" class="text-center">
                 <div class="py-6">
                     <ExclamationCircleIcon
                         class="w-32 h-32 text-red-600 mx-auto mb-4"
@@ -295,8 +386,9 @@
                     </button>
                 </div>
             </div>
-        </div>
-    </div>
+       </div> 
+  </div>
+
 </template>
 
 <script setup>
@@ -319,6 +411,7 @@ const emit = defineEmits(["close", "confirm"]);
 const step = ref(1);
 const acceptTerms = ref(false);
 const email = ref("");
+const password = ref("");
 const errorMessage = ref("");
 const isLoading = ref(false);
 
@@ -331,9 +424,73 @@ onBeforeUnmount(() => {
     }
 });
 watch(step, (newStep) => {
-    if (newStep == 3) {
+    if (newStep == 5) {
         startCountdown();
     }
+});
+const goToPasswordStep = () => {
+    if (!isValidEmail.value) return;
+    step.value = 3;
+};
+const verifyPassword = async () => {
+    try {
+        isLoading.value = true;
+
+        await $fetch("/auth/verify-password", {
+            method: "POST",
+            baseURL: config.public.apiBase,
+            headers: {
+                Authorization: `Bearer ${token.value}`,
+            },
+            body: {
+                password: password.value,
+            },
+        });
+
+        // ถ้ารหัสผ่านถูก
+        step.value = 4;
+
+    } catch (error) {
+        errorMessage.value = "รหัสผ่านไม่ถูกต้อง";
+        step.value = 6;
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const deleteAccount = async () => {
+    try {
+        isLoading.value = true;
+
+        await $fetch("/users/me", {
+            method: "DELETE",
+            baseURL: config.public.apiBase,
+            headers: {
+                Authorization: `Bearer ${token.value}`,
+            },
+        });
+
+        await sendBackupToEmail();
+
+        step.value = 5; // สำเร็จ
+
+    } catch (error) {
+
+        if (error?.data?.message) {
+            errorMessage.value = error.data.message;
+        } else {
+            errorMessage.value = "ไม่สามารถลบบัญชีได้";
+        }
+
+        step.value = 6; // ติดพันธะ
+
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const isValidPassword = computed(() => {
+  return password.value.length >= 8;
 });
 
 const startCountdown = () => {
