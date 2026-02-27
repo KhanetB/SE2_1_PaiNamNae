@@ -169,7 +169,7 @@ const props = defineProps({
 
 const emit = defineEmits(["submit", "close"]);
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Local state
 const localRating = ref(0);
