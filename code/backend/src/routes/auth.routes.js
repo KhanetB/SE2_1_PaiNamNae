@@ -4,7 +4,7 @@ const validate = require("../middlewares/validate");
 const {
   loginSchema,
   changePasswordSchema,
-  verifyPasswordSchema,
+  verifyUserSchema,
 } = require("../validations/auth.validation");
 const { protect } = require("../middlewares/auth");
 
@@ -25,7 +25,7 @@ router.put(
 router.post(
   "/verify-user",
   protect,
-  validate({ body: verifyPasswordSchema }),
+  validate({ body: verifyUserSchema }),
   authController.verifyUser,
 );
 
