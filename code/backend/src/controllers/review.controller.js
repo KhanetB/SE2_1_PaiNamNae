@@ -56,6 +56,7 @@ const createReview = async (req, res, next) => {
       files: req.files,
       userId: req.user.sub,
       labels: req.body.labels,
+      now : req.body.now,
     });
 
     res.status(201).json({

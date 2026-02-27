@@ -4,6 +4,8 @@ const validate = require('../middlewares/validate');
 const { protect } = require('../middlewares/auth');
 const { createReviewSchema, editReviewSchema} = require('../validations/review.validation');
 const upload = require('../middlewares/upload.middleware');
+const multer = require('multer');
+const { multerErrorHandler } = require('../middlewares/multerErrorHadler');
 
 const router = express.Router();
 
@@ -32,7 +34,8 @@ router.get(
 router.post(
     '/',
     protect,
-    upload.array('files', 3),    
+    upload.array('files', 3),  
+    multerErrorHandler,  
     validate(createReviewSchema),
     reviewController.createReview
 );

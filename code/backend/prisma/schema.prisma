@@ -70,6 +70,12 @@ enum ReviewLabel {
   GOOD_MUSIC          // ชอบเพลงที่เปิด
 }
 
+enum ReviewFileType {
+  IMAGE
+  VIDEO
+}
+
+
 model User {
   id                      String              @id @default(cuid())
   username                String              @unique
@@ -252,7 +258,7 @@ model Review {
   rating      Float
   comment     String?
 
-  images      String[]
+  files       Json? // [{url , type}]
   labels      ReviewLabel[]
 
   createdAt   DateTime      @default(now())
