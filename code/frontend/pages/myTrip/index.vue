@@ -434,7 +434,7 @@ async function toggleTripDetails(tripId) {
 
     if (!trip.originHasName) {
         const geo = await googleMap.reverseGeocode(
-            trip.cooreds[0][0],
+            trip.coords[0][0],
             trip.coords[0][1],
         );
         const parts = await googleMap.extractNameParts(geo);
@@ -446,7 +446,12 @@ async function toggleTripDetails(tripId) {
 }
 
 async function handleConfirmDropoff(tripId) {
-    await confirmDropoff(tripId);
+    try {
+        await confirmDropoff(tripId);
+        await fetchMyTrips(doReverseGeocode);
+    } catch (error) {
+        console.error("Confirm dropoff failed:", error);
+    }
 }
 
 // Reverse-geocode pass-through after fetch
