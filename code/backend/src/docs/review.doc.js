@@ -4,7 +4,6 @@
  *   name: Reviews
  *   description: Review management for completed bookings
  */
-
 /**
  * @swagger
  * /api/reviews/me:
@@ -13,13 +12,9 @@
  *     tags: [Reviews]
  *     security:
  *       - bearerAuth: []
- *     description: |
- *       ดึงรีวิวทั้งหมดที่ผู้ใช้ที่ล็อกอินมีส่วนเกี่ยวข้อง  
- *       - driverId = current user  
- *       - passengerId = current user
  *     responses:
  *       200:
- *         description: List of reviews (empty array if no data)
+ *         description: List of reviews
  *         content:
  *           application/json:
  *             schema:
@@ -29,33 +24,31 @@
  *                 properties:
  *                   id:
  *                     type: string
- *                     example: cmlphxmxj000172r2z0lli7xf
  *                   bookingId:
  *                     type: string
- *                     example: cmlpala0e0004gzvu6je2mlbb
  *                   driverId:
  *                     type: string
- *                     example: cmlj778ls0001pkoq1imzxuto
  *                   passengerId:
  *                     type: string
- *                     example: cmlj7ebjj000ppkoqf7xwcbbj
  *                   rating:
  *                     type: number
  *                     format: float
- *                     example: 3.5
  *                   comment:
  *                     type: string
- *                     example: ดีมากมั้ง
- *                   images:
+ *                   files:
  *                     type: array
  *                     items:
- *                       type: string
- *                       example: https://res.cloudinary.com/.../reviews/img.jpg
+ *                       type: object
+ *                       properties:
+ *                         url:
+ *                           type: string
+ *                         type:
+ *                           type: string
+ *                           enum: [IMAGE, VIDEO]
  *                   labels:
  *                     type: array
  *                     items:
  *                       type: string
- *                       example: SAFE_DRIVING
  *                   createdAt:
  *                     type: string
  *                     format: date-time
@@ -66,6 +59,203 @@
  *         description: Unauthorized
  */
 
+/**
+ * @swagger
+ * /api/reviews/{reviewId}:
+ *   get:
+ *     summary: Get review by ID
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Review detail
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 bookingId:
+ *                   type: string
+ *                 driverId:
+ *                   type: string
+ *                 passengerId:
+ *                   type: string
+ *                 rating:
+ *                   type: number
+ *                   format: float
+ *                 comment:
+ *                   type: string
+ *                 files:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       url:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                         enum: [IMAGE, VIDEO]
+ *                 labels:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                    success:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: Not authorized, token failed
+ *                    data: 
+ *                      nullable: true
+ *                      example: null
+ *       403:
+ *         description: Forbidden (not owner of review)
+ *         content:
+ *           application/json:
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                    success:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: You are not allowed to view this review
+ *                    data: 
+ *                      nullable: true
+ *                      example: null
+ *       404:
+ *         description: Review not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                    success:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: Review not found
+ *                    data: 
+ *                      nullable: true
+ *                      example: null
+ */
+
+/**
+ * @swagger
+ * /api/reviews/booking/{bookingId}:
+ *   get:
+ *     summary: Get review by booking ID
+ *     tags: [Reviews]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Review detail
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 bookingId:
+ *                   type: string
+ *                 driverId:
+ *                   type: string
+ *                 passengerId:
+ *                   type: string
+ *                 rating:
+ *                   type: number
+ *                   format: float
+ *                 comment:
+ *                   type: string
+ *                 files:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       url:
+ *                         type: string
+ *                       type:
+ *                         type: string
+ *                         enum: [IMAGE, VIDEO]
+ *                 labels:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                    success:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: Not authorized, token failed
+ *                    data: 
+ *                      nullable: true
+ *                      example: null
+ *       403:
+ *         description: Forbidden (not owner of review)
+ *         content:
+ *           application/json:
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                    success:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: You are not allowed to view this review
+ *                    data: 
+ *                      nullable: true
+ *                      example: null
+ *       404:
+ *         description: Review not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *                  type: object
+ *                  properties:
+ *                    success:
+ *                      type: boolean
+ *                      example: false
+ *                    message:
+ *                      type: string
+ *                      example: Review not found
+ *                    data: 
+ *                      nullable: true
+ *                      example: null
+ */
 
 /**
  * @swagger
@@ -105,8 +295,13 @@
  *               files:
  *                 type: array
  *                 items:
- *                   type: string
- *                   format: binary
+ *                   type: object
+ *                   properties:
+ *                    url:
+ *                     type: string
+ *                    type:
+ *                     type: string
+ *                     enum: [IMAGE, VIDEO]
  *               now:
  *                  type: number
  *                  example: 1700000000000

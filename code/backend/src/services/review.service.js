@@ -229,6 +229,31 @@ const editReview = async (
     });
 };
 
+const getReviewByBookingId = async (bookingId, userId) => {
+    const review = await prisma.review.findUnique({
+        where: { bookingId },
+    });
+    if (!review) {
+        throw new ApiError(404, 'Review not found');
+    }
+    if (review.passengerId !== userId && review.driverId !== userId) {
+        throw new ApiError(403, 'You are not allowed to view this review');
+    }
+    return review;
+}
+
+const getReviewById = async (userId, reviewId) => {
+    const review = await prisma.review.findUnique({
+        where: { id: reviewId },
+    });
+    if (!review) {
+        throw new ApiError(404, 'Review not found');
+    }
+    if(review.passengerId !== userId && review.driverId !== userId) {
+        throw new ApiError(403, 'You are not allowed to view this review');
+    }
+    return review;
+}
 
 
 module.exports = {
@@ -236,4 +261,6 @@ module.exports = {
     getReviewsForUser,
     deleteReview,
     editReview,
+    getReviewByBookingId,
+    getReviewById,
 };

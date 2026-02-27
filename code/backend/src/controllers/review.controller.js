@@ -17,7 +17,7 @@ const getReviewById = asyncHandler(async (req, res, next) => {
   try {
     const reviewId = req.params.reviewId;
     const userId = req.user.sub;
-    const review = await reviewService.getReviewById(reviewId, userId);
+    const review = await reviewService.getReviewById(userId, reviewId);
     res.json(review);
   } catch (error) {
     next(
