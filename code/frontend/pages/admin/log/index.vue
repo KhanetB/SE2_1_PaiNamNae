@@ -67,18 +67,104 @@
 
                     <!-- Type Of Action -->
                     <div class="flex flex-col">
-                        <label class="mb-1 text-xs font-medium text-gray-600">Type Of Action</label>
-                        <select
-                        v-model="filters.action"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"
+
+                    <!-- ปุ่มเปิด popup -->
+                    <label class="mb-1 text-xs font-medium text-gray-600">
+                    Type Of Action
+                    </label>
+
+                    <button
+                    @click="openModal"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-left text-sm bg-white"
+                    >
+                    {{ displayLabel }}
+                    </button>
+
+                    <!-- Overlay -->
+                    <div
+                    v-if="showModal"
+                    class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+                    >
+                    <div
+                        @click.stop
+                        class="bg-white w-[420px] p-6 rounded-xl shadow-lg"
+                    >
+                        <h2 class="text-lg font-semibold text-center mb-4">
+                        TypeOfAction
+                        </h2>
+
+                        <!-- Checkbox list -->
+                        <div class="space-y-2 text-sm">
+
+                        <label class="flex items-center gap-2">
+                            <input
+                            type="checkbox"
+                            v-model="isAllSelected"
+                            />
+                            ทั้งหมด
+                        </label>
+
+                        <label
+                            v-for="item in actionOptions"
+                            :key="item.value"
+                            class="flex items-center gap-2"
                         >
-                        <option value="">ทั้งหมด</option>
-                        <option value="CREATE">CREATE</option>
-                        <option value="UPDATE">UPDATE</option>
-                        <option value="DELETE">DELETE</option>
-                        <option value="LOGIN">LOGIN</option>
-                        </select>
+                            <input
+                            type="checkbox"
+                            :value="item.value"
+                            v-model="tempSelected"
+                            />
+                            {{ item.label }}
+                        </label>
+
+                        </div>
+                        <!-- 🔹 Text เปิดคำอธิบาย -->
+                            <p class="text-xs text-red-500 mt-4 cursor-pointer"@click="openDescription">
+                            คำอธิบายเพิ่มเติมเกี่ยวกับการแบ่งหมวดหมู่ข้อมูลในการกรอง
+                            </p>
+                        <!-- Buttons -->
+                        <div class="flex justify-between mt-6">
+                        <button
+                            @click="clearAll"
+                            class="px-4 py-2 bg-gray-200 rounded"
+                        >
+                            ล้างทั้งหมด
+                        </button>
+
+                        <button
+                            @click="applyFilter"
+                            class="px-4 py-2 bg-blue-600 text-white rounded"
+                        >
+                            ใช้การกรอง
+                        </button>
+                        </div>
+                        <!-- DESCRIPTION MODAL -->
+                        <div
+                        v-if="showDescriptionModal"
+                        class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+                        >
+                        <div class="relative bg-white w-[500px] p-6 rounded-xl shadow-lg">
+                                
+                            <button @click="closeDescription"class="absolute top-3 right-3 text-red-500 hover:text-red-700"> ✕</button>
+                            <h2 class="text-lg font-semibold mb-4">
+                            คำอธิบายการแบ่งหมวดหมู่
+                            </h2>
+
+                            <p class="text-sm text-gray-600 leading-relaxed">
+                            การแบ่งหมวดหมู่ของ TypeOfAction ถูกออกแบบเพื่อแยกประเภทกิจกรรม
+                            ตามลักษณะการดำเนินงานของระบบ โดยมีรายละเอียดดังนี้:
+                            
+
+                            </p>
+
+                        </div>
+
                     </div>
+                </div>
+                </div>
+                </div>
+
+                </div>
 
                     <!-- IP Address -->
                     <div class="flex flex-col">
@@ -284,7 +370,7 @@
                         </nav>
                     </div>
                 </div>
-            </div>
+            
         </main>
 
         <!-- Mobile Overlay -->
@@ -295,7 +381,7 @@
         <ConfirmModal :show="showDelete" :title="`ลบการจอง${deletingBooking?.id ? ' : ' + deletingBooking.id : ''}`"
             message="การลบนี้เป็นการลบถาวร ข้อมูลทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้ คุณต้องการดำเนินการต่อหรือไม่?"
             confirmText="ลบถาวร" cancelText="ยกเลิก" variant="danger" @confirm="confirmDelete" @cancel="cancelDelete" />
-    </div>
+        </div>
 </template>
 
 <script setup>
@@ -343,7 +429,75 @@ const filters = reactive({
     departureTo: '',
     sort: ''
 })
+const showModal = ref(false)
+const showDescriptionModal = ref(false)
+/* ตัวเลือกทั้งหมด */
+const actionOptions = [
+  { label: '1. User & Personal Data Management', value: 'USER' },
+  { label: '2. Identity Verification (KYC)', value: 'KYC' },
+  { label: '3. Vehicle Management', value: 'VEHICLE' },
+  { label: '4. Transaction & Contract Log', value: 'TRANSACTION' }
+]
 
+/* ค่าที่ใช้จริง */
+const selectedActions = ref([])
+
+/* ค่า temp ตอนอยู่ใน popup */
+const tempSelected = ref([])
+
+/* default = ทั้งหมด */
+selectedActions.value = []
+tempSelected.value = []
+
+/* แสดงข้อความบนปุ่ม */
+const displayLabel = computed(() => {
+  if (selectedActions.value.length === 0) {
+    return 'ทั้งหมด'
+  }
+
+  return selectedActions.value.join(', ')
+})
+
+/* เปิด modal */
+function openModal() {
+  tempSelected.value = [...selectedActions.value]
+  showModal.value = true
+}
+
+/* ใช้ filter */
+function applyFilter() {
+  selectedActions.value = [...tempSelected.value]
+  showModal.value = false
+}
+
+/* ล้างทั้งหมด */
+function clearAll() {
+  tempSelected.value = []
+  selectedActions.value = []
+  showModal.value = false
+}
+
+/* checkbox  */
+const isAllSelected = computed({
+  get() {
+    return tempSelected.value.length === actionOptions.length
+  },
+  set(val) {
+    tempSelected.value = val
+      ? actionOptions.map(o => o.value)
+      : []
+  }
+})
+
+/* เปิด Description */
+function openDescription() {
+  showDescriptionModal.value = true
+}
+
+/* ปิด Description แล้วกลับ Filter */
+function closeDescription() {
+  showDescriptionModal.value = false
+}
 /* ---------- helpers to mirror routes index look&feel ---------- */
 function statusBadge(s) {
     if (s === 'CONFIRMED') return 'bg-green-100 text-green-700'
