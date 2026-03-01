@@ -1438,19 +1438,19 @@ const hasReview = async (trip) => {
 };
 
 const getReview = async (trip) => {
-    console.log("Get Review has called");
-    try {
-        const res = await $fetch(`/reviews/booking/${trip}`, {
-            method: "GET",
-            baseURL: config.public.apiBase,
-            headers: { Authorization: `Bearer ${token.value}` },
-        });
-        console.log("Res: ", res.review.id);
-        return res.review.id;
-    } catch (error) {
-        console.error("Error fetch review: ", error);
-        return "";
-    }
+  try {
+    const res = await $fetch(`/reviews/booking/${trip}`, {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+
+    console.log("Res:", res.id);
+    return res?.id ?? "";
+  } catch (error) {
+    console.error("Error fetch review:", error);
+    return "";
+  }
 };
 const submitReview = async (trip) => {
     if (reviewRating.value <= 0) {
