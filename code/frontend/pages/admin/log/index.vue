@@ -370,8 +370,71 @@
                         </nav>
                     </div>
                 </div>
+            <!-- EXPORT MODAL -->
+                <div
+                v-if="showExportModal"
+                class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+                >
+                <div
+                    @click.stop
+                    class="relative bg-white w-[500px] p-6 rounded-xl shadow-lg"
+                >
+                    <!-- ปุ่มปิด -->
+                    <button
+                    @click="closeExportModal"
+                    class="absolute top-3 right-3 text-red-500 hover:text-red-700"
+                    >
+                    ✕
+                    </button>
+
+                    <h2 class="text-lg font-semibold mb-4">
+                    Export
+                    </h2>
+
+                    <p class="text-sm text-gray-600 mb-4">
+                    เลือกฟิลด์ของผู้ใช้ ที่ท่านต้องการส่งออก
+                    </p>
+
+                    <!-- checkbox ทั้งหมด -->
+                    <div class="space-y-2 text-sm">
+
+                    <label class="flex items-center gap-2">
+                        <input
+                        type="checkbox"
+                        v-model="isAllExportSelected"
+                        />
+                        ทั้งหมด
+                    </label>
+
+                    <label
+                        v-for="field in exportFieldOptions"
+                        :key="field.value"
+                        class="flex items-center gap-2"
+                    >
+                        <input
+                        type="checkbox"
+                        :value="field.value"
+                        v-model="selectedExportFields"
+                        />
+                        {{ field.label }}
+                    </label>
+
+                    </div>
+
+                    <!-- ปุ่มล่าง -->
+                    <div class="mt-6">
+                    <button
+                        @click="confirmExport"
+                        class="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                        export log file
+                    </button>
+                </div>
+
+            </div>
+        </div>
             
-        </main>
+    </main>
 
         <!-- Mobile Overlay -->
         <div id="overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden"
@@ -497,6 +560,52 @@ function openDescription() {
 /* ปิด Description แล้วกลับ Filter */
 function closeDescription() {
   showDescriptionModal.value = false
+}
+/* EXPORT MODAL STATE */
+
+const showExportModal = ref(false)
+
+/* ตัวเลือก field สำหรับ export */
+const exportFieldOptions = [
+  { label: 'ชื่อ นามสกุล', value: 'fullName' },
+  { label: 'เบอร์โทรศัพท์', value: 'phone' },
+  { label: 'บัตรประชาชน', value: 'citizenId' },
+  { label: 'อีเมล', value: 'email' }
+]
+
+/* field ที่เลือก */
+const selectedExportFields = ref([])
+
+/* checkbox "ทั้งหมด" */
+const isAllExportSelected = computed({
+  get() {
+    return selectedExportFields.value.length === exportFieldOptions.length
+  },
+  set(val) {
+    selectedExportFields.value = val
+      ? exportFieldOptions.map(f => f.value)
+      : []
+  }
+})
+
+/* เปิด modal */
+function onExportLog() {
+  console.log('clicked')
+  showExportModal.value = true
+}
+/* ปิด modal */
+function closeExportModal() {
+  showExportModal.value = false
+}
+
+/* กด export */
+function confirmExport() {
+  console.log('Export fields:', selectedExportFields.value)
+
+  // TODO: เรียก API export ตรงนี้
+  // await exportCSV()
+
+  showExportModal.value = false
 }
 /* ---------- helpers to mirror routes index look&feel ---------- */
 function statusBadge(s) {
