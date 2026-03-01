@@ -1,0 +1,36 @@
+info:
+  name: TC08_DriverConfirmDropoff
+  type: http
+  seq: 9
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/bookings/{{booking_id}}/driver-confirm-dropoff
+  headers:
+    - name: Authorization
+      value: Bearer {{driver_token}}
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("get HTTP 200", function(){
+          const status = res.getStatus();
+          expect(status).to.equal(200);
+        })
+
+        test("update booking status success", function(){
+          const body = res.getBody();
+          expect(body.success).to.equal(true);
+          expect(body.data.status).to.equal("COMPLETED")
+        })
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
