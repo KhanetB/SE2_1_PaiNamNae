@@ -4,6 +4,9 @@ const validate = require('../middlewares/validate');
 const { protect } = require('../middlewares/auth');
 const { createReviewSchema, editReviewSchema} = require('../validations/review.validation');
 const upload = require('../middlewares/upload.middleware');
+const multer = require('multer');
+const { multerErrorHandler } = require('../middlewares/multerErrorHadler');
+const { anonymizeDeletedUsers } = require('../middlewares/anonymizeDeletedUsers');
 
 const router = express.Router();
 
@@ -18,6 +21,7 @@ router.get(
 router.get(
     '/:reviewId',
     protect,
+    anonymizeDeletedUsers,
     reviewController.getReviewById
 );
 
@@ -25,6 +29,7 @@ router.get(
 router.get(
     '/booking/:bookingId',
     protect,
+    anonymizeDeletedUsers,
     reviewController.getReviewByBookingId
 );
 
@@ -32,7 +37,8 @@ router.get(
 router.post(
     '/',
     protect,
-    upload.array('files', 3),    
+    upload.array('files', 3),  
+    multerErrorHandler,  
     validate(createReviewSchema),
     reviewController.createReview
 );
