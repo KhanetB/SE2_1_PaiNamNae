@@ -48,6 +48,7 @@ app.use(express.json());
 // app.use(limiter);
 
 // Logger Middleware
+app.set("etag", false);
 app.use(logger);
 
 //Metrics Middleware
