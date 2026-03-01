@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "test-delete-user-api",
+  "name": "test-delete-user-api-sprint2",
   "type": "collection",
   "ignore": [
     "node_modules",
