@@ -101,4 +101,11 @@ const changePassword = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { login, changePassword, verifyUser };
+const logout = asyncHandler(async (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Logout successful",
+    data: null,
+  });
+});
+module.exports = { login, changePassword, verifyUser, logout };

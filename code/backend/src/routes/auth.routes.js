@@ -29,4 +29,7 @@ router.post(
   authController.verifyUser,
 );
 
+// POST /api/auth/logout
+router.post("/logout", protect, authController.logout);
+
 module.exports = router;
