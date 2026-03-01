@@ -54,7 +54,7 @@ async function createLog(data) {
     expiresAt: expiresAt,
   };
   console.log("Log Data: ", logData);
-  logData.intergrityHash = computeHash(logData);
+  logData.integrityHash = computeHash(logData);
   const log = await prisma.auditLog.create({ data: logData });
   return log;
 }
@@ -130,14 +130,14 @@ async function verifyChainIntegrity(limit = 500) {
   for (let i = 0; i < logs.length; i++) {
     const log = logs[i];
 
-    // Verify intergrityHash by recomputing
+    // Verify integrityHash by recomputing
     const recomputedHash = computeHash(log);
-    if (recomputedHash !== log.intergrityHash) {
+    if (recomputedHash !== log.integrityHash) {
       return {
         valid: false,
         totalChecked: i + 1,
         corruptAt: log.id,
-        reason: "intergrityHash mismatch",
+        reason: "integrityHash mismatch",
       };
     }
   }
@@ -191,10 +191,67 @@ function getLogsToExport(filters = {}) {
   });
 }
 
+function maskPII(data) {
+  if (!data) return null;
+
+  const sanitized = { ...data };
+
+  const sensitiveFields = [
+    "password",
+    "currentPassword",
+    "newPassword",
+    "token",
+    "accessToken",
+    "refreshToken",
+    "otpCode",
+  ];
+
+  const partitionFields = {
+    email: (val) => {
+      if (!val) return val;
+      const [name, domain] = val.split("@");
+      return `${name.substring(0, 3)}***@${domain}`;
+    },
+    phoneNumber: (val) => {
+      val ? val.replace(/(\d{3})\d{4}(\d{3})/, "$1XXXX$2") : val;
+    },
+    nationalIdNumber: (val) =>
+      val ? val.replace(/(\d{1})\d{8}(\d{4})/, "$1XXXXXXXX$2") : val,
+  };
+
+  for (const field of sensitiveFields) {
+    if (sanitized[field]) sanitized[field] = "[REDACTED]";
+  }
+
+  // ดำเนินการ Partial Masking
+  for (const [field, masker] of Object.entries(partialFields)) {
+    if (sanitized[field]) sanitized[field] = masker(sanitized[field]);
+  }
+  return sanitized;
+}
+async function createUserSnapshot(userId) {
+  if (!userId) return;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+  const snapshot = {
+    id: user.id,
+    username: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    nationalIdNumber: user.nationalIdNumber,
+  };
+  return JSON.stringify(maskPII(snapshot));
+}
+
 module.exports = {
   createLog,
   getAllLogs,
   verifyChainIntegrity,
   logsToCSV,
   getLogsToExport,
+  createUserSnapshot,
+  maskPII,
 };

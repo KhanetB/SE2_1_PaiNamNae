@@ -173,7 +173,7 @@ model AuditLog {
   // ข้อกำหนด: รายละเอียดเพิ่มเติม
   metaData       Json?   @db.Json
   errorMessage   String?
-  intergrityHash String?
+  integrityHash String?
 
   createdAt DateTime @default(now())
   expiresAt DateTime

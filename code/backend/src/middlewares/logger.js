@@ -1,4 +1,5 @@
 const logService = require("../services/log.service");
+const uap = require("ua-parser-js");
 
 function mapToActionType(req, statusCode) {
   const path = req.originalUrl || req.path || "";
@@ -23,59 +24,25 @@ function mapToActionType(req, statusCode) {
   if (path.includes("/auth/register")) {
     return "USER_REGISTERED";
   }
-  // ADMIN_LOG_VIEWED;
-  // ADMIN_LOG_EXPORTED;
-  // ADMIN_EXPORT_REQUEST_CREATED;
   if (path.includes("/logs")) {
     if (method === "GET") return "ADMIN_LOG_VIEWED";
     if (method === "POST") return "ADMIN_LOG_EXPORTED";
   }
 
   // By Resource mapping
-  if (resource === "VEHICLE") {
-    if (method === "POST") return "VEHICLE_CREATED";
-    if (method === "PUT" || method === "PATCH") return "VEHICLE_UPDATED";
-    if (method === "DELETE") return "VEHICLE_DELETED";
-    return "VEHICLE_VIEWED";
+  const resourceMapping = {
+    VEHICLE: { POST: "VEHICLE_CREATED", PUT: "VEHICLE_UPDATED", PATCH: "VEHICLE_UPDATED", DELETE: "VEHICLE_DELETED", GET: "VEHICLE_VIEWED" },
+    ROUTE: { POST: "ROUTE_CREATED", PUT: "ROUTE_UPDATED", PATCH: "ROUTE_UPDATED", DELETE: "ROUTE_CANCELLED", GET: "ROUTE_VIEWED" },
+    BOOKING: { POST: "BOOKING_CREATED", PUT: "BOOKING_CONFIRMED", PATCH: "BOOKING_CONFIRMED", DELETE: "BOOKING_CANCELLED", GET: "BOOKING_VIEWED"},
+    REVIEW: { POST: "REVIEW_CREATED", PUT: null, PATCH: null, DELETE: null, GET: null},
+    DRIVER_VERIFICATION: { POST: "DRIVER_VERIFICATION_SUBMITTED",PUT: null, PATCH: null, DELETE: null, GET: "DRIVER_LICENSES_VIEWED"},
+    USER: { POST: "USER_REGISTERED", PUT: "PROFILE_UPDATED", PATCH: "PROFILE_UPDATED", DELETE: "USER_DELETED", GET: "PROFILE_VIEWED"},
+    EXPORT: { POST: "USER_DATA_EXPORT_REQUESTED", PUT: null, PATCH: null, DELETE: null, GET: null},
   }
 
-  if (resource === "ROUTE") {
-    if (method === "POST") return "ROUTE_CREATED";
-    if (method === "PUT" || method === "PATCH") return "ROUTE_UPDATED";
-    if (method === "DELETE") return "ROUTE_CANCELLED";
-    return "ROUTE_VIEWED";
-  }
 
-  if (resource === "BOOKING") {
-    if (method === "POST") return "BOOKING_CREATED";
-    // Assuming PUT translates to booking being processed
-    if (method === "PUT" || method === "PATCH") return "BOOKING_CONFIRMED";
-    if (method === "DELETE") return "BOOKING_CANCELLED";
-    return "BOOKING_VIEWED";
-  }
-
-  if (resource === "REVIEW") {
-    if (method === "POST") return "REVIEW_CREATED";
-    return null; // Avoid unneeded read mappings
-  }
-
-  if (resource === "DRIVER_VERIFICATION") {
-    if (method === "POST") return "DRIVER_VERIFICATION_SUBMITTED";
-    return "DRIVER_LICENSES_VIEWED";
-  }
-
-  if (resource === "USER") {
-    if (method === "POST") return "USER_REGISTERED";
-    if (method === "PUT" || method === "PATCH") return "PROFILE_UPDATED";
-    if (method === "DELETE") return "USER_DELETED";
-    return "PROFILE_VIEWED";
-  }
-
-  if (resource === "EXPORT") {
-    if (method === "POST") return "USER_DATA_EXPORT_REQUESTED";
-    return null;
-  }
-
+  const action = resourceMapping[resource]?.[method];
+  if (action) return action;
   return statusCode >= 400 ? "SYSTEM_ERROR" : null;
 }
 
@@ -141,7 +108,11 @@ const logger = (req, res, next) => {
 
       if (!action) return;
 
-      const metaDataObj = sanitizeBody(req.body);
+      const ua = uap(req.headers["user-agent"]);
+      const deviceInfo = ua.os.name 
+        ? `${ua.os.name} ${ua.os.version || ''} (${ua.browser.name || 'Unknown Browser'})`
+        : "Unknown Device";
+      const metaDataObj = logService.maskPII(req.body);
       // Check Status Code
       const accessResult =
         res.statusCode < 400
@@ -153,7 +124,7 @@ const logger = (req, res, next) => {
       await logService.createLog({
         action,
         userId: req.user?.sub || null,
-        userSnapshot: req.user ? JSON.stringify(req.user) : null,
+        userSnapshot: await logService.createUserSnapshot(req.user?.sub),
         actionTimeStamp: new Date(),
         ipAddress:
           req.ip ||
@@ -161,7 +132,7 @@ const logger = (req, res, next) => {
           req.socket?.remoteAddress ||
           "unknown",
         userAgent: req.headers["user-agent"] || "unknown",
-        deviceInfo: null,
+        deviceInfo: deviceInfo,
         httpMethod: req.method,
         endpoint: path,
         resourceType: extractResourceType(path) || "UNKNOWN",
@@ -175,7 +146,7 @@ const logger = (req, res, next) => {
       });
     } catch (err) {
       console.error(
-        `${new Date()} [AuditLog] Failed to create log entry: `,
+        `${new Date().toISOString()} [AuditLog] Error: `,
         err.message,
       );
     }
