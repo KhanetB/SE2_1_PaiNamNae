@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.1 (Python 3.13.2 on darwin)" generated="2026-02-17T01:33:17.957222" rpa="false" schemaversion="5">
+<suite id="s1" name="deleteAccountU1" source="/Users/simon/Documents/GitHub/SE2_1_PaiNamNae/test/deleteAccountU1.robot">
+<test id="s1-t1" name="Login And Delete Account Flow" line="59">
+<kw name="Open Browser To Login Page">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-02-17T01:33:18.169015" level="INFO">Opening browser 'Chrome' to base url 'http://localhost:3001/login'.</msg>
+<msg time="2026-02-17T01:33:18.344980" level="WARN">The chromedriver version (143.0.7499.169) detected in PATH at /opt/homebrew/bin/chromedriver might not be compatible with the detected chrome version (144.0.7559.133); currently, chromedriver 144.0.7559.133 is recommended for chrome 144.*, so it is advised to delete the driver in PATH and retry</msg>
+<arg>${URL}${URI_Login}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-02-17T01:33:18.168855" elapsed="2.666562"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-02-17T01:33:20.840476" elapsed="0.340122"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>0.5s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-02-17T01:33:21.181335" elapsed="0.002236"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-02-17T01:33:21.183685" elapsed="0.520019"/>
+</kw>
+<status status="PASS" start="2026-02-17T01:33:18.168482" elapsed="3.535679"/>
+</kw>
+<kw name="Fill Login Form">
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-17T01:33:21.708866" elapsed="1.045816"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-02-17T01:33:22.763744" level="INFO">Typing text 'test@gmail.com' into text field 'id=identifier'.</msg>
+<arg>id=identifier</arg>
+<arg>${IDENTIFIER}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-17T01:33:22.759781" elapsed="1.675061"/>
+</kw>
+<kw name="Clear Element Text" owner="SeleniumLibrary">
+<arg>id=password</arg>
+<doc>Clears the value of the text-input-element identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-17T01:33:24.435207" elapsed="1.044036"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-02-17T01:33:25.480915" level="INFO">Typing text '123456789' into text field 'id=password'.</msg>
+<arg>id=password</arg>
+<arg>${PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-17T01:33:25.480061" elapsed="1.588239"/>
+</kw>
+<status status="PASS" start="2026-02-17T01:33:21.706190" elapsed="5.362892"/>
+</kw>
+<kw name="Submit Login">
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-02-17T01:33:27.071307" level="INFO">Clicking button 'id=loginButton'.</msg>
+<arg>id=loginButton</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-17T01:33:27.070801" elapsed="2.621734"/>
+</kw>
+<status status="PASS" start="2026-02-17T01:33:27.070105" elapsed="2.626282"/>
+</kw>
+<kw name="Verify Login Success">
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<msg time="2026-02-17T01:33:46.193091" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-47.png"&gt;&lt;img src="selenium-screenshot-47.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-02-17T01:33:46.195287" level="FAIL">Location did not contain '/dashboard' in 15 seconds.</msg>
+<arg>/dashboard</arg>
+<arg>timeout=15s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="FAIL" start="2026-02-17T01:33:29.698897" elapsed="16.504064">Location did not contain '/dashboard' in 15 seconds.</status>
+</kw>
+<status status="FAIL" start="2026-02-17T01:33:29.697963" elapsed="16.505688">Location did not contain '/dashboard' in 15 seconds.</status>
+</kw>
+<kw name="Go To Profile Page">
+<status status="NOT RUN" start="2026-02-17T01:33:46.208443" elapsed="0.000159"/>
+</kw>
+<kw name="Click My Account">
+<status status="NOT RUN" start="2026-02-17T01:33:46.208796" elapsed="0.000020"/>
+</kw>
+<kw name="Click Delete Account">
+<status status="NOT RUN" start="2026-02-17T01:33:46.208899" elapsed="0.000295"/>
+</kw>
+<kw name="Accept Policy And Confirm Email">
+<status status="NOT RUN" start="2026-02-17T01:33:46.209326" elapsed="0.000015"/>
+</kw>
+<kw name="Confirm Delete Account">
+<status status="NOT RUN" start="2026-02-17T01:33:46.209407" elapsed="0.000014"/>
+</kw>
+<kw name="Verify Account Deleted">
+<status status="NOT RUN" start="2026-02-17T01:33:46.209511" elapsed="0.000013"/>
+</kw>
+<kw name="Close Browser" owner="SeleniumLibrary">
+<doc>Closes the current browser.</doc>
+<status status="NOT RUN" start="2026-02-17T01:33:46.210387" elapsed="0.000018"/>
+</kw>
+<status status="FAIL" start="2026-02-17T01:33:18.168104" elapsed="28.042772">Location did not contain '/dashboard' in 15 seconds.</status>
+</test>
+<status status="FAIL" start="2026-02-17T01:33:17.958265" elapsed="28.253051"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="deleteAccountU1" id="s1" pass="0" fail="1" skip="0">deleteAccountU1</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2026-02-17T01:33:18.344980" level="WARN">The chromedriver version (143.0.7499.169) detected in PATH at /opt/homebrew/bin/chromedriver might not be compatible with the detected chrome version (144.0.7559.133); currently, chromedriver 144.0.7559.133 is recommended for chrome 144.*, so it is advised to delete the driver in PATH and retry</msg>
+</errors>
+</robot>

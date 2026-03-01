@@ -20,7 +20,7 @@
         </div>
 
         <!-- ปุ่มเข้าสู่ระบบ -->
-        <button type="submit"
+        <button id="loginButton" type="submit"
           class="w-full py-3 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
           เข้าสู่ระบบ
         </button>

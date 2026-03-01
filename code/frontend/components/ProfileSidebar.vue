@@ -44,17 +44,52 @@
                     </li>
                 </ul>
             </div>
+            <div>
+                <ul class="space-y-1">
+                    <li>
+                       <button
+                            id="deleteAccountButton"
+                            @click="openConfirmDelete"
+                            class="block w-full text-left px-4 py-2 text-sm rounded-md text-red-700 hover:bg-red-100"
+                            >
+                                ลบบัญชีผู้ใช้
+                        </button>
+                    </li>
+                </ul>
+            </div>
         </nav>
+
+  <ConfirmDelete
+  :isVisible="showConfirmDelete"
+  @close="showConfirmDelete = false"
+  @confirm="handleDelete"
+/>
     </aside>
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+import ConfirmDelete from './ConfirmDelete.vue'
 
-const route = useRoute();
+const route = useRoute()
 
-// Function to check if a menu item is active
+const showConfirmDelete = ref(false)
+
+const openConfirmDelete = () => {
+  showConfirmDelete.value = true
+}
+
+const closeConfirmDelete = () => {
+  showConfirmDelete.value = false
+}
+
 const isActive = (path) => {
-    return route.path === path;
-};
+  return route.path === path
+}
+
+const handleDelete = () => {
+  console.log('บัญชีผู้ใช้ถูกลบ')
+  showConfirmDelete.value = false
+}
 </script>
