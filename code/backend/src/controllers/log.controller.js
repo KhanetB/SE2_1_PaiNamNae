@@ -43,4 +43,44 @@ const verifyIntegrity = asyncHandler(async (req, res) => {
     data: result,
   });
 });
-module.exports = { getLogs, verifyIntegrity };
+
+const exportLogs = asyncHandler(async (req, res) => {
+  const {
+    startDate,
+    endDate,
+    userId,
+    ipAddress,
+    action,
+    accessResult,
+    includeNationalId,
+    format = "csv",
+  } = req.query;
+
+  const filters = {
+    startDate,
+    endDate,
+    userId,
+    ipAddress,
+    action: action ? action.split(",") : undefined,
+    accessResult,
+  };
+
+  const logs = await logService.getLogsToExport(filters);
+
+  const date = new Date().toISOString().split("T")[0];
+
+  if (format == "json") {
+    const fileName = `audit-log-export-${date}.json`;
+    res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+    res.setHeader("Content-Type", "application/json");
+    return res.status(200).json(logs);
+  }
+
+  /// default as csv format
+  const csvContent = logService.logsToCSV(logs, includeNationalId);
+  const fileName = `audit-log-export-${date}.csv`;
+  res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.status(200).send(csvContent);
+});
+module.exports = { getLogs, verifyIntegrity, exportLogs };

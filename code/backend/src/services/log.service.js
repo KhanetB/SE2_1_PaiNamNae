@@ -146,8 +146,55 @@ async function verifyChainIntegrity(limit = 500) {
 }
 function getLogStats() {}
 
-function logsToCSV() {}
+function logsToCSV(logs, includeNationalId = false) {
+  const headers = [];
 
-function getLogsToExport() {}
+  const rows = logs.map((log) => {
+    const row = [];
+    return row.map((field) => `"${field}"`).join(",");
+  });
 
-module.exports = { createLog, getAllLogs, verifyChainIntegrity };
+  return [headers.join(","), ...rows].join("\n");
+}
+
+function getLogsToExport(filters = {}) {
+  const { startDate, endDate, userId, ipAddress, action, accessResult } =
+    filters;
+
+  const where = {};
+
+  if (startDate || endDate) {
+    where.createdAt = {};
+    if (startDate) where.createdAt.gte = new Date(startDate);
+    if (endDate) where.createdAt.lte = new Date(endDate);
+  }
+
+  if (userId) {
+    where.userId = { contains: userId, mode: "insensitive" };
+  }
+
+  if (ipAddress) {
+    where.ipAddress = { contains: ipAddress };
+  }
+
+  if (action && action.length > 0) {
+    where.action = { in: action };
+  }
+
+  if (accessResult) {
+    where.accessResult = accessResult;
+  }
+
+  return prisma.auditLog.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+module.exports = {
+  createLog,
+  getAllLogs,
+  verifyChainIntegrity,
+  logsToCSV,
+  getLogsToExport,
+};
