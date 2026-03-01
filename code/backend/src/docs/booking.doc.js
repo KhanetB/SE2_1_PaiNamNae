@@ -381,7 +381,21 @@
  *         schema: { type: string }
  *     responses:
  *       200:
- *         description: Passenger confirmed drop-off successfully
+ *         description: Passenger confirmed drop-off successfully, status changed to PASSENGER_CONFIRMED_ARRIVAL
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       example: "PASSENGER_CONFIRMED_ARRIVAL"
  *       400:
  *         description: Only IN_TRANSIT bookings can be confirmed by passenger
  *       403:
@@ -407,6 +421,20 @@
  *     responses:
  *       200:
  *         description: Driver confirmed drop-off successfully and booking marked as COMPLETED
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       example: "COMPLETED"
  *       400:
  *         description: Passenger confirmation required before driver confirmation
  *       403:
