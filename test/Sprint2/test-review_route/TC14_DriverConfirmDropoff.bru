@@ -1,11 +1,11 @@
 meta {
-  name: TC12_DriverCompleteBooking
+  name: TC14_DriverConfirmDropoff
   type: http
-  seq: 13
+  seq: 16
 }
 
 patch {
-  url: http://localhost:3000/api/bookings/{{booking_id}}/status
+  url: http://localhost:3000/api/bookings/{{booking_id}}/driver-confirm-dropoff
   body: json
   auth: inherit
 }
@@ -14,14 +14,8 @@ headers {
   Authorization: Bearer {{driver_token}}
 }
 
-body:json {
-  {
-    "status": "COMPLETED"
-  }
-}
-
 tests {
-  test("get HTTP 200",function(){
+  test("get HTTP 200", function(){
     const status = res.getStatus();
     expect(status).to.equal(200);
   })

@@ -1,7 +1,7 @@
 meta {
-  name: TC10_CreateReviewWithUnknowBookingId
+  name: TC11_CreateReviewWithIncompleteBooking
   type: http
-  seq: 12
+  seq: 13
 }
 
 post {
@@ -16,22 +16,18 @@ headers {
 
 body:json {
   {
-    "bookingId":"cmlqnzh3l0001356q5xvda8b3",
+    "bookingId":"{{booking_id}}",
     "rating": 4.5,
     "comment": "{{review_comment}}"
   }
 }
 
 tests {
-  test("get HTTP 404", function(){
+  test("get HTTP 400", function(){
     const status = res.getStatus();
-    expect(status).to.equal(404);
+    expect(status).to.equal(400);
   })
   
-  test("get message: Booking not found", function(){
-    const body = res.getBody();
-    expect(body.message).to.equal("Booking not found")
-  })
 }
 
 settings {

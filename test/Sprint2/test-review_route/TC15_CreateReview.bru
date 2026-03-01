@@ -1,7 +1,7 @@
 meta {
-  name: TC17_CreateReviewAfterComplete
+  name: TC15_CreateReview
   type: http
-  seq: 18
+  seq: 17
 }
 
 post {
@@ -22,10 +22,20 @@ body:json {
   }
 }
 
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("review_id",body.data.id);
+}
+
 tests {
-  test("get HTTP 409", function(){
+  test("get HTTP 201", function(){
     const status = res.getStatus();
-    expect(status).to.equal(409)
+    expect(status).to.equal(201)
+  })
+  
+  test("get review id", function(){
+    const body = res.getBody();
+    expect(body.data).to.have.property("id");
   })
 }
 

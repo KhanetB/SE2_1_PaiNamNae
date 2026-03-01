@@ -1,7 +1,7 @@
 meta {
-  name: TC11_CreateReviewWithIncompleteRoute
+  name: TC18_CreateReviewAfterComplete
   type: http
-  seq: 12
+  seq: 20
 }
 
 post {
@@ -18,16 +18,15 @@ body:json {
   {
     "bookingId":"{{booking_id}}",
     "rating": 4.5,
-    "comment": "{{review_comment}}"
+    "comment":"{{review_comment}}"
   }
 }
 
 tests {
-  test("get HTTP 400", function(){
+  test("get HTTP 409", function(){
     const status = res.getStatus();
-    expect(status).to.equal(400);
+    expect(status).to.equal(409)
   })
-  
 }
 
 settings {
