@@ -100,8 +100,6 @@ const createReview = async ({
           ? "IMAGE"
           : "VIDEO",
       });
-      const uploaded = await uploadToCloudinary(file.buffer, "reviews");
-      uploadedImages.push(uploaded);
     }
     console.log(labels);
     // 6. create review (enum array ใส่ตรงๆ)

@@ -251,7 +251,6 @@ const deleteUser = async (id) => {
 const softDeleteUser = async (
   id,
   deletedBy = "USER",
-<<<<<<< HEAD
   deleteDate = new Date()
 ) => {
   return prisma.$transaction(async (tx) => {
@@ -262,33 +261,6 @@ const softDeleteUser = async (
         `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`
       );
     }
-=======
-  deleteDate = new Date(),
-) => {
-  const checkDeletionStatus = await checkUserDeletionStatus(id);
-  if (!checkDeletionStatus.canDelete) {
-    throw new ApiError(
-      400,
-      `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`,
-    );
-  }
-  // if user already soft deleted
-  const existingUser = await prisma.user.findUnique({ where: { id } });
-  if (!existingUser || existingUser.deletedAt) {
-    throw new ApiError(404, "User not found or already deleted");
-  }
-  const user = await prisma.user.update({
-    where: { id },
-    data: {
-      deletedAt: deleteDate,
-      deletedBy,
-      isActive: false,
-    },
-  });
-  const { password, ...safeUser } = user;
-  return safeUser;
-};
->>>>>>> origin/Pasit_0207
 
     const existingUser = await tx.user.findUnique({ where: { id } });
     if (!existingUser || existingUser.deletedAt) {
