@@ -453,32 +453,49 @@ const verifyPassword = async () => {
         isLoading.value = false;
     }
 };
-
 const deleteAccount = async () => {
-    try {
-        isLoading.value = true;
-        await $fetch("/users/me", {
-            method: "DELETE",
-            baseURL: config.public.apiBase,
-            headers: {
-                Authorization: `Bearer ${token.value}`,
-            },
-        });
+  try {
+    isLoading.value = true;
 
-        await sendBackupToEmail();
+    // เช็คก่อนว่าลบได้ไหม
+    const check = await $fetch("/users/check-deletion-status", {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
-        step.value = 5; // สำเร็จ
-    } catch (error) {
-        if (error?.data?.message) {
-            errorMessage.value = error.data.message;
-        } else {
-            errorMessage.value = "ไม่สามารถลบบัญชีได้";
-        }
-
-        step.value = 6; // ติดพันธะ
-    } finally {
-        isLoading.value = false;
+    if (!check?.canDelete) {
+      errorMessage.value =
+        check?.message ?? "ไม่สามารถลบบัญชีได้ในขณะนี้";
+      step.value = 6; // ติดพันธะ
+      return;
     }
+
+    // ส่ง backup ก่อน
+    await sendBackupToEmail();
+
+    // ลบบัญชี
+    await $fetch("/users/me", {
+      method: "DELETE",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    step.value = 5; // สำเร็จ
+  } catch (error) {
+    errorMessage.value =
+      error?.response?._data?.message ??
+      error?.data?.message ??
+      "ไม่สามารถลบบัญชีได้";
+
+    step.value = 6; // error
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const isValidPassword = computed(() => {
