@@ -7,13 +7,14 @@ const router = express.Router();
 // All log routes require admin authentication
 router.use(protect, requireAdmin);
 
-// GET /log
+// GET /api/logs
 router.get("/", logController.getLogs);
-// router.get("/stats", logController.getLogStats);
+
+// GET /api/logs/verify
 router.get("/verify", logController.verifyIntegrity);
 
-// // Quick export (immediate download)
-// router.get("/export", logController.exportLogs);
+// GET /api/logs/export
+router.get("/export", logController.exportLogs);
 
 // // Export requests (SLA-based)
 // router.post("/export-requests", logController.createExportRequest);
