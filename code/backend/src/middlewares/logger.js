@@ -5,7 +5,7 @@ function mapToActionType(req, statusCode) {
   const path = req.originalUrl || req.path || "";
   const method = (req.method || "").toUpperCase();
   const resource = extractResourceType(path) || "";
-
+  console.log("Resource on Map Function: ", resource);
   if (path.includes("auth/login")) {
     return statusCode < 400 ? "LOGIN_SUCCESS" : "LOGIN_FAILED";
   }
@@ -58,9 +58,12 @@ function extractResourceType(path) {
   if (!path) return;
   let cleanPath = path.split("?")[0];
   cleanPath = cleanPath.replace(/\/{2,}/g, "/");
+  console.log("Clean Path: ", cleanPath);
   const segments = cleanPath.split("/").filter(Boolean);
+  console.log("Segments: ", segments);
   const resourceSegment =
     segments[0] === "api" ? segments[1] : segments[0];
+  console.log('Resource Segment: ', resourceSegment);
     if (!resourceSegment) return null;
   const map = {
     auth: "AUTH",
@@ -83,8 +86,9 @@ const logger = (req, res, next) => {
   next();
   res.on("finish", async () => {
     try {
-
+      
       const path = req.originalUrl || req.path || "";
+      console.log("PATH: ", path);
       if (
         path.includes("/heath") ||
         path.includes("/metrics") ||
@@ -95,7 +99,7 @@ const logger = (req, res, next) => {
       }
 
       const action = mapToActionType(req, res.statusCode);
-
+      console.log("Action: ", action);
 
       const ua = uap(req.headers["user-agent"]);
       const deviceInfo = ua.os.name
