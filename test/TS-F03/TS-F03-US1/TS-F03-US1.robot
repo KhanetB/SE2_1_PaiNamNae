@@ -1,20 +1,41 @@
 *** Settings ***
-Documentation   User Acceptance Testing for US1 - Passenger and Driver Flow
-Resource        common_resource.resource
+Documentation   US1-การ anonymous ฝั่งผู้ใช้ที่เป็น Passenger
+Resource        ../common_resource.resource
 
-Suite Setup     Run Keywords
-...             Create Session    api_session    ${BASE_API_URL}    AND
-...             Open System Browser
+# 1. เปลี่ยนมาเรียกใช้ Keyword ตัวเดียวให้ดูสะอาดขึ้น
+Suite Setup     Prepare Environment
 Suite Teardown  Close All Browsers
+
+*** Keywords ***
+Prepare Environment
+    # 2. เปิดหน้าต่างเบราว์เซอร์ 2 จอก่อนเลย (UI สำคัญสุดในเคสนี้)
+    Open Passenger And Driver Browsers
+    
+    # 3. ใส่ Ignore Error ไว้ชั่วคราว ถ้า API ยังไม่เปิดเบราว์เซอร์จะได้ไม่พังตาม
+    Run Keyword And Ignore Error    Create Session    api_session    ${BASE_API_URL}
 
 *** Test Cases ***
 
-TC01 สร้าง Account Passenger และ Driver ผ่าน API และเข้าหน้า Home ได้
-    [Documentation]    สร้าง User 2 Role ผ่าน API และทดสอบว่าล็อกอินเข้าสู่หน้าแรกได้
-    Create User Via API    ${PASSENGER_EMAIL}    ${PASSENGER_USER}    ${PASSENGER_PASS}    passenger    1349912345679
-    Create User Via API    ${DRIVER_EMAIL}       ${DRIVER_USER}       ${DRIVER_PASS}       driver       1349912345678
-    Login To System        ${PASSENGER_USER}     ${PASSENGER_PASS}
-    Logout From System
+TC01 สร้าง Account Passenger และ Driver ผ่าน Web UI และเข้าหน้า Home
+    [Documentation]    สมัครสมาชิกผ่านหน้าเว็บทั้งสอง Role แล้วทดสอบล็อกอิน
+    # ================= ฝั่ง Passenger (หน้าต่างซ้าย) =================
+    Switch Browser    passenger_window
+    Register User Via Web UI
+    ...    username=${PASSENGER_USER}    email=${PASSENGER_EMAIL}    password=${PASSENGER_PASS}
+    ...    firstname=passenger           lastname=delete             phone=0999999999
+    ...    gender=male                   national_id=1349912345679   expiry=31/12/2030
+    # ทดสอบเข้าสู่ระบบฝั่ง Passenger
+    Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
+
+    # ================= ฝั่ง Driver (หน้าต่างขวา) =================
+    Switch Browser    driver_window
+    Register User Via Web UI
+    ...    username=${DRIVER_USER}       email=${DRIVER_EMAIL}       password=${DRIVER_PASS}
+    ...    firstname=driver              lastname=delete             phone=0999999999
+    ...    gender=male                   national_id=1349912345678   expiry=31/12/2030
+    
+    # ทดสอบเข้าสู่ระบบฝั่ง Driver
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
 
 TC02 ผู้ใช้ที่เป็น Driver ยืนยัน Driver Verification
     [Documentation]    Driver เข้าสู่ระบบและกรอกข้อมูลใบขับขี่
@@ -23,35 +44,31 @@ TC02 ผู้ใช้ที่เป็น Driver ยืนยัน Driver Ve
 
 TC03 ผู้ใช้ที่เป็น Driver สร้าง Vehicle
     [Documentation]    Driver เพิ่มข้อมูลรถยนต์
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
     Driver Adds Vehicle
-    Logout From System
+    Logout From System Driver
 
 TC04 Admin Verify Driver
     [Documentation]    Admin ล็อกอินเข้ามาอนุมัติ Driver
     Login To System    ${ADMIN_USER}    ${ADMIN_PASS}
     Admin Approves Driver    ${DRIVER_USER}
-    Logout From System
+    Logout From System Admin
 
-TC05 Driver สร้างเส้นทาง(Routes) ผ่าน API
-    [Documentation]    นำ Token ของ Driver ไปยิง POST /api/routes
-    ${driver_token}=    Get API Auth Token    ${DRIVER_USER}    ${DRIVER_PASS}
-    ${headers}=         Create Dictionary     Authorization=Bearer ${driver_token}
-    
-    ${start_loc}=    Create Dictionary    lat=16.4772    lng=102.8141    name=Khon Kaen University    address=123 ถนนมิตรภาพ
-    ${end_loc}=      Create Dictionary    lat=16.445     lng=102.834     name=Central Plaza Khon Kaen    address=ถ. ศรีจันทร์
-    ${waypoints}=    Create List          ${{ {'lat': 16.46, 'lng': 102.82, 'name': 'ตลาดต้นตาล'} }}
+TC05 Driver สร้างเส้นทาง (Routes) ผ่าน Web UI
+    [Documentation]    จำลอง Driver สร้างเส้นทางการเดินทางใหม่ผ่านหน้าเว็บ
+    Switch Browser    driver_window
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
+    Driver Creates Route Via Web UI
+    ...    start_loc=Khon Kaen University
+    ...    end_loc=Central Plaza Khon Kaen
+    ...    depart_date=10/15/2030
+    ...    depart_time=09:00AM
+    ...    seats=3
+    ...    price=50
+    ...    conditions=ห้ามสูบบุหรี่ในรถ
 
-    ${route_payload}=    Create Dictionary
-    ...    vehicleId=${VEHICLE_ID}    startLocation=${start_loc}    endLocation=${end_loc}
-    ...    departureTime=2030-10-15T09:00:00Z    availableSeats=${3}    pricePerSeat=${50}
-    ...    conditions=ห้ามสูบบุหรี่ในรถ    waypoints=${waypoints}    optimizeWaypoints=${True}
-
-    ${res_route}=    POST On Session    api_session    /api/routes    json=${route_payload}    headers=${headers}
-    Status Should Be    201    ${res_route}
-
-TC07 - TC10 Flow การจองและเดินทางแบบ Real-time (ซ้าย Passenger / ขวา Driver)
+TC06 - TC09 Flow การจองและเดินทางแบบ Real-time (ซ้าย Passenger / ขวา Driver)
     [Documentation]    ทดสอบ 2 หน้าต่างพร้อมกัน ตั้งแต่จองที่นั่งจนจบการเดินทาง
-    
     # ================= ฝั่ง Passenger (ซ้าย) =================
     Switch Browser    passenger_window
     Login To System   ${PASSENGER_USER}    ${PASSENGER_PASS}
@@ -61,34 +78,130 @@ TC07 - TC10 Flow การจองและเดินทางแบบ Real-
     Switch Browser    driver_window
     Login To System   ${DRIVER_USER}    ${DRIVER_PASS}
     
-    # TC08: Driver เห็นคำขอจอง กดยืนยันคำขอ และกดยืนยันเริ่มเดินทาง
-    Click Element     id=my_booking_requests_menu
-    Wait Until Element Is Visible    xpath=//button[text()='ยืนยันคำขอ']
-    Click Button      xpath=//button[text()='ยืนยันคำขอ']
-    Wait Until Element Is Visible    xpath=//button[text()='ยืนยันการเดินทาง']
-    Click Button      xpath=//button[text()='ยืนยันการเดินทาง']
+    # TC07: Driver เห็นคำขอจอง กดยืนยันคำขอ และกดยืนยันเริ่มเดินทาง
+    Driver Approves Booking Request   ${PASSENGER_EMAIL}
 
     # ================= ฝั่ง Passenger (ซ้าย) =================
     Switch Browser    passenger_window
-    # TC09: Passenger เห็นว่ารถเริ่มเดินทางแล้ว และกดยืนยันเมื่อถึงจุดหมาย
-    Click Element     id=my_trips_menu
-    Wait Until Element Is Visible    xpath=//button[text()='ถึงจุดหมาย']
-    Click Button      xpath=//button[text()='ถึงจุดหมาย']
+    Passenger Confirms Arrival
+    # TC08: Passenger เห็นว่ารถเริ่มเดินทางแล้ว และกดยืนยันเมื่อถึงจุดหมาย
+
+        # ================= ฝั่ง Driver (ขวา) =================
+    Switch Browser    driver_window
+    # TC09: Driver เห็น Passenger กดยืนยัน จึงกดยืนยันถึงจุดหมายและจบงาน
+    Driver Confirms Arrival
+
+TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
+    [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
+    Switch Browser    passenger_window
+    Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
+    Deletes Account Passenger    ${PASSENGER_EMAIL}
+
+TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
+    Switch Browser    driver_window
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
+    Wait Until Element Is Visible    xpath=//a[contains(., 'การเดินทางทั้งหมด')]    timeout=10s
+    Click Element                    xpath=//a[contains(., 'การเดินทางทั้งหมด')]
+    Sleep                            ${DELAY}            
+    Wait Until Element Is Visible    xpath=//a[contains(., 'คำขอจองเส้นทางของฉัน')]    timeout=10s
+    Click Element                    xpath=//a[contains(., 'คำขอจองเส้นทางของฉัน')]
+    Sleep                            ${DELAY}
+    Wait Until Element Is Visible    xpath=//button[contains(@class, 'tab-button') and contains(normalize-space(.), 'ทั้งหมด')]    timeout=15s
+    Click Button                     xpath=//button[contains(@class, 'tab-button') and contains(normalize-space(.), 'ทั้งหมด')]
+    Wait Until Page Contains    Deleted User   timeout=10s
+
+*** Comments ***
+
+TC01 สร้าง Account Passenger และ Driver ผ่าน Web UI และเข้าหน้า Home
+    [Documentation]    สมัครสมาชิกผ่านหน้าเว็บทั้งสอง Role แล้วทดสอบล็อกอิน
+    # ================= ฝั่ง Passenger (หน้าต่างซ้าย) =================
+    Switch Browser    passenger_window
+    Register User Via Web UI
+    ...    username=${PASSENGER_USER}    email=${PASSENGER_EMAIL}    password=${PASSENGER_PASS}
+    ...    firstname=passenger           lastname=delete             phone=0999999999
+    ...    gender=male                   national_id=1349912345679   expiry=31/12/2030
+    # ทดสอบเข้าสู่ระบบฝั่ง Passenger
+    Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
+
+    # ================= ฝั่ง Driver (หน้าต่างขวา) =================
+    Switch Browser    driver_window
+    Register User Via Web UI
+    ...    username=${DRIVER_USER}       email=${DRIVER_EMAIL}       password=${DRIVER_PASS}
+    ...    firstname=driver              lastname=delete             phone=0999999999
+    ...    gender=male                   national_id=1349912345678   expiry=31/12/2030
+    
+    # ทดสอบเข้าสู่ระบบฝั่ง Driver
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
+
+TC02 ผู้ใช้ที่เป็น Driver ยืนยัน Driver Verification
+    [Documentation]    Driver เข้าสู่ระบบและกรอกข้อมูลใบขับขี่
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
+    Driver Fills Verification Form
+
+TC03 ผู้ใช้ที่เป็น Driver สร้าง Vehicle
+    [Documentation]    Driver เพิ่มข้อมูลรถยนต์
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
+    Driver Adds Vehicle
+    Logout From System Driver
+
+TC04 Admin Verify Driver
+    [Documentation]    Admin ล็อกอินเข้ามาอนุมัติ Driver
+    Login To System    ${ADMIN_USER}    ${ADMIN_PASS}
+    Admin Approves Driver    ${DRIVER_USER}
+    Logout From System Admin
+
+TC05 Driver สร้างเส้นทาง (Routes) ผ่าน Web UI
+    [Documentation]    จำลอง Driver สร้างเส้นทางการเดินทางใหม่ผ่านหน้าเว็บ
+    Switch Browser    driver_window
+    Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
+    Driver Creates Route Via Web UI
+    ...    start_loc=Khon Kaen University
+    ...    end_loc=Central Plaza Khon Kaen
+    ...    depart_date=10/15/2030
+    ...    depart_time=09:00AM
+    ...    seats=3
+    ...    price=50
+    ...    conditions=ห้ามสูบบุหรี่ในรถ
+
+TC06 - TC09 Flow การจองและเดินทางแบบ Real-time (ซ้าย Passenger / ขวา Driver)
+    [Documentation]    ทดสอบ 2 หน้าต่างพร้อมกัน ตั้งแต่จองที่นั่งจนจบการเดินทาง
+    # ================= ฝั่ง Passenger (ซ้าย) =================
+    Switch Browser    passenger_window
+    Login To System   ${PASSENGER_USER}    ${PASSENGER_PASS}
+    Passenger Books A Seat    # TC07: ค้นหาเส้นทางและกดจองที่นั่ง
 
     # ================= ฝั่ง Driver (ขวา) =================
     Switch Browser    driver_window
-    # TC10: Driver เห็น Passenger กดยืนยัน จึงกดยืนยันถึงจุดหมายและจบงาน
-    Wait Until Element Is Visible    xpath=//button[text()='ยืนยันถึงจุดหมาย']
-    Click Button      xpath=//button[text()='ยืนยันถึงจุดหมาย']
-    Wait Until Element Is Visible    xpath=//button[text()='ยืนยันการถึงที่หมาย']
-    Click Button      xpath=//button[text()='ยืนยันการถึงที่หมาย']
+    Login To System   ${DRIVER_USER}    ${DRIVER_PASS}
+    
+    # TC07: Driver เห็นคำขอจอง กดยืนยันคำขอ และกดยืนยันเริ่มเดินทาง
+    Driver Approves Booking Request   ${PASSENGER_EMAIL}
 
-TC11, TC12 Passenger ทำการลบบัญชีผู้ใช้
+    # ================= ฝั่ง Passenger (ซ้าย) =================
+    Switch Browser    passenger_window
+    Passenger Confirms Arrival
+    # TC08: Passenger เห็นว่ารถเริ่มเดินทางแล้ว และกดยืนยันเมื่อถึงจุดหมาย
+
+        # ================= ฝั่ง Driver (ขวา) =================
+    Switch Browser    driver_window
+    # TC09: Driver เห็น Passenger กดยืนยัน จึงกดยืนยันถึงจุดหมายและจบงาน
+    Driver Confirms Arrival
+
+TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
     [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
+    Switch Browser    passenger_window
     Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
-    Passenger Deletes Account
+    Deletes Account    ${PASSENGER_EMAIL}
 
-TC13 Driver เห็นข้อมูล Passenger เป็น Anonymous
+TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
+    Switch Browser    driver_window
     Login To System    ${DRIVER_USER}    ${DRIVER_PASS}
-    Click Element    id=my_booking_requests_menu
-    Wait Until Page Contains    Anonymous
+    Wait Until Element Is Visible    xpath=//a[contains(., 'การเดินทางทั้งหมด')]    timeout=10s
+    Click Element                    xpath=//a[contains(., 'การเดินทางทั้งหมด')]
+    Sleep                            ${DELAY}            
+    Wait Until Element Is Visible    xpath=//a[contains(., 'คำขอจองเส้นทางของฉัน')]    timeout=10s
+    Click Element                    xpath=//a[contains(., 'คำขอจองเส้นทางของฉัน')]
+    Sleep                            ${DELAY}
+    Wait Until Element Is Visible    xpath=//button[contains(@class, 'tab-button') and contains(normalize-space(.), 'ทั้งหมด')]    timeout=15s
+    Click Button                     xpath=//button[contains(@class, 'tab-button') and contains(normalize-space(.), 'ทั้งหมด')]
+    Wait Until Page Contains    Deleted User   timeout=10s
