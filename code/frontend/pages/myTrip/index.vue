@@ -368,104 +368,16 @@ function closeConfirmModal() {
 async function handleConfirmAction() {
     if (!tripToAction.value) return;
     try {
-<<<<<<< HEAD
-        const res = await $fetch(`/reviews/booking/${trip}`, {
-            method: "GET",
-            baseURL: config.public.apiBase,
-            headers: { Authorization: `Bearer ${token.value}` },
-        });
-        console.log("Res: ", res);
-        return res.hasReview;
-    } catch (error) {
-        console.error("Error fetch review: ", error);
-        return false;
-    }
-};
-
-const getReview = async (trip) => {
-  try {
-    const res = await $fetch(`/reviews/booking/${trip}`, {
-      method: "GET",
-      baseURL: config.public.apiBase,
-      headers: { Authorization: `Bearer ${token.value}` },
-    });
-
-    console.log("Res:", res.id);
-    return res?.id ?? "";
-  } catch (error) {
-    console.error("Error fetch review:", error);
-    return "";
-  }
-};
-const submitReview = async (trip) => {
-    if (reviewRating.value <= 0) {
-        toast.error("กรุณากรอกข้อมูล", "คุณยังไม่ได้เลือกดาว");
-        return;
-    }
-
-    if (!reviewComment) {
-        toast.error("กรุณากรอกข้อมูล", "คุณยังไม่ได้เขียน comment");
-        return;
-    }
-    const formData = new FormData();
-
-    // formData.append("bookingId", trip.id);
-    formData.append("rating", reviewRating.value);
-    formData.append("comment", reviewComment.value);
-    const labelsEnum = selectedTags.value
-        .map((tag) => reviewMaps[tag])
-        .join(",");
-
-    console.log("Label: ", labelsEnum.length === 0 ? "" : labelsEnum);
-    formData.append("labels", labelsEnum);
-
-    reviewImages.value.forEach((file) => {
-        formData.append("files", file);
-    });
-
-    try {
-        isSubmittingReview.value = true;
-
-        if (isEditingReview.value) {
-            await $fetch(`/reviews/${currentReviewId.value}`, {
-                method: "PUT",
-                baseURL: config.public.apiBase,
-                body: formData,
-                headers: { Authorization: `Bearer ${token.value}` },
-            });
-
-            toast.success("แก้ไขรีวิวสำเร็จ", "ข้อมูลของคุณถูกบันทึกแล้ว");
-        } else {
-            formData.append("bookingId", trip.id);
-            console.log("Booking ID: ", trip.id);
-            console.log("Token: ", token.value);
-            const res = await $fetch(`/reviews`, {
-                method: "POST",
-                baseURL: config.public.apiBase,
-                body: formData,
-                headers: { Authorization: `Bearer ${token.value}` },
-            });
-            toast.success("บันทึกรีวิวสำเร็จ", "ข้อมูลของคุณถูกบันทึกแล้ว");
-            console.log("Res: ", res);
-=======
         if (modalContent.value.action === "deleteReview") {
             await deleteReview(tripToAction.value.reviewId);
->>>>>>> origin/Pasit_0207
         }
         closeConfirmModal();
     } catch (error) {
-<<<<<<< HEAD
-        console.error("Error send review: ", error);
-        toast.error("บันทึกไม่สำเร็จ", `${error.response._data.message}`);
-    } finally {
-        isSubmittingReview.value = false;
-=======
         toast.error(
             "เกิดข้อผิดพลาด",
             error.data?.message || "ไม่สามารถดำเนินการได้",
         );
         closeConfirmModal();
->>>>>>> origin/Pasit_0207
     }
 }
 
