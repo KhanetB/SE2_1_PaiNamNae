@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const prisma = require("../utils/prisma");
+const { includes } = require("zod/v4");
 
 /**
  * Compute SHA-256 hash for log entry key field.
@@ -22,22 +23,13 @@ function computeHash(data) {
   return crypto.createHash("sha256").update(payload).digest("hex");
 }
 
-async function getLastHash() {
-  const lastLog = await prisma.auditLog.findFirst({
-    orderBy: { createdAt: "desc" },
-    select: { currentHash: true },
-  });
-
-  return lastLog ? lastLog.currentHash : null;
-}
 
 async function createLog(data) {
   const now = new Date();
   const expiresAt = new Date(now);
   expiresAt.setDate(expiresAt.getDate() + 90);
   const logData = {
-    userId: data.userId || null,
-    userSnapshot: data.userSnapshot || null,
+     userId: data.userId || null,
     action: data.action,
     actionTimeStamp: data.actionTimeStamp || now,
     ipAddress: data.ipAddress || "unknown",
@@ -51,9 +43,7 @@ async function createLog(data) {
     metaData: data.metaData || null,
     errorMessage: data.errorMessage || null,
     createdAt: now,
-    expiresAt: expiresAt,
   };
-  console.log("Log Data: ", logData);
   logData.integrityHash = computeHash(logData);
   const log = await prisma.auditLog.create({ data: logData });
   return log;
@@ -64,12 +54,14 @@ async function getAllLogs(filters = {}) {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action,
     accessResult,
     page = 1,
     pageLimit = 25,
   } = filters;
+
   const where = {};
 
   if (startDate || endDate) {
@@ -80,6 +72,15 @@ async function getAllLogs(filters = {}) {
 
   if (userId) {
     where.userId = { contains: userId, mode: "insensitive" };
+  }
+
+  if (username) {
+    where.user = {
+      username: {
+        contains: username,
+        mode: "insensitive",
+      },
+    };
   }
 
   if (ipAddress) {
@@ -102,6 +103,13 @@ async function getAllLogs(filters = {}) {
       orderBy: { createdAt: "desc" },
       skip,
       take: pageLimit,
+      include: {
+        user: {
+          select: {
+            username: true,
+          },
+        },
+      },
     }),
     prisma.auditLog.count({ where }),
   ]);
@@ -144,22 +152,48 @@ async function verifyChainIntegrity(limit = 500) {
 
   return { valid: true, totalChecked: logs.length };
 }
-function getLogStats() {}
 
-function logsToCSV(logs, includeNationalId = false) {
-  const headers = [];
+function logsToCSV(logs, selectedUserFields = []) {
+  if (!logs || logs.length === 0) return "";
+
+  const baseHeaders = ["id", "userId", "ipAddress", "action", "createdAt"];
+  const headers = [...baseHeaders, ...selectedUserFields];
 
   const rows = logs.map((log) => {
-    const row = [];
-    return row.map((field) => `"${field}"`).join(",");
+    const row = headers.map((header) => {
+      let value = "";
+
+      if (baseHeaders.includes(header)) {
+        value = log[header];
+      } else if (selectedUserFields.includes(header)) {
+        value = log.user ? log.user[header] : "";
+      }
+
+      if (value === null || value === undefined || value === "") return '""';
+      if (value instanceof Date) return `"${value.toISOString()}"`;
+      if (typeof value === "object") {
+        return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+      }
+
+      return `"${String(value).replace(/"/g, '""')}"`;
+    });
+
+    return row.join(",");
   });
 
   return [headers.join(","), ...rows].join("\n");
 }
 
-function getLogsToExport(filters = {}) {
-  const { startDate, endDate, userId, ipAddress, action, accessResult } =
-    filters;
+async function getLogsToExport(filters = {}, selectedUserFields = []) {
+  const {
+    startDate,
+    endDate,
+    userId,
+    ipAddress,
+    action,
+    accessResult,
+    username,
+  } = filters;
 
   const where = {};
 
@@ -185,10 +219,37 @@ function getLogsToExport(filters = {}) {
     where.accessResult = accessResult;
   }
 
-  return prisma.auditLog.findMany({
+  if (username) {
+    where.user = {
+      username: {
+        contains: username,
+        mode: "insensitive",
+      },
+    };
+  }
+
+  let includeUser = false;
+
+  if (selectedUserFields.length > 0) {
+    const userSelect = {};
+    selectedUserFields.forEach((field) => {
+      userSelect[field] = true;
+    });
+
+    includeUser = {
+      select: userSelect,
+    };
+  }
+
+  const logs = await prisma.auditLog.findMany({
     where,
     orderBy: { createdAt: "desc" },
+    include: {
+      user: includeUser,
+    },
   });
+
+  return logs;
 }
 
 function maskPII(data) {
@@ -223,27 +284,10 @@ function maskPII(data) {
     if (sanitized[field]) sanitized[field] = "[REDACTED]";
   }
 
-  // ดำเนินการ Partial Masking
   for (const [field, masker] of Object.entries(partialFields)) {
     if (sanitized[field]) sanitized[field] = masker(sanitized[field]);
   }
   return sanitized;
-}
-async function createUserSnapshot(userId) {
-  if (!userId) return;
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) return;
-  const snapshot = {
-    id: user.id,
-    username: user.username,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    role: user.role,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    nationalIdNumber: user.nationalIdNumber,
-  };
-  return JSON.stringify(maskPII(snapshot));
 }
 
 module.exports = {
@@ -252,6 +296,5 @@ module.exports = {
   verifyChainIntegrity,
   logsToCSV,
   getLogsToExport,
-  createUserSnapshot,
   maskPII,
 };

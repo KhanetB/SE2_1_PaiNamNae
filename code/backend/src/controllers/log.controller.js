@@ -1,11 +1,11 @@
 const asyncHandler = require("express-async-handler");
 const logService = require("../services/log.service");
-const ApiError = require("../utils/ApiError");
 const getLogs = asyncHandler(async (req, res) => {
   const {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action,
     accessResult,
@@ -17,6 +17,7 @@ const getLogs = asyncHandler(async (req, res) => {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action: action ? action.split(",") : undefined,
     accessResult,
@@ -49,10 +50,11 @@ const exportLogs = asyncHandler(async (req, res) => {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action,
     accessResult,
-    includeNationalId,
+    userFields,
     format = "csv",
   } = req.query;
 
@@ -62,11 +64,13 @@ const exportLogs = asyncHandler(async (req, res) => {
     userId,
     ipAddress,
     action: action ? action.split(",") : undefined,
+    username,
     accessResult,
   };
 
-  const logs = await logService.getLogsToExport(filters);
 
+  const selectedUserFileds = userFields ? userFields.split(",").map((f) => f.trim()) : [];
+  const logs = await logService.getLogsToExport(filters, selectedUserFileds);
   const date = new Date().toISOString().split("T")[0];
 
   if (format == "json") {
@@ -77,7 +81,7 @@ const exportLogs = asyncHandler(async (req, res) => {
   }
 
   /// default as csv format
-  const csvContent = logService.logsToCSV(logs, includeNationalId);
+  const csvContent = logService.logsToCSV(logs, selectedUserFileds);
   const fileName = `audit-log-export-${date}.csv`;
   res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
