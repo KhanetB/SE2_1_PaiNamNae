@@ -144,20 +144,46 @@ async function verifyChainIntegrity(limit = 500) {
 
   return { valid: true, totalChecked: logs.length };
 }
-function getLogStats() {}
 
-function logsToCSV(logs, includeNationalId = false) {
-  const headers = [];
+function logsToCSV(logs, selectedUserFileds = []) {
+  if (!logs || logs.length == 0) return "";
+
+  const baseHeaders = [
+    "id",
+    "userId",
+    "ipAddress",
+    "action",
+    "createdAt"
+  ];
+  const headers = [...baseHeaders, ...selectedUserFileds];
 
   const rows = logs.map((log) => {
-    const row = [];
-    return row.map((field) => `"${field}"`).join(",");
+    const snapshot = log.userSnapshot || {};
+    const row = headers.map((header) => {
+      let value = "";
+
+      if (baseHeaders.includes(header)) {
+        value = log[header];
+      } else if (selectedUserFileds.includes(header)) {
+        value = snapshot[header];
+      }
+
+      if (value === null || value === undefined) return '""';
+      if (value instanceof Date) return `"${value.toISOString()}"`;
+      if (typeof value === "object") {
+        return `"${JSON.stringify(value).replace(/"/g, '""')}"`
+      }
+
+      return `"${String(value).replace(/"/g,'""')}"`
+    })
+
+    return row.join(",");
   });
 
   return [headers.join(","), ...rows].join("\n");
 }
 
-function getLogsToExport(filters = {}) {
+function getLogsToExport(filters = {}, selectedUserFileds =[]) {
   const { startDate, endDate, userId, ipAddress, action, accessResult } =
     filters;
 
@@ -185,10 +211,33 @@ function getLogsToExport(filters = {}) {
     where.accessResult = accessResult;
   }
 
-  return prisma.auditLog.findMany({
+  const logs = prisma.auditLog.findMany({
     where,
     orderBy: { createdAt: "desc" },
   });
+
+  return logs.map((log) => {
+    let parsedSnapshot ={};
+    if (log.userSnapshot) {
+      parsedSnapshot = typeof log.userSnapshot == "string" ? JSON.parse(log.userSnapshot) : log.userSnapshot;
+    }
+
+    const filterdSnapshot = {}
+    if (selectedUserFileds && selectedUserFileds.length > 0) {
+      selectedUserFileds.forEach((field) => {
+        if (parsedSnapshot[field] !== undefined) {
+          filterdSnapshot[field] = parsedSnapshot[field];
+        }
+      });
+    } else {
+      Object.assign(filterdSnapshot, parsedSnapshot);
+    }
+
+    return {
+      ...log,
+      userSnapshot: filterdSnapshot,
+    }
+   })
 }
 
 function maskPII(data) {
@@ -206,7 +255,7 @@ function maskPII(data) {
     "otpCode",
   ];
 
-  const partitionFields = {
+  const partialFields = {
     email: (val) => {
       if (!val) return val;
       const [name, domain] = val.split("@");

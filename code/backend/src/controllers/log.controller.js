@@ -52,7 +52,7 @@ const exportLogs = asyncHandler(async (req, res) => {
     ipAddress,
     action,
     accessResult,
-    includeNationalId,
+    userField: userFields,
     format = "csv",
   } = req.query;
 
@@ -65,8 +65,9 @@ const exportLogs = asyncHandler(async (req, res) => {
     accessResult,
   };
 
-  const logs = await logService.getLogsToExport(filters);
 
+  const selectedUserFileds = userFields ? userFields.split(",").map((f) => f.trim()) : [];
+  const logs = await logService.getLogsToExport(filters, selectedUserFileds);
   const date = new Date().toISOString().split("T")[0];
 
   if (format == "json") {
@@ -77,7 +78,7 @@ const exportLogs = asyncHandler(async (req, res) => {
   }
 
   /// default as csv format
-  const csvContent = logService.logsToCSV(logs, includeNationalId);
+  const csvContent = logService.logsToCSV(logs, selectedUserFileds);
   const fileName = `audit-log-export-${date}.csv`;
   res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
