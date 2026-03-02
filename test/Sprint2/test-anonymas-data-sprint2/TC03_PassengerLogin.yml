@@ -1,0 +1,52 @@
+info:
+  name: TC03_PassengerLogin
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: http://localhost:3000/api/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "email": "{{passenger_email}}",
+        "password": "{{passenger_password}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        bru.setEnvVar("passenger_token",body.data.token)
+    - type: tests
+      code: |-
+        test("response status should return 200 OK", function(){
+          const status = res.getStatus();
+          const expected = 200
+          expect(status).to.equal(expected);
+          if(status !== expected){
+            bru.runner.stopExecution();
+          }
+        });
+        test("resposne body should contain", function(){
+          const body = res.getBody()
+          const message = body.message
+          const expectedMessage = "Login successful"
+          expect(body).to.have.property("message")
+          expect(message).to.equal(expectedMessage)
+          if(message !== expectedMessage){
+            bru.runner.stopExecution();
+          }
+        });
+
+
+        // bru.setNextRequest("TC04_DeleteLoginUser");
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

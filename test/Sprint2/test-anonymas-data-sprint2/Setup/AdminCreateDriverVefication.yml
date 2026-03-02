@@ -1,0 +1,62 @@
+info:
+  name: AdminCreateDriverVefication
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:3000/api/driver-verifications/admin
+  headers:
+    - name: Authorization
+      value: Bearer {{admin_token}}
+  body:
+    type: multipart-form
+    data:
+      - name: licenseNumber
+        type: text
+        value: "1234567891"
+      - name: firstNameOnLicense
+        type: text
+        value: Test
+      - name: lastNameOnLicense
+        type: text
+        value: User
+      - name: typeOnLicense
+        type: text
+        value: PRIVATE_CAR
+      - name: licenseIssueDate
+        type: text
+        value: 2022-05-10 00:00:00.000
+      - name: licenseExpiryDate
+        type: text
+        value: 2027-05-10 00:00:00.000
+      - name: licensePhotoUrl
+        type: file
+        value:
+          - person.jpg
+      - name: selfiePhotoUrl
+        type: file
+        value:
+          - person.jpg
+      - name: userId
+        type: text
+        value: "{{driver_id}}"
+      - name: status
+        type: text
+        value: APPROVED
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("get HTTP 201",function(){
+          const status = res.getStatus();
+          expect(status).to.equal(201);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
