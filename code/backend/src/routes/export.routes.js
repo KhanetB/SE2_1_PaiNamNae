@@ -10,8 +10,4 @@ router.get("/me", protect, exportController.downloadMyData);
 module.exports = router;
 
 // POST /api/export/email
-<<<<<<< HEAD
-router.post('/email', protect, userController.handleAccountDeletion);
-=======
 router.post("/email", protect, userController.handleAccountDeletion);
->>>>>>> Phuri_2283

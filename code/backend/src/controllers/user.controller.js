@@ -214,27 +214,6 @@ const setUserStatus = asyncHandler(async (req, res) => {
     .json({ success: true, message: "User status updated", data: updatedUser });
 });
 
-<<<<<<< HEAD
-const handleAccountDeletion = async (req, res, next) => {
-    try {
-        const userId = req.user.sub;      
-        const { email } = req.body;      
-        if (!email) {
-             throw new ApiError(400, "กรุณาระบุอีเมลเพื่อรับไฟล์ข้อมูลส่วนตัว");
-        }
-
-        console.log("Generating PDPA data...");
-        const userData = await exportService.generateUserData(userId);
-
-        console.log(`Sending backup to ${email}...`);
-        await emailService.sendBackupEmail(email, userData);
-        
-        // ---------------------------------------------
-        // หลังจากส่งเมลสำเร็จแล้ว ค่อยเรียกฟังก์ชันลบของเพื่อน
-        // ---------------------------------------------
-        
-        /*
-=======
 // Delete user controller (soft delete by user themselves)
 const deleteUserController = asyncHandler(async (req, res) => {
   const permanentDelete = req.query.permanent === "true";
@@ -281,38 +260,11 @@ const handleAccountDeletion = async (req, res, next) => {
     // ---------------------------------------------
 
     /*
->>>>>>> Phuri_2283
         console.log("Deleting user account...");
         await prisma.user.delete({
              where: { id: userId }
         });
             */
-<<<<<<< HEAD
-        res.status(200).json({ 
-            success: true, 
-            message: "ส่งข้อมูลสำรองทางอีเมลและลบบัญชีเรียบร้อยแล้ว" 
-        });
-
-    } catch (error) {
-        // ถ้าส่งเมลไม่ผ่าน ระบบจะไม่ลบ User (Safety)
-        next(error);
-    }
-};
-
-module.exports = {
-    adminListUsers,
-    getAllUsers,
-    getUserById,
-    getMyUser,
-    getUserPublicById,
-    createUser,
-    updateCurrentUserProfile,
-    adminUpdateUser,
-    adminDeleteUser,
-    setUserStatus,
-    handleAccountDeletion
-};
-=======
     res.status(200).json({
       success: true,
       message: "ส่งข้อมูลสำรองทางอีเมลและลบบัญชีเรียบร้อยแล้ว",
@@ -338,4 +290,3 @@ module.exports = {
   checkUserDeletionStatus,
   handleAccountDeletion,
 };
->>>>>>> Phuri_2283
