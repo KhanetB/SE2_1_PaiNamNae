@@ -47,9 +47,13 @@ function mapToActionType(req, statusCode) {
 }
 
 function extractResourceType(path) {
-  const segments = path.replace(/^\/api\//, "").split("/");
-  const resource = segments[0] || "";
-
+  if (!path) return;
+  let cleanPath = path.split("?")[0];
+  cleanPath = cleanPath.replace(/\/{2,}/g, "/");
+  const segments = cleanPath.split("/").filter(Boolean);
+  const resourceSegment =
+    segments[0] === "api" ? segments[1] : segments[0];
+    if (!resourceSegment) return null;
   const map = {
     auth: "AUTH",
     users: "USER",
@@ -62,38 +66,16 @@ function extractResourceType(path) {
     export: "EXPORT",
     logs: "AUDIT_LOG",
   };
-  return map[resource] || resource.toUpperCase() || null;
+  return map[resourceSegment] || resourceSegment.toUpperCase() || null;
 }
 
-function sanitizeBody(body) {
-  if (!body || typeof body !== "object") return null;
 
-  const sensitiveFields = [
-    "password",
-    "currentPassword",
-    "newPassword",
-    "token",
-    "accessToken",
-    "refreshToken",
-    "nationalNumber",
-    "otpCode",
-  ];
-
-  const sanitized = { ...body };
-  for (const field of sensitiveFields) {
-    if (sanitized[field]) {
-      sanitized[field] = "[REDACTED]";
-    }
-  }
-
-  return sanitized;
-}
 
 const logger = (req, res, next) => {
   next();
   res.on("finish", async () => {
     try {
-      console.log("res.locals: ", res.locals);
+
       const path = req.originalUrl || req.path || "";
       if (
         path.includes("/heath") ||
@@ -106,7 +88,6 @@ const logger = (req, res, next) => {
 
       const action = mapToActionType(req, res.statusCode);
 
-      if (!action) return;
 
       const ua = uap(req.headers["user-agent"]);
       const deviceInfo = ua.os.name 
@@ -122,9 +103,8 @@ const logger = (req, res, next) => {
             : "ERROR";
 
       await logService.createLog({
-        action,
+        action: action || "UNKNOWN",
         userId: req.user?.sub || null,
-        userSnapshot: await logService.createUserSnapshot(req.user?.sub),
         actionTimeStamp: new Date(),
         ipAddress:
           req.ip ||

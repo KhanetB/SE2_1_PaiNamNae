@@ -30,6 +30,6 @@ router.post(
 );
 
 // POST /api/auth/logout
-router.post("/logout", protect, authController.logout);
+router.get("/logout", authController.logout);
 
 module.exports = router;

@@ -71,6 +71,7 @@ enum ReviewLabel {
 }
 
 enum ActionType {
+  UNKNOWN
   // AUTHENTICATION
   LOGIN_SUCCESS
   LOGIN_FAILED
@@ -151,7 +152,6 @@ model AuditLog {
   // ข้อกำหนด: ข้อมูลในการระบุตัวตนผู้ใช้
   userId       String?
   user         User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userSnapshot String?
 
   // ข้อกำหนด: วันเวลาและรายละเอียดเหตุการณ์สำคัญ
   action          ActionType
@@ -176,14 +176,12 @@ model AuditLog {
   integrityHash String?
 
   createdAt DateTime @default(now())
-  expiresAt DateTime
 
   @@index([createdAt])
   @@index([userId])
   @@index([ipAddress])
   @@index([action])
   @@index([accessResult])
-  @@index([expiresAt])
 }
 
 model User {

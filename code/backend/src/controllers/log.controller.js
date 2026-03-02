@@ -1,11 +1,11 @@
 const asyncHandler = require("express-async-handler");
 const logService = require("../services/log.service");
-const ApiError = require("../utils/ApiError");
 const getLogs = asyncHandler(async (req, res) => {
   const {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action,
     accessResult,
@@ -17,6 +17,7 @@ const getLogs = asyncHandler(async (req, res) => {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action: action ? action.split(",") : undefined,
     accessResult,
@@ -49,10 +50,11 @@ const exportLogs = asyncHandler(async (req, res) => {
     startDate,
     endDate,
     userId,
+    username,
     ipAddress,
     action,
     accessResult,
-    userField: userFields,
+    userFields,
     format = "csv",
   } = req.query;
 
@@ -62,6 +64,7 @@ const exportLogs = asyncHandler(async (req, res) => {
     userId,
     ipAddress,
     action: action ? action.split(",") : undefined,
+    username,
     accessResult,
   };
 
