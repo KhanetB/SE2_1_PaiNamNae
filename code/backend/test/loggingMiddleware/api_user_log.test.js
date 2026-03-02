@@ -169,7 +169,7 @@ test("TC11 Deleted User", async () => {
   const expectedAction = "USER_DELETED"
   const expectedAccessResult = "SUCCESS"
   const reqPath = "/api/users/me"
-  const method = "DELETED"
+  const method = "DELETE"
   const req = {
     user: { sub: 1 },
     method: method,
@@ -201,5 +201,15 @@ test("TC11 Deleted User", async () => {
   await finishCallback();
 
   expect(next).toHaveBeenCalledTimes(1);
-  expect(_createLog).toHaveBeenCalledTimes(0);
+  expect(_createLog).toHaveBeenCalledTimes(1);
+  expect(_createLog).toHaveBeenCalledWith(
+    expect.objectContaining({
+      action: expectedAction,
+      accessResult: expectedAccessResult,
+      userId: req.user.sub,
+      endpoint: req.path,
+      httpMethod: req.method,
+      httpStatusCode: res.statusCode.toString(),
+    }),
+  )
 });

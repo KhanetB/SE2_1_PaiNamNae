@@ -117,7 +117,7 @@ test("TC13 Create Booking", async () => {
 });
 
 test("TC14 Update Booking", async () => {
-  const expectedAction = "BOOKING_CONFIRMED"
+  const expectedAction = "BOOKING_UPDATED"
   const expectedAccessResult = "SUCCESS"
   const reqPath = "/api/bookings"
   const method = "PATCH"
@@ -166,7 +166,7 @@ test("TC14 Update Booking", async () => {
 });
 
 test("TC15 Cancle Booking", async () => {
-  const expectedAction = "BOOKING_CANCELLED"
+  const expectedAction = "BOOKING_DELETED"
   const expectedAccessResult = "SUCCESS"
   const reqPath = "/api/bookings"
   const method = "DELETE"
