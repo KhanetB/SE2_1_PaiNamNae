@@ -246,7 +246,10 @@ const getReviewByBookingId = async (bookingId, userId) => {
   if (review.passengerId !== userId && review.driverId !== userId) {
     throw new ApiError(403, 'You are not allowed to view this review');
   }
-  return review;
+  return {
+    hasReview: true,
+    review
+  }
 }
 
 const getReviewById = async (userId, reviewId) => {

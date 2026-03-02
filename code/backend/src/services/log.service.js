@@ -206,7 +206,7 @@ function maskPII(data) {
     "otpCode",
   ];
 
-  const partitionFields = {
+  const partialFields = {
     email: (val) => {
       if (!val) return val;
       const [name, domain] = val.split("@");
