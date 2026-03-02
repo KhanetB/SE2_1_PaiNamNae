@@ -537,10 +537,9 @@ import TripRouteDetail from "~/components/TripRouteDetail.vue";
 import { useMyRoutes, reasonLabel } from "~/composables/useMyRoutes";
 import { useGoogleMap } from "~/composables/useGoogleMap";
 import { useToast } from "~/composables/useToast";
-<<<<<<< HEAD
 import { useAuth } from "~/composables/useAuth";
-dayjs.locale("th");
-dayjs.extend(buddhistEra);
+import dayjs from "dayjs";
+import buddhistEra from "dayjs/plugin/buddhistEra";
 
 const { token } = useAuth();
 
@@ -550,13 +549,13 @@ const { $api } = useNuxtApp();
 const { toast } = useToast();
 
 // --- State Management ---
-const activeTab = ref("pending");
-const selectedTripId = ref(null);
-const isLoading = ref(false);
-const mapContainer = ref(null);
-const googleMap = useGoogleMap(mapContainer);
+// const activeTab = ref("pending");
+// const selectedTripId = ref(null);
+// const isLoading = ref(false);
+// const mapContainer = ref(null);
+// const googleMap = useGoogleMap(mapContainer);
 
-const { toast } = useToast();
+// const { toast } = useToast();
 const mapContainer = ref(null);
 const googleMap = useGoogleMap(mapContainer);
 

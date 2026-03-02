@@ -225,8 +225,6 @@ model User {
   PassengerReviews        Review[]            @relation("PassengerReviews")
   DriverReviews           Review[]            @relation("DriverReviews")
 
-  PassengerReviews Review[]   @relation("PassengerReviews")
-  DriverReviews    Review[]   @relation("DriverReviews")
   auditLog         AuditLog[]
 
   @@index([role])
@@ -260,7 +258,7 @@ model DriverVerification {
 
 model Notification {
   id     String @id @default(cuid())
-  userId String?
+  userId String? 
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type     NotificationType @default(SYSTEM)

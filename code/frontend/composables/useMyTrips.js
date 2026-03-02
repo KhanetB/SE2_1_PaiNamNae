@@ -78,7 +78,8 @@ export function useMyTrips() {
                 : null
         ).filter(Boolean)
         return {
-            hasReview: false, reviewId: '',
+            hasReview: false, 
+            reviewId: '',
             id: b.id,
             status: String(b.status || '').toLowerCase(),
             routeStatus: String(b.route?.status || '').toLowerCase(),
@@ -117,6 +118,7 @@ export function useMyTrips() {
             console.log("Res:", res);
             return { hasReview: res.hasReview, reviewId: res.review?.id ?? '' }
         } catch {
+            console.error(`Failed to fetch review status for booking ${bookingId}`)
             return { hasReview: false, reviewId: '' }
         }
     }
@@ -130,6 +132,7 @@ export function useMyTrips() {
 
                 console.log("Trip:", trip);
                 const { hasReview, reviewId } = await fetchReviewStatus(trip.id)
+                console.log(`Booking ${trip.id} hasReview:`, hasReview, 'reviewId:', reviewId);
                 trip.hasReview = hasReview
                 trip.reviewId = reviewId
             }))

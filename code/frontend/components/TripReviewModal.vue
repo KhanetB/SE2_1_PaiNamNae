@@ -88,7 +88,7 @@
             <!-- Photo Upload -->
             <div class="mt-4">
                 <label class="block mb-1 text-md"
-                    >เพิ่มรูปภาพ (สูงสุด 3 รูป)</label
+                    >เพิ่มไฟล์รูปภาพหรือไฟล์วิดีโอ (ขนาดไม่เกิน 10 MB , สูงสุด 3 ไฟล์)</label
                 >
                 <div class="flex gap-3">
                     <div
@@ -112,7 +112,7 @@
                             />
                         </template v-else>
 
-                        <template> <img :src="url" class="object-cover w-full h-full rounded-lg border" /></template>
+                        <template v-else> <img :src="url" class="object-cover w-full h-full rounded-lg border" /></template>
                         <button
                             @click="removeImage(index)"
                             class="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-2 -right-2"
@@ -254,7 +254,7 @@ function handleFileChange(event) {
         }
 
         if (file.size > MAX_FILE_SIZE) {
-            alert(`ไฟล์ ${file.name} มีขนาดใหญ่เกินกำหนด (25MB)`);
+            alert(`ไฟล์ ${file.name} มีขนาดใหญ่เกินกำหนด (10MB)`);
             continue;
         }
 
