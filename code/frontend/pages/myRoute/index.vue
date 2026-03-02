@@ -537,7 +537,6 @@ import TripRouteDetail from "~/components/TripRouteDetail.vue";
 import { useMyRoutes, reasonLabel } from "~/composables/useMyRoutes";
 import { useGoogleMap } from "~/composables/useGoogleMap";
 import { useToast } from "~/composables/useToast";
-<<<<<<< HEAD
 import { useAuth } from "~/composables/useAuth";
 dayjs.locale("th");
 dayjs.extend(buddhistEra);
@@ -550,15 +549,10 @@ const { $api } = useNuxtApp();
 const { toast } = useToast();
 
 // --- State Management ---
-const activeTab = ref("pending");
 const selectedTripId = ref(null);
-const isLoading = ref(false);
 const mapContainer = ref(null);
 const googleMap = useGoogleMap(mapContainer);
 
-const { toast } = useToast();
-const mapContainer = ref(null);
-const googleMap = useGoogleMap(mapContainer);
 
 useHead({
     title: "คำขอจองเส้นทางของฉัน - ไปนำแหน่",
@@ -592,7 +586,6 @@ const {
     copyEmail,
 } = useMyRoutes();
 
-const selectedTripId = ref(null);
 
 const selectedLabel = computed(() => {
     if (activeTab.value === "myRoutes") {
