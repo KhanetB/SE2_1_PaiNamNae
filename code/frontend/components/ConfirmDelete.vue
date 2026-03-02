@@ -587,7 +587,8 @@ const verifyUser = async () => {
     });
 };
 const sendBackupToEmail = async () => {
-    if (!token.value) {
+    try{
+        if (!token.value) {
         throw new Error(
             "Unauthorized: token not found in send backup to email",
         );
@@ -602,6 +603,12 @@ const sendBackupToEmail = async () => {
             email: email.value,
         },
     });
+    
+    }catch(error){
+        console.error("Error sending backup to email: ", error);
+         throw new Error("Failed to send backup to email");
+    }
+    
 };
 
 // เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ

@@ -258,7 +258,7 @@ model DriverVerification {
 
 model Notification {
   id     String @id @default(cuid())
-  userId String?
+  userId String? 
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type     NotificationType @default(SYSTEM)
