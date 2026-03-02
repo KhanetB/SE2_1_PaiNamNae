@@ -225,8 +225,6 @@ model User {
   PassengerReviews        Review[]            @relation("PassengerReviews")
   DriverReviews           Review[]            @relation("DriverReviews")
 
-  PassengerReviews Review[]   @relation("PassengerReviews")
-  DriverReviews    Review[]   @relation("DriverReviews")
   auditLog         AuditLog[]
 
   @@index([role])
