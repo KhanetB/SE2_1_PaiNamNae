@@ -75,6 +75,121 @@ enum ReviewFileType {
   VIDEO
 }
 
+enum ActionType {
+  // AUTHENTICATION
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  SESSION_EXPIRED
+  PASSWORD_CHANGED
+  PASSWORD_RESET_REQUESTED
+  VERIFY_PASSWORD_FAILED
+  VERIFY_PASSWORD_SUCCESS
+  // USER 
+  USER_REGISTERED
+  USER_DELETED
+  PROFILE_VIEWED
+  PROFILE_UPDATED
+  PROFILE_PICTURE_UPLOADED
+  NATIONAL_ID_UPLOADED
+  NATIONAL_ID_VIEWED
+  SELFIE_UPLOADED
+  USER_DATA_EXPORT_REQUESTED
+
+  // VEHICLE
+  VEHICLE_CREATED
+  VEHICLE_UPDATED
+  VEHICLE_DELETED
+  VEHICLE_VIEWED
+
+  // BOOKING
+  BOOKING_CREATED
+  BOOKING_CONFIRMED
+  BOOKING_REJECTED
+  BOOKING_CANCELLED
+  BOOKING_COMPLETED
+  BOOKING_VIEWED
+
+  // ROUTE 
+  ROUTE_CREATED
+  ROUTE_UPDATED
+  ROUTE_VIEWED
+  ROUTE_CANCELLED
+  ROUTE_STARTED
+  ROUTE_COMPLETED
+
+  // REVIEW 
+  REVIEW_CREATED
+
+  // DRIVER VERIFICATION
+  DRIVER_VERIFICATION_SUBMITTED
+  DRIVER_VERIFICATION_APPROVED
+  DRIVER_VERIFICATION_REJECTED
+  DRIVER_LICENSES_VIEWED
+
+  // Admin Actions
+  ADMIN_USER_VIEWED
+  ADMIN_USER_SUSPENDED
+  ADMIN_USER_UNSUSPENDED
+  ADMIN_USER_DELETED
+  ADMIN_BOOKING_VIEWED
+  ADMIN_ROUTE_VIEWED
+  ADMIN_VERIFICATION_VIEWED
+  ADMIN_LOG_VIEWED
+  ADMIN_LOG_EXPORTED
+  ADMIN_EXPORT_REQUEST_CREATED
+
+  // System
+  SYSTEM_ERROR
+  UNAUTHORIZED_ACCESS_ATTEMPT
+  RATE_LIMIT_EXCEEDED
+}
+
+enum AccessResult {
+  SUCCESS
+  ERROR
+  DENIED
+}
+
+model AuditLog {
+  id           String  @id @default(cuid())
+  // ข้อกำหนด: ข้อมูลในการระบุตัวตนผู้ใช้
+  userId       String?
+  user         User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userSnapshot String?
+
+  // ข้อกำหนด: วันเวลาและรายละเอียดเหตุการณ์สำคัญ
+  action          ActionType
+  actionTimeStamp DateTime // UTC, NTP-Synced
+
+  // ข้อกำหนด: ข้อมูลอุปกรณ์และเครือข่าย
+  ipAddress  String // support ipv4 and ipv6
+  userAgent  String
+  deviceInfo String?
+
+  // ข้อกำหนด: รายละเอียดการใช้งาน
+  httpMethod     String?
+  endpoint       String
+  resourceType   String
+  // ข้อกำหนด: success or defined
+  accessResult   AccessResult
+  httpStatusCode String
+
+  // ข้อกำหนด: รายละเอียดเพิ่มเติม
+  metaData       Json?   @db.Json
+  errorMessage   String?
+  intergrityHash String?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([action])
+  @@index([accessResult])
+  @@index([expiresAt])
+}
 
 model User {
   id                      String              @id @default(cuid())
@@ -110,6 +225,9 @@ model User {
   PassengerReviews        Review[]            @relation("PassengerReviews")
   DriverReviews           Review[]            @relation("DriverReviews")
 
+  PassengerReviews Review[]   @relation("PassengerReviews")
+  DriverReviews    Review[]   @relation("DriverReviews")
+  auditLog         AuditLog[]
 
   @@index([role])
   @@index([isActive])

@@ -1,0 +1,341 @@
+# PBI#1 – ระบบ Audit Log ที่ถูกกฎหมาย (พรบ.คอมพิวเตอร์ & PDPA)
+
+ออกแบบและพัฒนาระบบบันทึก Activity Log สำหรับ website ที่ปฏิบัติตาม **พ.ร.บ. ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์ พ.ศ. 2560** และ **PDPA** โดยครอบคลุมทั้ง Database, Backend API, และ Frontend Admin Dashboard
+
+---
+
+## Legal Compliance Mapping
+
+| ข้อกำหนดกฎหมาย | Implementation |
+|---|---|
+| เก็บข้อมูลไม่น้อยกว่า 90 วัน | `retentionDays` field + cron job ลบเมื่อครบกำหนด |
+| ขยายได้สูงสุด 2 ปี | `LogExportRequest.extendedRetentionUntil` |
+| ส่งมอบภายใน 7–15 วัน | `LogExportRequest` model + status tracking |
+| ข้อมูลต้องแก้ไขไม่ได้ | ไม่มี `UPDATE`/`DELETE` endpoint + Row-level security + SHA-256 hash |
+| รับรองความถูกต้อง | `integrityHash` field + `/verify` endpoint |
+| เข้าถึงได้เฉพาะ Admin | `protect` + [requireAdmin](file:///home/pasit/Documents/project-based/SE2_1_PaiNamNae/code/backend/src/middlewares/auth.js#35-42) middleware |
+| ระบุตัวตนผู้ใช้ได้ | `userId`, `username`, `ipAddress` ใน log |
+| Clock Sync | NTP/UTC timestamp + `serverTimestamp` field |
+
+---
+
+## Proposed Changes
+
+### 1. Database Layer
+
+#### [MODIFY] [schema.prisma](file:///home/pasit/Documents/project-based/SE2_1_PaiNamNae/code/backend/prisma/schema.prisma)
+
+เพิ่ม 3 enum และ 2 model ใหม่ต่อท้าย schema:
+
+**Enum ใหม่:**
+
+```prisma
+enum AuditEventType {
+  // Authentication Events
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  TOKEN_REFRESHED
+  PASSWORD_CHANGED
+  ACCOUNT_LOCKED
+
+  // Resource Access Events
+  FILE_ACCESSED
+  DATA_VIEWED
+  DATA_EXPORTED
+
+  // System Events
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  ROLE_CHANGED
+  VERIFICATION_APPROVED
+  VERIFICATION_REJECTED
+
+  // Authorization Events
+  ACCESS_DENIED
+  PERMISSION_CHANGED
+
+  // Business Events
+  BOOKING_CREATED
+  BOOKING_CANCELLED
+  BOOKING_COMPLETED
+  ROUTE_CREATED
+  ROUTE_CANCELLED
+  REVIEW_SUBMITTED
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+```
+
+**Model `AuditLog` (immutable — ไม่มี `updatedAt`, ไม่มี UPDATE/DELETE endpoint ใด ๆ):**
+
+```prisma
+model AuditLog {
+  id              String         @id @default(cuid())
+  
+  // ตัวตนผู้ใช้ (มาตรา 26 พรบ.คอม)
+  userId          String?        // null ถ้าเป็น anonymous
+  username        String?
+  userRole        String?
+  
+  // ข้อมูลเครือข่าย/อุปกรณ์
+  ipAddress       String
+  userAgent       String?
+  deviceType      String?        // 'mobile' | 'desktop' | 'tablet'
+  
+  // รายละเอียดเหตุการณ์
+  eventType       AuditEventType
+  httpMethod      String?        // GET, POST, etc.
+  endpoint        String?        // API path
+  statusCode      Int?
+  
+  // รายละเอียดเพิ่มเติม (JSON)
+  resourceType    String?        // 'booking' | 'route' | 'user' | etc.
+  resourceId      String?
+  actionDetail    Json?          @db.Json
+  
+  // ผลลัพธ์
+  success         Boolean        @default(true)
+  errorMessage    String?
+  
+  // Integrity & Timestamp
+  integrityHash   String         // SHA-256 of the log entry
+  serverTimestamp DateTime       @default(now()) // UTC, NTP-synced
+  
+  // Retention
+  retentionDays   Int            @default(90)  // ขั้นต่ำ 90 วัน ตามกฎหมาย
+  expiresAt       DateTime       // serverTimestamp + retentionDays
+  
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([eventType])
+  @@index([serverTimestamp])
+  @@index([expiresAt])
+  @@index([success])
+}
+```
+
+**Model `LogExportRequest` (ติดตาม SLA 7-15 วัน):**
+
+```prisma
+model LogExportRequest {
+  id                    String       @id @default(cuid())
+  requestedBy           String       // adminId who requested
+  
+  // ช่วงวันที่ดึงข้อมูล
+  dateFrom              DateTime
+  dateTo                DateTime
+  
+  // ตัวกรอง (Customize ตามข้อ 6)
+  filterUserId          String?
+  filterIpAddress       String?
+  filterEventTypes      String[]
+  includeNationalId     Boolean      @default(false)  // PDPA: เลือกได้
+  
+  // Export format
+  format                String       @default("CSV")  // CSV | JSON
+  status                ExportStatus @default(PENDING)
+  
+  // SLA tracking (7-15 วัน)
+  requestedAt           DateTime     @default(now())
+  officerDeadline       DateTime     // เจ้าหน้าที่กำหนด (7-15 วัน)
+  completedAt           DateTime?
+  downloadUrl           String?
+  
+  // Extended Retention (สูงสุด 2 ปี)
+  extendRetention       Boolean      @default(false)
+  extendedRetentionDays Int?         // max 730 วัน (2 ปี)
+  
+  createdAt             DateTime     @default(now())
+  
+  @@index([requestedBy])
+  @@index([status])
+  @@index([requestedAt])
+}
+```
+
+---
+
+### 2. Backend Layer
+
+#### [NEW] `src/utils/logHasher.js`
+
+SHA-256 hash ของ log entry เพื่อรับรองความถูกต้องของข้อมูล:
+
+```js
+const crypto = require('crypto');
+
+function hashLogEntry(entry) {
+  const payload = JSON.stringify({
+    userId: entry.userId,
+    username: entry.username,
+    ipAddress: entry.ipAddress,
+    eventType: entry.eventType,
+    endpoint: entry.endpoint,
+    statusCode: entry.statusCode,
+    serverTimestamp: entry.serverTimestamp?.toISOString?.() ?? entry.serverTimestamp,
+  });
+  return crypto.createHash('sha256').update(payload).digest('hex');
+}
+
+function verifyLogEntry(entry) {
+  const expected = hashLogEntry(entry);
+  return entry.integrityHash === expected;
+}
+
+module.exports = { hashLogEntry, verifyLogEntry };
+```
+
+#### [NEW] `src/middlewares/auditLogger.js`
+
+Middleware ที่ hook ทุก request อัตโนมัติ บันทึกทั้ง success และ failure:
+
+```js
+// ทำงานกับทุก route หลัง response ถูก send
+// - จับ userId, username, IP, userAgent, method, path, statusCode
+// - classify eventType จาก method + path (เช่น POST /api/auth/login → LOGIN_SUCCESS/LOGIN_FAILED)
+// - คำนวณ integrityHash
+// - บันทึกลง AuditLog ผ่าน prisma.auditLog.create() แบบ non-blocking
+```
+
+> **Design Decision:** ใช้ `res.on('finish')` event เพื่อรู้ statusCode จริงก่อน log หากเกิด error ใน logger เอง จะ fallback log ไปยัง stderr เท่านั้น ไม่ให้กระทบ response
+
+#### [NEW] `src/services/auditLog.service.js`
+
+- `getLogs(filters)` – query ด้วย filter (userId, IP, eventType, dateRange)
+- `verifyIntegrity(logId)` – ตรวจสอบ hash
+- `getStats()` – สรุปสถิติสำหรับ Dashboard
+- `createExportRequest(data)` – สร้าง export request พร้อม deadline SLA
+- `processExport(requestId)` – generate CSV/JSON file
+- `getExportRequests()` – ดู list ของ export requests
+
+#### [NEW] `src/controllers/auditLog.controller.js`
+
+```
+GET  /api/admin/logs              – ดู logs (paginated, filterable)
+GET  /api/admin/logs/stats        – สถิติสำหรับ Dashboard
+GET  /api/admin/logs/:id/verify   – ตรวจสอบ integrity ของ log record
+POST /api/admin/logs/export       – สร้าง export request
+GET  /api/admin/logs/export       – ดู export requests ทั้งหมด
+GET  /api/admin/logs/export/:id   – download ไฟล์ที่ export แล้ว
+```
+
+> ทุก endpoint ผ่าน `protect` + [requireAdmin](file:///home/pasit/Documents/project-based/SE2_1_PaiNamNae/code/backend/src/middlewares/auth.js#35-42) middleware  
+> **ไม่มี** endpoint สำหรับ UPDATE หรือ DELETE log เด็ดขาด
+
+#### [MODIFY] [server.js](file:///home/pasit/Documents/project-based/SE2_1_PaiNamNae/code/backend/server.js)
+
+- เพิ่ม `auditLogger` middleware ก่อน routes
+- Register `auditLog.routes.js` ใน `/api/admin/logs`
+
+---
+
+### 3. Frontend Layer (Nuxt.js)
+
+#### [NEW] `pages/admin/logs/index.vue` – Admin Log Dashboard
+
+หน้าหลักสำหรับดู audit logs พร้อม:
+
+**Panel ซ้าย – Filters (Customize ตามข้อ 6):**
+- 📅 Date range picker (เลือกช่วงเวลา)
+- 👤 User/IP search (เลือกข้อมูลที่เกี่ยวกับ user หรือ IP)
+- 🏷️ Event type multi-select (เลือกประเภทเหตุการณ์)
+- ✅/❌ Success/Failed filter
+
+**Panel หลัก – Log Table:**
+- แสดงข้อมูลพื้นฐาน: Timestamp, User, IP, Event Type, Endpoint, Status
+- Integrity badge (✅ Valid / ❌ Tampered)
+- Pagination
+- Export button → เปิด modal สร้าง export request
+
+**Stats Cards (บนสุด):**
+- Total logs วันนี้
+- Failed logins
+- Access denied count
+- Logs expiring soon
+
+#### [NEW] `pages/admin/logs/export.vue` – Export Request Management
+
+- ดู list ของ export requests ทั้งหมด
+- แสดง SLA deadline และ status (Pending/Processing/Completed/Failed)
+- Download button เมื่อ export เสร็จ
+
+#### [NEW] `components/admin/LogFilters.vue`
+#### [NEW] `components/admin/LogTable.vue`
+#### [NEW] `composables/useAuditLogs.js`
+
+---
+
+## Security Design
+
+```mermaid
+graph TD
+    A[HTTP Request] --> B[auditLogger middleware]
+    B --> C[Process Request]
+    C --> D[Response sent]
+    D --> E[res.on finish event]
+    E --> F{Classify Event Type}
+    F --> G[Compute SHA-256 Hash]
+    G --> H[prisma.auditLog.create ONLY]
+    H --> I[(PostgreSQL AuditLog table)]
+    
+    J[Admin] --> K[protect + requireAdmin]
+    K --> L[GET /api/admin/logs]
+    L --> M[READ ONLY from AuditLog]
+```
+
+**ไม่มีทาง UPDATE/DELETE records เพราะ:**
+1. ไม่มี endpoint สำหรับ UPDATE/DELETE
+2. Row-level security policy ใน PostgreSQL (recommend)
+3. Database user ที่ app ใช้ไม่มี permission DELETE/UPDATE บน `audit_logs` table
+
+---
+
+## Verification Plan
+
+### Unit/Integration Tests
+
+ตรวจสอบด้วยคำสั่ง:
+```bash
+cd /home/pasit/Documents/project-based/SE2_1_PaiNamNae/code/backend
+npm test
+```
+
+จะเพิ่ม test cases ใน `test/` สำหรับ:
+- `logHasher.hashLogEntry()` – ผลลัพธ์ deterministic
+- `logHasher.verifyLogEntry()` – detect การแก้ไขข้อมูล
+
+### Manual API Testing (ใช้ curl หรือ Postman)
+
+1. **ทดสอบ auto-logging:** ทำ action ใด ๆ (login, จอง trip) → เรียก `GET /api/admin/logs` ด้วย admin token → ต้องมี log record ใหม่
+2. **ทดสอบ integrity:** เรียก `GET /api/admin/logs/:id/verify` → ต้องได้ `valid: true`
+3. **ทดสอบ access control:** เรียก `GET /api/admin/logs` ด้วย PASSENGER token → ต้องได้ `403 Forbidden`
+4. **ทดสอบ export:** POST export request → ตรวจสอบ `LogExportRequest` record ถูกสร้าง
+
+### Frontend Manual Testing
+
+1. Login ด้วย admin account → ไปที่ `/admin/logs`
+2. ทดสอบ filter date range, user, event type
+3. ตรวจสอบ integrity badge แสดง ✅
+4. ทดสอบ export flow
+
+---
+
+## ข้อสังเกตสำคัญสำหรับอาจารย์
+
+> [!IMPORTANT]
+> **ประเด็นที่ครอบคลุมทุกข้อ:**
+> 1. **ข้อมูลแก้ไขไม่ได้** – ใช้ SHA-256 hash + ไม่มี UPDATE/DELETE endpoint
+> 2. **รับรองความถูกต้อง** – `/verify` endpoint + `integrityHash`
+> 3. **Admin read-only** – `protect` + [requireAdmin](file:///home/pasit/Documents/project-based/SE2_1_PaiNamNae/code/backend/src/middlewares/auth.js#35-42) + Dashboard แสดงแค่ read
+> 4. **Export ตาม SLA** – `LogExportRequest` model + 7-15 วัน deadline tracking
+> 5. **ครบ minimum fields** – userId, IP, timestamp, eventType, endpoint, success/fail
+> 6. **Customizable** – filter ด้วย date range, user/IP, event type, เลือก nationalId ใส่ export ไม่ใส่ (PDPA)
+> 7. **Retention 90 วัน** – `expiresAt` field + cron job, ขยายได้ถึง 2 ปี
