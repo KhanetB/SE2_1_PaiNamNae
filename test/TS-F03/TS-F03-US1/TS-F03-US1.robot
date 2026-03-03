@@ -95,7 +95,7 @@ TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
     [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
     Switch Browser    passenger_window
     Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
-    Deletes Account    ${PASSENGER_EMAIL}
+    Deletes Account Passenger  ${PASSENGER_EMAIL}   ${PASSENGER_PASS}
 
 TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
     Switch Browser    driver_window
@@ -109,8 +109,6 @@ TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
     Wait Until Element Is Visible    xpath=//button[contains(@class, 'tab-button') and contains(normalize-space(.), 'ทั้งหมด')]    timeout=15s
     Click Button                     xpath=//button[contains(@class, 'tab-button') and contains(normalize-space(.), 'ทั้งหมด')]
     Wait Until Page Contains    Deleted User   timeout=10s
-
-
 
 *** Comments ***
 
@@ -193,7 +191,7 @@ TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
     [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
     Switch Browser    passenger_window
     Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
-    Deletes Account    ${PASSENGER_EMAIL}
+    Deletes Account Passenger  ${PASSENGER_EMAIL}   ${PASSENGER_PASS}
 
 TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
     Switch Browser    driver_window

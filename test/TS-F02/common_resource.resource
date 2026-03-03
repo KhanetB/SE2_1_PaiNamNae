@@ -24,6 +24,8 @@ ${TEST_USER}            testUser
 ${TEST_PASS}            123456789
 ${IDCARD_PATH}          ${CURDIR}/idcard.jpeg
 ${SELFIE_PATH}          ${CURDIR}/selfie.jpg
+${IMAGE}                ${CURDIR}/reviewpic.jpg
+${PDF}                  ${CURDIR}/Lab08.pdf
 
 # ================= Locators (สมมติ) =================
 ${TXT_USERNAME}         id=identifier
@@ -121,7 +123,7 @@ Driver Fills Verification Form
     Choose File                          xpath=(//input[@type='file'])[2]    ${SELFIE_PATH}
     Sleep                                0.5s
     Input Text                           id=firstNameOnLicense    driver
-    Input Text                           id=lastNameOnLicense     delete
+    Input Text                           id=lastNameOnLicense     forreview
     Input Text                           id=licenseNumber    12345678
     Select From List By Value            id=typeOnLicense    PRIVATE_CAR
     Input Text                           id=licenseIssueDate    12/31/2026
@@ -312,7 +314,7 @@ Deletes Account Passenger
     Wait Until Page Contains         ลบบัญชีสำเร็จแล้ว   timeout=10s
 
 Deletes Account driver
-    [Arguments]   ${EMAIL}
+    [Arguments]    ${EMAIL}    ${PASSWORD}
     Wait Until Element Is Visible    xpath=(//div[contains(@class, 'dropdown-trigger')])[2]/div    timeout=10s
     Mouse Over                       xpath=(//div[contains(@class, 'dropdown-trigger')])[2]/div
     Sleep                                ${DELAY}
@@ -332,7 +334,13 @@ Deletes Account driver
     Input Text                       xpath=//input[@placeholder='กรอกอีเมลของคุณ']    ${EMAIL}
     Wait Until Element Is Enabled    xpath=//button[contains(., 'ยืนยันการลบบัญชี')]    timeout=10s
     Click Button                     xpath=//button[contains(., 'ยืนยันการลบบัญชี')]
-    Wait Until Page Contains    ลบบัญชีสำเร็จแล้ว   timeout=10s 
+    Wait Until Element Is Visible    xpath=//input[@placeholder="กรอกรหัสผ่านของคุณ"]    timeout=10s
+    Input Password                   xpath=//input[@placeholder="กรอกรหัสผ่านของคุณ"]    ${PASSWORD}
+    Wait Until Element Is Enabled    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]    timeout=10s
+    Click Element                    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]
+    Wait Until Element Is Enabled    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]    timeout=10s
+    Click Element                    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]
+    Wait Until Page Contains         ลบบัญชีสำเร็จแล้ว   timeout=10s
     
 # ================= Dual Window Setup =================
 Open Passenger And Driver Browsers
@@ -345,3 +353,36 @@ Open Passenger And Driver Browsers
     Open Browser    ${WEB_URL}    ${BROWSER}    alias=driver_window  options=add_argument("--incognito")
     Set Window Size    960    1080
     Set Window Position    960    0
+
+# ================= API Reviews Keywords =================
+Get User Token Via API
+    [Documentation]    Login via API และ return access token
+    [Arguments]    ${username}    ${password}
+    ${login_data}=    Create Dictionary    username=${username}    password=${password}
+    ${response}=    POST On Session    api_session    /api/auth/login    json=${login_data}    expected_status=any
+    Should Be Equal As Numbers    ${response.status_code}    200
+    ${token}=    Set Variable    ${response.json()}[data][token]
+    RETURN    ${token}
+
+Get My Reviews Via API
+    [Documentation]    เรียก GET /api/reviews/me เพื่อดึงรีวิวทั้งหมดของ user ที่ login อยู่ (return list โดยตรง)
+    [Arguments]    ${access_token}
+    ${headers}=    Create Dictionary    Authorization=Bearer ${access_token}
+    ${response}=    GET On Session    api_session    /api/reviews/me    headers=${headers}    expected_status=any
+    Should Be Equal As Numbers    ${response.status_code}    200
+    ${reviews_list}=    Set Variable    ${response.json()}
+    RETURN    ${reviews_list}
+
+Get Review By Booking ID Via API
+    [Documentation]    เรียก GET /api/reviews/booking/:bookingId
+    [Arguments]    ${access_token}    ${booking_id}
+    ${headers}=    Create Dictionary    Authorization=Bearer ${access_token}
+    ${response}=    GET On Session    api_session    /api/reviews/booking/${booking_id}    headers=${headers}    expected_status=any
+    RETURN    ${response}
+
+Delete Review Via API
+    [Documentation]    เรียก DELETE /api/reviews/:reviewId เพื่อลบรีวิว
+    [Arguments]    ${access_token}    ${review_id}
+    ${headers}=    Create Dictionary    Authorization=Bearer ${access_token}
+    ${response}=    DELETE On Session    api_session    /api/reviews/${review_id}    headers=${headers}    expected_status=any
+    RETURN    ${response}
