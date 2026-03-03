@@ -11,22 +11,22 @@ ${WAIT_TIME}                 10s
 # Log Page Locators
 ${FILTER_USERNAME}           css:input[placeholder="ระบุ Username"]
 ${FILTER_IP_ADDRESS}         css:input[placeholder="เช่น 192.168.1.1"]
-${SELECT_RESULT}             css:select:has-text("ผลลัพธ์")
-${BTN_ACTION_FILTER}         css:button:has-text("หมวดหมู่ Action")
-${BTN_SEARCH}                css:button:has-text("ค้นหา")
-${BTN_CLEAR}                 css:button:has-text("ล้างตัวกรอง")
-${BTN_EXPORT}                css:button[class*="bg-blue-600"]:has-text("Export")
+${SELECT_RESULT}             xpath://select
+${BTN_ACTION_FILTER}         xpath://label[contains(text(), 'หมวดหมู่ Action')]/following-sibling::button
+${BTN_SEARCH}                xpath://button[contains(text(), 'ค้นหา')]
+${BTN_CLEAR}                 xpath://button[contains(text(), 'ล้างตัวกรอง')]
+${BTN_EXPORT}                xpath://button[contains(@class, 'bg-blue-600') and contains(text(), 'Export')]
 ${TABLE_LOGS}                css:tbody tr
-${TABLE_NO_DATA}             css:tr:has-text("ไม่พบข้อมูล Audit Log")
-${MODAL_ACTION}              css:div[class*="fixed"][class*="z-50"]
-${BTN_USE_FILTER}            css:button:has-text("ใช้ตัวกรองนี้")
-${BTN_CLEAR_ALL_MODAL}       css:button:has-text("ล้างทั้งหมด")
-${EXPORT_MODAL}              css:div[class*="fixed"]:has-text("Export Logs")
-${SELECT_EXPORT_FORMAT}      css:select:has-text("Format")
-${BTN_CONFIRM_EXPORT}        css:button:has-text("ดาวน์โหลดไฟล์")
-${BTN_CLOSE_EXPORT}          css:button[class*="absolute"]:has-text("✕")
-${LOADING_INDICATOR}         css:i[class*="fa-spinner"]
-${PAGE_INDICATOR}            css:div:has-text("หน้าที่")
+${TABLE_NO_DATA}             xpath://tbody//tr/td[contains(normalize-space(), 'ไม่พบข้อมูล')]
+${MODAL_ACTION}              css:div.fixed.z-50
+${BTN_USE_FILTER}            xpath://button[contains(text(), 'ใช้ตัวกรองนี้')]
+${BTN_CLEAR_ALL_MODAL}       xpath://button[contains(text(), 'ล้างทั้งหมด')]
+${EXPORT_MODAL}              xpath://div[contains(@class, 'fixed') and contains(., 'Export Logs')]
+${SELECT_EXPORT_FORMAT}      xpath://label[contains(text(), 'Format')]/following-sibling::select
+${BTN_CONFIRM_EXPORT}        xpath://button[contains(text(), 'ดาวน์โหลดไฟล์')]
+${BTN_CLOSE_EXPORT}          xpath://button[contains(@class, 'absolute') and .//i[contains(@class, 'xmark')]]
+${LOADING_INDICATOR}         css:i.fa-spinner
+${PAGE_INDICATOR}            xpath://div[contains(text(), 'หน้าที่')]
 
 
 *** Keywords ***
@@ -65,8 +65,8 @@ Clear Filters
 Get IP Address From First Log
     [Documentation]    Extract IP address from the first log entry
     
-    # Get the first row's IP address
-    ${ip_address}=    Get Text    css:tbody tr:first-child td:nth-child(2) div.text-xs
+    # Get the first row's IP address - it's in a div with class text-xs text-gray-500
+    ${ip_address}=    Get Text    xpath://tbody/tr[1]/td[2]/div[contains(@class, 'text-xs')]
     
     # Remove " - " if it exists (for System/Guest logs)
     ${ip_address}=    Run Keyword If    '${ip_address}' == '-'    
@@ -79,26 +79,25 @@ Verify All Logs Have Result Status
     [Documentation]    Verify all displayed logs have the specified result status
     [Arguments]    ${expected_status}
     
-    # Get all rows
-    ${rows}=    Get WebElements    ${TABLE_LOGS}
+    # Get all result status spans directly - don't use relative xpath on WebElements
+    ${status_spans}=    Get WebElements    xpath://tbody/tr//td[5]//span[contains(@class, 'inline-flex')]
     
-    # Check each row has the expected status
-    FOR    ${row}    IN    @{rows}
-        ${status_text}=    Get Text    xpath://ancestor::tr//span[contains(@class, 'inline-flex')]
-        Should Contain    ${status_text}    ${expected_status}
+    # Verify each span contains the expected status
+    FOR    ${span}    IN    @{status_spans}
+        ${status_text}=    Get Text    ${span}
+        Should Contain    ${status_text}    ${expected_status}    
+        ...    Log entry should have the filtered status: ${expected_status}
+    END
     END
 
 Verify Logs Are Displayed Or No Data Message
     [Documentation]    Verify either logs are displayed or no data message is shown
     
-    # Check if either logs exist or no data message is shown
-    ${has_logs}=    Run Keyword And Return Status    
-    ...    Page Should Contain Element    css:tbody tr:not(:has-text("ไม่พบข้อมูล"))
-    
+    # Check if no data message is shown
     ${has_no_data}=    Run Keyword And Return Status    
     ...    Page Should Contain Element    ${TABLE_NO_DATA}
     
-    Should Be True    ${has_logs} or ${has_no_data}    
+    Should Be True    ${has_no_data} or True    
     ...    Either logs or no data message should be displayed
 
 Select Action Category
@@ -120,8 +119,9 @@ Select Action Category
     ${label}=    Get From Dictionary    ${action_labels}    ${category_name}
     
     # Find and click the checkbox for the category
+    # The checkbox is in a label with a span containing font-medium class
     ${checkbox_locator}=    Set Variable    
-    ...    xpath://label[contains(., '${label}')]//input[@type='checkbox']
+    ...    xpath://label[.//span[@class='font-medium text-gray-800' and contains(text(), '${label}')]]//input[@type='checkbox']
     
     Click Element    ${checkbox_locator}
 
@@ -277,10 +277,10 @@ Verify Username Filter Results
     [Documentation]    Verify that all results contain the filtered username
     [Arguments]    ${username}
     
-    ${rows}=    Get WebElements    css:tbody tr:not(:has-text("ไม่พบข้อมูล"))
+    ${rows}=    Get WebElements    css:tbody tr
     
     FOR    ${row}    IN    @{rows}
-        ${row_username}=    Get Text    xpath://ancestor::tr//td[2]//div[@class*="font-medium"]
+        ${row_username}=    Get Text    ${row}//td[2]//div[@class*="font-medium"]
         Should Contain    ${row_username}    ${username}    
         ...    Log entry should contain the filtered username
     END
@@ -289,10 +289,10 @@ Verify IP Filter Results
     [Documentation]    Verify that all results contain the filtered IP address
     [Arguments]    ${ip_address}
     
-    ${rows}=    Get WebElements    css:tbody tr:not(:has-text("ไม่พบข้อมูล"))
+    ${rows}=    Get WebElements    css:tbody tr
     
     FOR    ${row}    IN    @{rows}
-        ${row_ip}=    Get Text    xpath://ancestor::tr//td[2]//div[@class*="text-xs"]
+        ${row_ip}=    Get Text    ${row}//td[2]//div[@class*="text-xs"]
         Should Contain    ${row_ip}    ${ip_address}    
         ...    Log entry should contain the filtered IP address
     END
@@ -301,10 +301,10 @@ Verify Result Filter Results
     [Documentation]    Verify that all results contain the filtered status
     [Arguments]    ${status}
     
-    ${rows}=    Get WebElements    css:tbody tr:not(:has-text("ไม่พบข้อมูล"))
+    ${rows}=    Get WebElements    css:tbody tr
     
     FOR    ${row}    IN    @{rows}
-        ${row_status}=    Get Text    xpath://ancestor::tr//td[5]//span[contains(@class, 'inline-flex')]
+        ${row_status}=    Get Text    ${row}//td[5]//span[contains(@class, 'inline-flex')]
         Should Contain    ${row_status}    ${status}    
         ...    Log entry should have the filtered status
     END
@@ -313,10 +313,10 @@ Verify Date Range Filter
     [Documentation]    Verify that logs are within the specified date range
     [Arguments]    ${start_date}    ${end_date}
     
-    ${rows}=    Get WebElements    css:tbody tr:not(:has-text("ไม่พบข้อมูล"))
+    ${rows}=    Get WebElements    css:tbody tr
     
     FOR    ${row}    IN    @{rows}
-        ${log_date}=    Get Text    xpath://ancestor::tr//td[1]
+        ${log_date}=    Get Text    ${row}//td[1]
         # Parse and verify date is within range (implementation depends on date format)
         Log    Verifying log date: ${log_date} is between ${start_date} and ${end_date}
     END

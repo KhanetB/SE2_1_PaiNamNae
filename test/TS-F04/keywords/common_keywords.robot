@@ -1,6 +1,8 @@
 *** Settings ***
 Library    SeleniumLibrary
 Library    String
+Library    sys
+Library    selenium.webdriver
 
 *** Variables ***
 ${BASE_URL}              http://localhost:3001
@@ -18,10 +20,26 @@ ${BTN_LOGIN}             css:button#loginButton
 
 *** Keywords ***
 Open Browser And Login As Admin
-    [Documentation]    Open browser, navigate to login page, and login as admin
+    [Documentation]    Open browser with Chrome options in guest mode to avoid password change dialog
+    
+    Log    Configuring Chrome options (Guest mode)    INFO
+    ${chrome_options}=    Evaluate    sys.modules['selenium.webdriver'].ChromeOptions()    sys, selenium.webdriver
+    ${prefs}=             Create Dictionary    
+    ...    credentials_enable_service=${False}    
+    ...    profile.password_manager_enabled=${False}
+    Call Method    ${chrome_options}    add_experimental_option    prefs    ${prefs}
+    
+    # Run Chrome in guest mode to prevent password change dialog
+    Call Method    ${chrome_options}    add_argument    guest
+    
+    # Add Chrome switches to disable various popups and features
+    Call Method    ${chrome_options}    add_argument    disable-popup-blocking
+    Call Method    ${chrome_options}    add_argument    no-default-browser-check
+    Call Method    ${chrome_options}    add_argument    disable-translate
     
     Log    Opening browser at ${LOGIN_PAGE_URL}    INFO
-    Open Browser    ${LOGIN_PAGE_URL}    ${BROWSER}
+    Create WebDriver    Chrome    options=${chrome_options}
+    Go To    ${LOGIN_PAGE_URL}
     Maximize Browser Window
     
     # Wait for page to load with timeout
