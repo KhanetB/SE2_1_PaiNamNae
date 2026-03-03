@@ -87,6 +87,9 @@ app.use("/api", routes);
 // Export Data Route
 app.use("/api/export", exportRoutes);
 
+// Export Data Route
+app.use('/api/export', exportRoutes);
+
 app.use((req, res, next) => {
   next(new ApiError(404, `Cannot ${req.method} ${req.originalUrl}`));
 });
