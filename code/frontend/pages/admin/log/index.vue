@@ -13,7 +13,8 @@
                         <h1 class="text-2xl font-semibold text-gray-800">
                             System Logs
                         </h1>
-                        <button
+                        <button 
+                            :id="exportLog"
                             @click="onExportLog"
                             class="inline-flex items-center gap-2 px-3 py-2 text-white bg-blue-600 rounded-md cursor-pointer hover:bg-blue-700"
                         >
@@ -40,27 +41,27 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                             <div class="flex flex-col">
                                 <label class="mb-1 text-xs font-medium text-gray-600">วันที่เริ่มต้น</label>
-                                <input v-model="filters.startDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
+                                <input :id="startDate" v-model="filters.startDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
 
                             <div class="flex flex-col">
                                 <label class="mb-1 text-xs font-medium text-gray-600">วันที่สิ้นสุด</label>
-                                <input v-model="filters.endDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
+                                <input :id="endDate" v-model="filters.endDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
 
                             <div class="flex flex-col">
                                 <label class="mb-1 text-xs font-medium text-gray-600">Username</label>
-                                <input v-model="filters.username" type="text" placeholder="ระบุ Username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
+                                <input :id="username" v-model="filters.username" type="text" placeholder="ระบุ Username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
                               
                             <div class="flex flex-col">
                                 <label class="mb-1 text-xs font-medium text-gray-600">IP Address</label>
-                                <input v-model="filters.ipAddress" type="text" placeholder="เช่น 192.168.1.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
+                                <input :id="ipAddress" v-model="filters.ipAddress" type="text" placeholder="เช่น 192.168.1.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
 
                             <div class="flex flex-col">
                                 <label class="mb-1 text-xs font-medium text-gray-600">ผลลัพธ์ (Access Result)</label>
-                                <select v-model="filters.accessResult" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm">
+                                <select :id="accessResult" v-model="filters.accessResult" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm">
                                     <option value="">ทั้งหมด</option>
                                     <option value="SUCCESS">SUCCESS</option>
                                     <option value="DENIED">DENIED (401/403)</option>
@@ -70,7 +71,7 @@
 
                             <div class="flex flex-col lg:col-span-2">
                                 <label class="mb-1 text-xs font-medium text-gray-600">หมวดหมู่ Action</label>
-                                <button @click="openModal" class="w-full px-3 py-2 border border-gray-300 rounded-md text-left text-sm bg-white truncate focus:outline-none">
+                                <button :id="openAction" @click="openModal" class="w-full px-3 py-2 border border-gray-300 rounded-md text-left text-sm bg-white truncate focus:outline-none">
                                     {{ displayLabel }}
                                 </button>
 
@@ -100,10 +101,10 @@
                         </div>
 
                         <div class="flex gap-3 mt-4">
-                            <button @click="applyFilters" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 text-sm">
+                            <button :id="applyFilters" @click="applyFilters" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 text-sm">
                                 <i class="fa-solid fa-filter mr-1"></i> ค้นหา
                             </button>
-                            <button @click="clearFilters" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 text-sm">
+                            <button :id="clearFilters" @click="clearFilters" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 text-sm">
                                 ล้างตัวกรอง
                             </button>
                         </div>
