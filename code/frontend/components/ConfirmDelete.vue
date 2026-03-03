@@ -310,7 +310,7 @@
                     <button
                         class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="isLoading"
-                        @click="deleteAccount"
+                        @click="confirmDelete"
                     >
                         <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
                         <span v-else class="flex items-center gap-2"
@@ -587,7 +587,8 @@ const verifyUser = async () => {
     });
 };
 const sendBackupToEmail = async () => {
-    if (!token.value) {
+    try{
+        if (!token.value) {
         throw new Error(
             "Unauthorized: token not found in send backup to email",
         );
@@ -602,6 +603,12 @@ const sendBackupToEmail = async () => {
             email: email.value,
         },
     });
+    
+    }catch(error){
+        console.error("Error sending backup to email: ", error);
+         throw new Error("Failed to send backup to email");
+    }
+    
 };
 
 // เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ
@@ -630,9 +637,6 @@ const confirmDelete = async () => {
         // useCookie("user").value = null;
         // useCookie("session").value = null;
 
-        if (process.client) {
-            localStorage.removeItem("token");
-        }
 
         step.value = 3;
     } catch (error) {
@@ -648,7 +652,7 @@ const confirmDelete = async () => {
             errorMessage.value = "เกิดข้อผิดพลาด ไม่สามารถลบบัญชีผู้ใช้ได้";
         }
 
-        step.value = 4;
+        step.value = 6;
     } finally {
         isLoading.value = false;
     }
