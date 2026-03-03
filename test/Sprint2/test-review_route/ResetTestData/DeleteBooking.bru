@@ -1,0 +1,23 @@
+meta {
+  name: DeleteBooking
+  type: http
+  seq: 3
+  tags: [
+    reset
+  ]
+}
+
+delete {
+  url: http://localhost:3000/api/bookings/admin/{{booking_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

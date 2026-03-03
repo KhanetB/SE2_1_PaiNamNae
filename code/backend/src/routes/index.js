@@ -1,24 +1,25 @@
-const express = require('express');
-const authRoutes = require('./auth.routes');
-const userRoutes = require('./user.routes');
-const vehicleRoutes = require('./vehicle.routes');
-const routeRoutes   = require('./route.routes');
-const driverVerifRoutes = require('./driverVerification.routes');
-const bookingRoutes = require('./booking.routes');
-const notificationRoutes = require('./notification.routes')
-const mapRoutes = require('./maps.routes')
-const reviewRoutes = require('./review.routes');
+const express = require("express");
+const authRoutes = require("./auth.routes");
+const userRoutes = require("./user.routes");
+const vehicleRoutes = require("./vehicle.routes");
+const routeRoutes = require("./route.routes");
+const driverVerifRoutes = require("./driverVerification.routes");
+const bookingRoutes = require("./booking.routes");
+const notificationRoutes = require("./notification.routes");
+const mapRoutes = require("./maps.routes");
+const reviewRoutes = require("./review.routes");
+const logRoutes = require("./log.routes");
 
 const router = express.Router();
 
-router.use('/auth', authRoutes);
-router.use('/users', userRoutes);
-router.use('/vehicles', vehicleRoutes);
-router.use('/routes', routeRoutes);
-router.use('/driver-verifications', driverVerifRoutes);
-router.use('/bookings', bookingRoutes);
-router.use('/notifications', notificationRoutes);
-router.use('/api/maps', mapRoutes);
-router.use('/reviews', reviewRoutes);
-
+router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
+router.use("/vehicles", vehicleRoutes);
+router.use("/routes", routeRoutes);
+router.use("/driver-verifications", driverVerifRoutes);
+router.use("/bookings", bookingRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/api/maps", mapRoutes);
+router.use("/reviews", reviewRoutes);
+router.use("/logs", logRoutes);
 module.exports = router;

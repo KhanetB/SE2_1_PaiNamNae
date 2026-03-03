@@ -70,6 +70,106 @@ enum ReviewLabel {
   GOOD_MUSIC          // ชอบเพลงที่เปิด
 }
 
+enum ReviewFileType {
+  IMAGE
+  VIDEO
+}
+
+enum ActionType {
+  UNKNOWN
+  // AUTHENTICATION
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  PASSWORD_CHANGED
+  // USER 
+  USER_REGISTERED
+  USER_DELETED
+  PROFILE_VIEWED
+  PROFILE_UPDATED
+  USER_DATA_EXPORT_REQUESTED
+
+  // VEHICLE
+  VEHICLE_CREATED
+  VEHICLE_UPDATED
+  VEHICLE_DELETED
+  VEHICLE_VIEWED
+
+  // BOOKING
+  BOOKING_CREATED
+  BOOKING_UPDATED
+  BOOKING_DELETED
+  BOOKING_VIEWED
+
+  // ROUTE 
+  ROUTE_CREATED
+  ROUTE_UPDATED
+  ROUTE_VIEWED
+  ROUTE_DELETE
+
+  // REVIEW 
+  REVIEW_CREATED
+
+  // DRIVER VERIFICATION
+  DRIVER_VERIFICATION_SUBMITTED
+  DRIVER_VERIFICATION_UPDATED
+  DRIVER_LICENSES_VIEWED
+
+  // Admin Actions
+  ADMIN_VIEWED
+  ADMIN_CREATED
+  ADMIN_UPDATED
+  ADMIN_DELETED
+  ADMIN_LOG_VIEWED
+  ADMIN_LOG_EXPORTED
+
+  // System
+  SYSTEM_ERROR
+}
+
+enum AccessResult {
+  SUCCESS
+  ERROR
+  DENIED
+}
+
+model AuditLog {
+  id           String  @id @default(cuid())
+  // ข้อกำหนด: ข้อมูลในการระบุตัวตนผู้ใช้
+  userId       String?
+  user         User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // ข้อกำหนด: วันเวลาและรายละเอียดเหตุการณ์สำคัญ
+  action          ActionType
+  actionTimeStamp DateTime // UTC, NTP-Synced
+
+  // ข้อกำหนด: ข้อมูลอุปกรณ์และเครือข่าย
+  ipAddress  String // support ipv4 and ipv6
+  userAgent  String
+  deviceInfo String?
+
+  // ข้อกำหนด: รายละเอียดการใช้งาน
+  httpMethod     String?
+  endpoint       String
+  resourceType   String
+  // ข้อกำหนด: success or defined
+  accessResult   AccessResult
+  httpStatusCode String
+
+  // ข้อกำหนด: รายละเอียดเพิ่มเติม
+  metaData       Json?   @db.Json
+  errorMessage   String?
+  integrityHash String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([action])
+  @@index([accessResult])
+}
+
 model User {
   id                      String              @id @default(cuid())
   username                String              @unique
@@ -104,6 +204,7 @@ model User {
   PassengerReviews        Review[]            @relation("PassengerReviews")
   DriverReviews           Review[]            @relation("DriverReviews")
 
+  auditLog         AuditLog[]
 
   @@index([role])
   @@index([isActive])
@@ -136,8 +237,8 @@ model DriverVerification {
 
 model Notification {
   id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? 
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type     NotificationType @default(SYSTEM)
   title    String
@@ -179,10 +280,10 @@ model Vehicle {
 
 model Route {
   id              String      @id @default(cuid())
-  driverId        String
-  driver          User        @relation("DriverRoutes", fields: [driverId], references: [id], onDelete: Cascade)
-  vehicleId       String
-  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId        String?
+  driver          User?        @relation("DriverRoutes", fields: [driverId], references: [id], onDelete: SetNull)
+  vehicleId       String?
+  vehicle         Vehicle?     @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
   startLocation   Json        @db.Json
   endLocation     Json        @db.Json
   departureTime   DateTime
@@ -217,10 +318,10 @@ model Route {
 
 model Booking {
   id              String        @id @default(cuid())
-  routeId         String
-  route           Route         @relation(fields: [routeId], references: [id], onDelete: Cascade)
-  passengerId     String
-  passenger       User          @relation("PassengerBookings", fields: [passengerId], references: [id], onDelete: Cascade)
+  routeId         String?
+  route           Route?         @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  passengerId     String?
+  passenger       User?          @relation("PassengerBookings", fields: [passengerId], references: [id], onDelete: SetNull)
   numberOfSeats   Int
   status          BookingStatus @default(PENDING)
   cancelledAt     DateTime?
@@ -243,16 +344,16 @@ model Review {
   bookingId   String        @unique
   booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  driverId    String 
-  driver      User          @relation("DriverReviews", fields: [driverId], references: [id], onDelete: Cascade)
+  driverId    String? 
+  driver      User?          @relation("DriverReviews", fields: [driverId], references: [id], onDelete: SetNull)
 
-  passengerId String
-  passenger   User          @relation("PassengerReviews", fields: [passengerId], references: [id], onDelete: Cascade)
+  passengerId String?
+  passenger   User?          @relation("PassengerReviews", fields: [passengerId], references: [id], onDelete: SetNull)
 
   rating      Float
   comment     String?
 
-  images      String[]
+  files       Json? // [{url , type}]
   labels      ReviewLabel[]
 
   createdAt   DateTime      @default(now())

@@ -1,12 +1,7 @@
 <template>
     <div class="">
-        <AdminHeader />
-        <AdminSidebar />
-
-        <!-- Main Content -->
-        <main id="main-content" class="main-content mt-16 ml-0 lg:ml-[280px] p-6">
-            <!-- Page Title -->
-            <div class="mx-auto max-w-8xl">
+        <!-- Page Title -->
+        <div class="mx-auto max-w-8xl">
                 <!-- Title + Controls -->
                 <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <!-- Left: Title + Create Button -->
@@ -183,12 +178,9 @@
                                     <!-- สวิตช์เปิด/ปิดการใช้งาน -->
                                     <td class="px-4 py-3">
                                         <div class="flex items-center">
-                                            <label class="inline-flex items-center cursor-pointer select-none switch">
-                                                <input type="checkbox" class="switch-input" :checked="u.isActive"
-                                                    :disabled="isLoading || togglingIds.has(u.id)"
-                                                    @change="onToggleActive(u, $event.target.checked)" />
-                                                <span class="switch-slider"></span>
-                                            </label>
+                                            <ToggleSwitch :model-value="u.isActive"
+                                                :disabled="isLoading || togglingIds.has(u.id)"
+                                                @update:model-value="onToggleActive(u, $event)" />
                                             <span class="ml-2 text-sm "
                                                 :class="u.isActive ? 'text-green-700' : 'text-gray-500'">
                                                 {{ u.isActive ? 'Active' : 'Inactive' }}
@@ -266,11 +258,6 @@
                     </div>
                 </div>
             </div>
-        </main>
-
-        <!-- Mobile Overlay -->
-        <div id="overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden"
-            @click="closeMobileSidebar"></div>
 
         <!-- Confirm Delete Modal -->
         <ConfirmModal :show="showDelete" :title="`ลบผู้ใช้${deletingUser?.email ? ' : ' + deletingUser.email : ''}`"
@@ -280,20 +267,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
-import { useRuntimeConfig, useCookie } from '#app'
+import { ref, reactive, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
-import AdminHeader from '~/components/admin/AdminHeader.vue'
-import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import ConfirmModal from '~/components/ConfirmModal.vue'
 import { useToast } from '~/composables/useToast'
+import { formatDate } from '~/utils/date'
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
 
-definePageMeta({ middleware: ['admin-auth'] })
+definePageMeta({ layout: 'admin', middleware: ['admin-auth'] })
 
 const { toast } = useToast()
 
@@ -304,12 +289,8 @@ const users = ref([])
 // เก็บ id ที่กำลัง toggle อยู่ เพื่อ disable สวิตช์/กันคลิกซ้ำ
 const togglingIds = ref(new Set())
 
-const pagination = reactive({
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 1
-})
+import { usePagination } from '~/composables/usePagination'
+const { pagination, totalPages, pageButtons, setPagination } = usePagination(20)
 
 const filters = reactive({
     q: '',
@@ -321,36 +302,10 @@ const filters = reactive({
     isActive: ''
 })
 
-const totalPages = computed(() =>
-    Math.max(1, pagination.totalPages || Math.ceil((pagination.total || 0) / (pagination.limit || 20)))
-)
-
-const pageButtons = computed(() => {
-    const total = totalPages.value
-    const current = pagination.page
-    if (!total || total < 1) return []
-    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
-    const set = new Set([1, total, current])
-    if (current - 1 > 1) set.add(current - 1)
-    if (current + 1 < total) set.add(current + 1)
-    const pages = Array.from(set).sort((a, b) => a - b)
-    const out = []
-    for (let i = 0; i < pages.length; i++) {
-        if (i > 0 && pages[i] - pages[i - 1] > 1) out.push('…')
-        out.push(pages[i])
-    }
-    return out
-})
-
 function roleBadge(role) {
     if (role === 'ADMIN') return 'bg-purple-100 text-purple-700'
     if (role === 'DRIVER') return 'bg-blue-100 text-blue-700'
     return 'bg-gray-100 text-gray-700'
-}
-
-function formatDate(iso) {
-    if (!iso) return '-'
-    return dayjs(iso).format('D MMMM BBBB HH:mm')
 }
 
 function parseSort(s) {
@@ -394,12 +349,8 @@ async function fetchUsers(page = 1) {
         })
 
         const list = res?.data || res?.items || []
-        const p = res?.pagination || {}
         users.value = list
-        pagination.page = Number(p.page ?? page)
-        pagination.limit = Number(p.limit ?? pagination.limit)
-        pagination.total = Number(p.total ?? list.length)
-        pagination.totalPages = Number(p.totalPages ?? Math.ceil(pagination.total / pagination.limit))
+        setPagination(res?.pagination || {}, page, list.length)
     } catch (err) {
         console.error(err)
         loadError.value = err?.data?.message || 'ไม่สามารถโหลดข้อมูลได้'
@@ -561,203 +512,9 @@ function onViewUser(u) {
     navigateTo(`/admin/users/${u.id}`).catch(() => { })
 }
 
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
-
-function defineGlobalScripts() {
-    window.toggleSidebar = function () {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const toggleIcon = document.getElementById('toggle-icon');
-
-        if (!sidebar || !mainContent || !toggleIcon) return;
-
-        sidebar.classList.toggle('collapsed');
-
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '80px';
-            toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
-        } else {
-            mainContent.style.marginLeft = '280px';
-            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
-        }
-    }
-
-    window.toggleMobileSidebar = function () {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-
-        if (!sidebar || !overlay) return;
-
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('hidden');
-    }
-
-    window.toggleSubmenu = function (menuId) {
-        const menu = document.getElementById(menuId);
-        const icon = document.getElementById(menuId + '-icon');
-
-        if (!menu || !icon) return;
-
-        menu.classList.toggle('hidden');
-
-        if (menu.classList.contains('hidden')) {
-            icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-        } else {
-            icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-        }
-    }
-
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const overlay = document.getElementById('overlay');
-
-        if (!sidebar || !mainContent || !overlay) return;
-
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.add('hidden');
-
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '80px';
-            } else {
-                mainContent.style.marginLeft = '280px';
-            }
-        } else {
-            mainContent.style.marginLeft = '0';
-        }
-    }
-
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
-
-function cleanupGlobalScripts() {
-    window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
-    delete window.toggleSidebar
-    delete window.toggleMobileSidebar
-    delete window.closeMobileSidebar
-    delete window.toggleSubmenu
-    delete window.__adminResizeHandler__
-}
-
 onMounted(() => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
     fetchUsers(1)
-})
-
-onUnmounted(() => {
-    cleanupGlobalScripts()
 })
 </script>
 
-<style>
-.sidebar {
-    transition: width 0.3s ease;
-}
 
-.sidebar.collapsed {
-    width: 80px;
-}
-
-.sidebar:not(.collapsed) {
-    width: 280px;
-}
-
-.sidebar-item {
-    transition: all 0.3s ease;
-}
-
-.sidebar-item:hover {
-    background-color: rgba(59, 130, 246, 0.05);
-}
-
-.sidebar.collapsed .sidebar-text {
-    display: none;
-}
-
-.sidebar.collapsed .sidebar-item {
-    justify-content: center;
-}
-
-.main-content {
-    transition: margin-left 0.3s ease;
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        z-index: 1000;
-        transform: translateX(-100%);
-    }
-
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-
-    .main-content {
-        margin-left: 0 !important;
-    }
-}
-
-/* ---- สไตล์ของสวิตช์ ---- */
-.switch {
-    position: relative;
-    width: 42px;
-    height: 24px;
-}
-
-.switch-input {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 42px;
-    height: 24px;
-    margin: 0;
-    outline: none;
-    position: relative;
-    cursor: pointer;
-}
-
-.switch-slider {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    background: #e5e7eb;
-    /* gray-200 */
-    border-radius: 9999px;
-    transition: background 0.2s ease;
-}
-
-.switch-input:checked+.switch-slider {
-    background: #22c55e;
-    /* green-500 */
-}
-
-.switch-slider::after {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 9999px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
-    transition: transform 0.2s ease;
-}
-
-.switch-input:checked+.switch-slider::after {
-    transform: translateX(18px);
-}
-
-.switch-input:disabled+.switch-slider {
-    filter: grayscale(0.4);
-    opacity: .6;
-}
-</style>

@@ -460,6 +460,9 @@ const handleRegister = async () => {
 
   try {
     // เรียก endpoint เดียวกับหน้าแอดมิน
+   for (const [key, value] of fd.entries()) {
+  console.log(key, value);
+}
     await postForm(`${apiBase}/users`, fd);
     router.push('/register/success');
   } catch (err) {

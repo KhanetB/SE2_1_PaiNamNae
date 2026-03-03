@@ -13,17 +13,19 @@ const createReviewSchema = {
     rating: z.coerce.number().min(0).max(5),
     comment: z.string().trim().max(1000).optional(),
     labels: z.string().optional(),
+    now: z.string().optional(), // for testing purposes
   }),
 
   files: z
     .array(
       z.object({
-        mimetype: z.enum(["image/jpeg", "image/png", "image/webp"]),
+        mimetype: z.string().regex(/^(image|video)\//),
         buffer: z.instanceof(Buffer),
-      }),
+      })
     )
-    .max(3, "You can upload up to 3 images")
+    .max(3, "You can upload up to 3 files")
     .optional(),
+    
 };
 
 const editReviewSchema = {
