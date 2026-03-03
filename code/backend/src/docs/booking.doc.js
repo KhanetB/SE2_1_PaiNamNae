@@ -106,11 +106,13 @@
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [PENDING, CONFIRMED, REJECTED, CANCELLED]
+ *                 enum: [PENDING, CONFIRMED, IN_TRANSIT, PASSENGER_CONFIRMED_ARRIVAL, COMPLETED, REJECTED, CANCELLED]
  *                 example: CONFIRMED
  *     responses:
  *       200:
  *         description: Booking status updated successfully
+ *       400:
+ *         description: Invalid state transition or invalid input
  *       403:
  *         description: Forbidden (not your route)
  *       404:
@@ -203,7 +205,7 @@
  *         schema: { type: string, example: "ขอนแก่น" }
  *       - in: query
  *         name: status
- *         schema: { type: string, enum: [PENDING, CONFIRMED, REJECTED, CANCELLED] }
+ *         schema: { type: string, enum: [PENDING, CONFIRMED, IN_TRANSIT, PASSENGER_CONFIRMED_ARRIVAL, COMPLETED, REJECTED, CANCELLED] }
  *       - in: query
  *         name: passengerId
  *         schema: { type: string }
@@ -335,7 +337,7 @@
  *               dropoffLocation: { type: object }
  *               status:
  *                 type: string
- *                 enum: [PENDING, CONFIRMED, REJECTED, CANCELLED]
+ *                 enum: [PENDING, CONFIRMED, IN_TRANSIT, PASSENGER_CONFIRMED_ARRIVAL, COMPLETED, REJECTED, CANCELLED]
  *     responses:
  *       200:
  *         description: Booking updated successfully
@@ -359,6 +361,84 @@
  *     responses:
  *       200:
  *         description: Booking deleted successfully
+ *       404:
+ *         description: Booking not found
+ */
+
+/**
+ * @swagger
+ * /api/bookings/{id}/passenger-confirm-dropoff:
+ *   patch:
+ *     summary: Passenger confirms drop-off
+ *     description: ผู้โดยสารยืนยันว่าเดินทางถึงปลายทางแล้ว (ต้องเป็นสถานะ IN_TRANSIT)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Passenger confirmed drop-off successfully, status changed to PASSENGER_CONFIRMED_ARRIVAL
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       example: "PASSENGER_CONFIRMED_ARRIVAL"
+ *       400:
+ *         description: Only IN_TRANSIT bookings can be confirmed by passenger
+ *       403:
+ *         description: Forbidden (not the passenger of this booking)
+ *       404:
+ *         description: Booking not found
+ */
+
+/**
+ * @swagger
+ * /api/bookings/{id}/driver-confirm-dropoff:
+ *   patch:
+ *     summary: Driver confirms drop-off and completes booking
+ *     description: คนขับยืนยันการถึงปลายทางอย่างเป็นทางการ (ต้องเป็นสถานะ PASSENGER_CONFIRMED_ARRIVAL)
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Driver confirmed drop-off successfully and booking marked as COMPLETED
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     status:
+ *                       type: string
+ *                       example: "COMPLETED"
+ *       400:
+ *         description: Passenger confirmation required before driver confirmation
+ *       403:
+ *         description: Forbidden (not the driver of this booking)
  *       404:
  *         description: Booking not found
  */

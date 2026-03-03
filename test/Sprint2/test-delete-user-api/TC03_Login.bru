@@ -1,0 +1,51 @@
+meta {
+  name: TC03_Login
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:3000/api/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "test@gmail.com",
+    "username": "testUser",
+    "password": "123456789"
+  }
+}
+
+tests {
+  test("response status should return 200 OK", function(){
+    const status = res.getStatus();
+    const expected = 200
+    expect(status).to.equal(expected);
+    if(status !== expected){
+      bru.runner.stopExecution();
+    }
+  });
+  test("resposne body should contain", function(){
+    const body = res.getBody()
+    const message = body.message
+    const expectedMessage = "Login successful"
+    expect(body).to.have.property("message")
+    expect(message).to.equal(expectedMessage)
+    if(message !== expectedMessage){
+      bru.runner.stopExecution();
+    }else{
+       bru.setEnvVar("token", body.data.token)
+      console.log(bru.getEnvVar("token"))
+    }
+  });
+  
+  
+  // bru.setNextRequest("TC04_DeleteLoginUser");
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
