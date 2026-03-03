@@ -139,12 +139,88 @@
                                         </button>
                                     </div>
                                 </div>
-
+                                
                                 <!-- Detail panel (expand) -->
                                 <TripRouteDetail
                                     v-if="selectedTripId === trip.id"
                                     :trip="trip"
                                 />
+                                <!-- Review display -->
+                                <div
+                                v-if="trip.review"
+                                class="p-4 mt-4 bg-gray-50 border border-gray-200 rounded-lg"
+                                >
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="font-medium text-gray-800">
+                                    รีวิวของฉัน
+                                    </div>
+                                    <div class="text-yellow-500 font-semibold">
+                                    ⭐ {{ trip.review.rating }}
+                                    </div>
+                                </div>
+                                 <span
+                                        v-if="
+                                            trip.status === 'completed' &&
+                                            trip.hasReview
+                                        "
+                                        class="px-4 py-2 text-green-700 rounded-2xl bg-green-100 text-sm font-medium"
+                                    >
+                                        คุณได้เขียนรีวิวนี้ไปแล้ว
+                                    </span>
+                                    <span
+                                        v-if="
+                                            trip.status === 'completed' &&
+                                            !trip.hasReview &&
+                                            new Date() -
+                                                new Date(trip.completedAt) >
+                                                7 * 24 * 60 * 60 * 1000
+                                        "
+                                        class="px-4 py-2 text-sm text-gray-500 transition duration-200 border border-gray-300 rounded-md hover:bg-gray-50"
+                                    >
+                                        หมดเขตการรีวิวแล้ว (เกิน 7 วัน)
+                                    </span>
+
+                                <p class="text-sm text-gray-700 whitespace-pre-line">
+                                    {{ trip.review.comment }}
+                                </p>
+
+                                <div
+                                    v-if="trip.review.labels?.length"
+                                    class="flex flex-wrap gap-2 mt-2"
+                                >
+                                    <span
+                                    v-for="label in trip.review.labels"
+                                    :key="label"
+                                    class="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded-full"
+                                    >
+                                    {{ label }}
+                                    </span>
+                                </div>
+                                <!--  -->
+                                <div
+                                    v-if="trip.review.files?.length"
+                                    class="flex gap-2 mt-3"
+                                >
+                                <div
+                                    v-for="file in trip.review.files"
+                                    :key="file.url"
+                                    @click.stop="openPreview(file)"
+                                    class="cursor-pointer"
+                                >
+                                    <img
+                                        v-if="file.type === 'IMAGE'"
+                                        :src="file.url"
+                                        class="object-cover w-20 h-20 rounded-lg border hover:scale-105 transition"
+                                    />
+
+                                    <video
+                                        v-else-if="file.type === 'VIDEO'"
+                                        :src="file.url"
+                                        class="w-20 h-20 rounded-lg border"
+                                    />
+                                </div>
+                            </div>
+                                </div>
 
                                 <!-- Action buttons -->
                                 <div
@@ -174,27 +250,7 @@
                                         เขียนรีวิว
                                     </button>
 
-                                    <span
-                                        v-if="
-                                            trip.status === 'completed' &&
-                                            trip.hasReview
-                                        "
-                                        class="px-4 py-2 text-sm text-green-600 transition duration-200 border border-green-300 rounded-md hover:bg-green-50"
-                                    >
-                                        คุณได้เขียนรีวิวนี้ไปแล้ว
-                                    </span>
-                                    <span
-                                        v-if="
-                                            trip.status === 'completed' &&
-                                            !trip.hasReview &&
-                                            new Date() -
-                                                new Date(trip.completedAt) >
-                                                7 * 24 * 60 * 60 * 1000
-                                        "
-                                        class="px-4 py-2 text-sm text-gray-500 transition duration-200 border border-gray-300 rounded-md hover:bg-gray-50"
-                                    >
-                                        หมดเขตการรีวิวแล้ว (เกิน 7 วัน)
-                                    </span>
+                                   
 
                                     <!-- <button
                                         v-if="trip.status === 'completed' && trip.hasReview"
@@ -252,6 +308,37 @@
             @close="closeReviewModal"
         />
     </div>
+    <div
+    v-if="isPreviewOpen"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+    @click="closePreview"
+>
+    <div
+        class="relative max-w-4xl w-full p-4"
+        @click.stop
+    >
+        <button
+            @click="closePreview"
+            class="absolute text-white top-2 right-2 text-2xl"
+        >
+            ✕
+        </button>
+
+        <img
+            v-if="previewFile?.type === 'IMAGE'"
+            :src="previewFile.url"
+            class="max-h-[80vh] mx-auto rounded-lg"
+        />
+
+        <video
+            v-else-if="previewFile?.type === 'VIDEO'"
+            :src="previewFile.url"
+            controls
+            autoplay
+            class="max-h-[80vh] mx-auto rounded-lg"
+        />
+    </div>
+</div>
 </template>
 
 <script setup>
@@ -265,6 +352,19 @@ import TripReviewModal from "~/components/TripReviewModal.vue";
 import { useMyTrips } from "~/composables/useMyTrips";
 import { useGoogleMap } from "~/composables/useGoogleMap";
 import { useToast } from "~/composables/useToast";
+
+const previewFile = ref(null)
+const isPreviewOpen = ref(false)
+
+function openPreview(file) {
+    previewFile.value = file
+    isPreviewOpen.value = true
+}
+
+function closePreview() {
+    isPreviewOpen.value = false
+    previewFile.value = null
+}
 
 definePageMeta({ middleware: "auth" });
 

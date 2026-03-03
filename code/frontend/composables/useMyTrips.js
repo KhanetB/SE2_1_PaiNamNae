@@ -109,19 +109,27 @@ export function useMyTrips() {
     }
 
     async function fetchReviewStatus(bookingId) {
-        try {
-            const res = await $fetch(`/reviews/booking/${bookingId}`, {
-                method: 'GET',
-                baseURL: config.public.apiBase,
-                headers: { Authorization: `Bearer ${token.value}` },
-            })
-            console.log("Res:", res);
-            return { hasReview: res.hasReview, reviewId: res.review?.id ?? '' }
-        } catch {
-            console.error(`Failed to fetch review status for booking ${bookingId}`)
-            return { hasReview: false, reviewId: '' }
+    try {
+        const res = await $fetch(`/reviews/booking/${bookingId}`, {
+            method: 'GET',
+            baseURL: config.public.apiBase,
+            headers: { Authorization: `Bearer ${token.value}` },
+        })
+
+        return {
+            hasReview: res.hasReview,
+            reviewId: res.review?.id ?? '',
+            review: res.review ?? null
+        }
+
+    } catch {
+        return {
+            hasReview: false,
+            reviewId: '',
+            review: null
         }
     }
+}
 
     async function fetchMyTrips(reverseGeocodeCallback) {
         isLoading.value = true
@@ -131,10 +139,11 @@ export function useMyTrips() {
             await Promise.all(allTrips.value.map(async (trip) => {
 
                 console.log("Trip:", trip);
-                const { hasReview, reviewId } = await fetchReviewStatus(trip.id)
+                const { hasReview, reviewId, review } = await fetchReviewStatus(trip.id)
                 console.log(`Booking ${trip.id} hasReview:`, hasReview, 'reviewId:', reviewId);
                 trip.hasReview = hasReview
                 trip.reviewId = reviewId
+                trip.review = review
             }))
             if (reverseGeocodeCallback) await reverseGeocodeCallback(allTrips.value)
         } catch (error) {
