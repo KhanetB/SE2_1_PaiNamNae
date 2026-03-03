@@ -76,24 +76,17 @@ enum ReviewFileType {
 }
 
 enum ActionType {
+  UNKNOWN
   // AUTHENTICATION
   LOGIN_SUCCESS
   LOGIN_FAILED
   LOGOUT
-  SESSION_EXPIRED
   PASSWORD_CHANGED
-  PASSWORD_RESET_REQUESTED
-  VERIFY_PASSWORD_FAILED
-  VERIFY_PASSWORD_SUCCESS
   // USER 
   USER_REGISTERED
   USER_DELETED
   PROFILE_VIEWED
   PROFILE_UPDATED
-  PROFILE_PICTURE_UPLOADED
-  NATIONAL_ID_UPLOADED
-  NATIONAL_ID_VIEWED
-  SELFIE_UPLOADED
   USER_DATA_EXPORT_REQUESTED
 
   // VEHICLE
@@ -104,45 +97,34 @@ enum ActionType {
 
   // BOOKING
   BOOKING_CREATED
-  BOOKING_CONFIRMED
-  BOOKING_REJECTED
-  BOOKING_CANCELLED
-  BOOKING_COMPLETED
+  BOOKING_UPDATED
+  BOOKING_DELETED
   BOOKING_VIEWED
 
   // ROUTE 
   ROUTE_CREATED
   ROUTE_UPDATED
   ROUTE_VIEWED
-  ROUTE_CANCELLED
-  ROUTE_STARTED
-  ROUTE_COMPLETED
+  ROUTE_DELETE
 
   // REVIEW 
   REVIEW_CREATED
 
   // DRIVER VERIFICATION
   DRIVER_VERIFICATION_SUBMITTED
-  DRIVER_VERIFICATION_APPROVED
-  DRIVER_VERIFICATION_REJECTED
+  DRIVER_VERIFICATION_UPDATED
   DRIVER_LICENSES_VIEWED
 
   // Admin Actions
-  ADMIN_USER_VIEWED
-  ADMIN_USER_SUSPENDED
-  ADMIN_USER_UNSUSPENDED
-  ADMIN_USER_DELETED
-  ADMIN_BOOKING_VIEWED
-  ADMIN_ROUTE_VIEWED
-  ADMIN_VERIFICATION_VIEWED
+  ADMIN_VIEWED
+  ADMIN_CREATED
+  ADMIN_UPDATED
+  ADMIN_DELETED
   ADMIN_LOG_VIEWED
   ADMIN_LOG_EXPORTED
-  ADMIN_EXPORT_REQUEST_CREATED
 
   // System
   SYSTEM_ERROR
-  UNAUTHORIZED_ACCESS_ATTEMPT
-  RATE_LIMIT_EXCEEDED
 }
 
 enum AccessResult {
@@ -156,7 +138,6 @@ model AuditLog {
   // ข้อกำหนด: ข้อมูลในการระบุตัวตนผู้ใช้
   userId       String?
   user         User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  userSnapshot String?
 
   // ข้อกำหนด: วันเวลาและรายละเอียดเหตุการณ์สำคัญ
   action          ActionType
@@ -181,14 +162,12 @@ model AuditLog {
   integrityHash String?
 
   createdAt DateTime @default(now())
-  expiresAt DateTime
 
   @@index([createdAt])
   @@index([userId])
   @@index([ipAddress])
   @@index([action])
   @@index([accessResult])
-  @@index([expiresAt])
 }
 
 model User {

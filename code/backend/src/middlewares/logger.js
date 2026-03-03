@@ -5,7 +5,7 @@ function mapToActionType(req, statusCode) {
   const path = req.originalUrl || req.path || "";
   const method = (req.method || "").toUpperCase();
   const resource = extractResourceType(path) || "";
-
+  console.log("Resource on Map Function: ", resource);
   if (path.includes("auth/login")) {
     return statusCode < 400 ? "LOGIN_SUCCESS" : "LOGIN_FAILED";
   }
@@ -29,15 +29,23 @@ function mapToActionType(req, statusCode) {
     if (method === "POST") return "ADMIN_LOG_EXPORTED";
   }
 
+  if (path.includes("/admin")) {
+    if (method === "GET") return "ADMIN_VIEWED";
+    if (method === "POST") return "ADMIN_CREATED";
+    if (method === "PATCH") return "ADMIN_UPDATED";
+    if (method === "PUT") return "ADMIN_UPDATED";
+    if (method === "DELETE") return "ADMIN_DELETED";
+  }
+
   // By Resource mapping
   const resourceMapping = {
     VEHICLE: { POST: "VEHICLE_CREATED", PUT: "VEHICLE_UPDATED", PATCH: "VEHICLE_UPDATED", DELETE: "VEHICLE_DELETED", GET: "VEHICLE_VIEWED" },
     ROUTE: { POST: "ROUTE_CREATED", PUT: "ROUTE_UPDATED", PATCH: "ROUTE_UPDATED", DELETE: "ROUTE_CANCELLED", GET: "ROUTE_VIEWED" },
-    BOOKING: { POST: "BOOKING_CREATED", PUT: "BOOKING_CONFIRMED", PATCH: "BOOKING_CONFIRMED", DELETE: "BOOKING_CANCELLED", GET: "BOOKING_VIEWED" },
+    BOOKING: { POST: "BOOKING_CREATED", PUT: "BOOKING_UPDATED", PATCH: "BOOKING_UPDATED", DELETE: "BOOKING_DELETED", GET: "BOOKING_VIEWED" },
     REVIEW: { POST: "REVIEW_CREATED", PUT: null, PATCH: null, DELETE: null, GET: null },
-    DRIVER_VERIFICATION: { POST: "DRIVER_VERIFICATION_SUBMITTED", PUT: null, PATCH: null, DELETE: null, GET: "DRIVER_LICENSES_VIEWED" },
+    DRIVER_VERIFICATION: { POST: "DRIVER_VERIFICATION_SUBMITTED", PUT: "DRIVER_VERIFICATION_UPDATED", PATCH: "DRIVER_VERIFICATION_UPDATED", DELETE: null, GET: "DRIVER_LICENSES_VIEWED" },
     USER: { POST: "USER_REGISTERED", PUT: "PROFILE_UPDATED", PATCH: "PROFILE_UPDATED", DELETE: "USER_DELETED", GET: "PROFILE_VIEWED" },
-    EXPORT: { POST: "USER_DATA_EXPORT_REQUESTED", PUT: null, PATCH: null, DELETE: null, GET: null },
+    EXPORT: { POST: "USER_DATA_EXPORT_REQUESTED", PUT: null, PATCH: null, DELETE: null, GET: "USER_DATA_EXPORT_REQUESTED" },
   }
 
 
@@ -47,9 +55,16 @@ function mapToActionType(req, statusCode) {
 }
 
 function extractResourceType(path) {
-  const segments = path.replace(/^\/api\//, "").split("/");
-  const resource = segments[0] || "";
-
+  if (!path) return;
+  let cleanPath = path.split("?")[0];
+  cleanPath = cleanPath.replace(/\/{2,}/g, "/");
+  console.log("Clean Path: ", cleanPath);
+  const segments = cleanPath.split("/").filter(Boolean);
+  console.log("Segments: ", segments);
+  const resourceSegment =
+    segments[0] === "api" ? segments[1] : segments[0];
+  console.log('Resource Segment: ', resourceSegment);
+  if (!resourceSegment) return null;
   const map = {
     auth: "AUTH",
     users: "USER",
@@ -62,39 +77,18 @@ function extractResourceType(path) {
     export: "EXPORT",
     logs: "AUDIT_LOG",
   };
-  return map[resource] || resource.toUpperCase() || null;
+  return map[resourceSegment] || resourceSegment.toUpperCase() || null;
 }
 
-function sanitizeBody(body) {
-  if (!body || typeof body !== "object") return null;
 
-  const sensitiveFields = [
-    "password",
-    "currentPassword",
-    "newPassword",
-    "token",
-    "accessToken",
-    "refreshToken",
-    "nationalNumber",
-    "otpCode",
-  ];
-
-  const sanitized = { ...body };
-  for (const field of sensitiveFields) {
-    if (sanitized[field]) {
-      sanitized[field] = "[REDACTED]";
-    }
-  }
-
-  return sanitized;
-}
 
 const logger = (req, res, next) => {
   next();
   res.on("finish", async () => {
     try {
-      console.log("res.locals: ", res.locals);
+
       const path = req.originalUrl || req.path || "";
+      console.log("PATH: ", path);
       if (
         path.includes("/heath") ||
         path.includes("/metrics") ||
@@ -105,8 +99,7 @@ const logger = (req, res, next) => {
       }
 
       const action = mapToActionType(req, res.statusCode);
-
-      if (!action) return;
+      console.log("Action: ", action);
 
       const ua = uap(req.headers["user-agent"]);
       const deviceInfo = ua.os.name
@@ -120,11 +113,11 @@ const logger = (req, res, next) => {
           : res.statusCode === 401 || res.statusCode === 403
             ? "DENIED"
             : "ERROR";
+      console.log(extractResourceType(path))
 
       await logService.createLog({
-        action,
+        action: action || "UNKNOWN",
         userId: req.user?.sub || null,
-        userSnapshot: await logService.createUserSnapshot(req.user?.sub),
         actionTimeStamp: new Date(),
         ipAddress:
           req.ip ||

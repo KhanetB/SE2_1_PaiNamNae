@@ -8,9 +8,7 @@
             class="main-content mt-16 ml-0 lg:ml-[280px] p-6"
         >
             <div class="mx-auto max-w-8xl">
-                <div
-                    class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between"
-                >
+                <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex items-center gap-3">
                         <h1 class="text-2xl font-semibold text-gray-800">
                             System Logs
@@ -27,172 +25,74 @@
                             class="inline-flex items-center gap-2 px-3 py-2 text-emerald-700 bg-emerald-100 border border-emerald-300 rounded-md cursor-pointer hover:bg-emerald-200 transition-colors"
                         >
                             <i class="fa-solid fa-shield-halved"></i>
-                            <span class="hidden sm:inline"
-                                >Verify Integrity</span
-                            >
+                            <span class="hidden sm:inline">Verify Integrity</span>
                         </button>
                     </div>
                 </div>
 
-                <div
-                    class="mb-4 bg-white border border-gray-300 rounded-lg shadow-sm"
-                >
+                <div class="mb-4 bg-white border border-gray-300 rounded-lg shadow-sm">
                     <div class="px-4 py-4 sm:px-6">
                         <div class="flex items-center gap-2 mb-4">
                             <i class="fa-solid fa-filter text-gray-600"></i>
-                            <span class="text-sm font-semibold text-gray-700"
-                                >ตัวกรองระบบ (Audit Logs)</span
-                            >
+                            <span class="text-sm font-semibold text-gray-700">ตัวกรองระบบ (Audit Logs)</span>
                         </div>
 
-                        <div
-                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"
-                        >
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                             <div class="flex flex-col">
-                                <label
-                                    class="mb-1 text-xs font-medium text-gray-600"
-                                    >วันที่เริ่มต้น</label
-                                >
-                                <input
-                                    v-model="filters.startDate"
-                                    type="date"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"
-                                />
+                                <label class="mb-1 text-xs font-medium text-gray-600">วันที่เริ่มต้น</label>
+                                <input v-model="filters.startDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
 
                             <div class="flex flex-col">
-                                <label
-                                    class="mb-1 text-xs font-medium text-gray-600"
-                                    >วันที่สิ้นสุด</label
-                                >
-                                <input
-                                    v-model="filters.endDate"
-                                    type="date"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"
-                                />
+                                <label class="mb-1 text-xs font-medium text-gray-600">วันที่สิ้นสุด</label>
+                                <input v-model="filters.endDate" type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
 
                             <div class="flex flex-col">
-                                <label
-                                    class="mb-1 text-xs font-medium text-gray-600"
-                                    >User ID</label
-                                >
-                                <input
-                                    v-model="filters.userId"
-                                    type="text"
-                                    placeholder="ระบุ User ID"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"
-                                />
+                                <label class="mb-1 text-xs font-medium text-gray-600">Username</label>
+                                <input v-model="filters.username" type="text" placeholder="ระบุ Username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
+                            </div>
+                              
+                            <div class="flex flex-col">
+                                <label class="mb-1 text-xs font-medium text-gray-600">IP Address</label>
+                                <input v-model="filters.ipAddress" type="text" placeholder="เช่น 192.168.1.1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"/>
                             </div>
 
                             <div class="flex flex-col">
-                                <label
-                                    class="mb-1 text-xs font-medium text-gray-600"
-                                    >IP Address</label
-                                >
-                                <input
-                                    v-model="filters.ipAddress"
-                                    type="text"
-                                    placeholder="เช่น 192.168.1.1"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"
-                                />
-                            </div>
-
-                            <div class="flex flex-col">
-                                <label
-                                    class="mb-1 text-xs font-medium text-gray-600"
-                                    >ผลลัพธ์ (Access Result)</label
-                                >
-                                <select
-                                    v-model="filters.accessResult"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm"
-                                >
+                                <label class="mb-1 text-xs font-medium text-gray-600">ผลลัพธ์ (Access Result)</label>
+                                <select v-model="filters.accessResult" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:outline-none text-sm">
                                     <option value="">ทั้งหมด</option>
                                     <option value="SUCCESS">SUCCESS</option>
-                                    <option value="DENIED">
-                                        DENIED (401/403)
-                                    </option>
-                                    <option value="ERROR">
-                                        ERROR (400/500+)
-                                    </option>
+                                    <option value="DENIED">DENIED (401/403)</option>
+                                    <option value="ERROR">ERROR (400/500+)</option>
                                 </select>
                             </div>
 
                             <div class="flex flex-col lg:col-span-2">
-                                <label
-                                    class="mb-1 text-xs font-medium text-gray-600"
-                                    >หมวดหมู่ Action</label
-                                >
-                                <button
-                                    @click="openModal"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-left text-sm bg-white truncate focus:outline-none"
-                                >
+                                <label class="mb-1 text-xs font-medium text-gray-600">หมวดหมู่ Action</label>
+                                <button @click="openModal" class="w-full px-3 py-2 border border-gray-300 rounded-md text-left text-sm bg-white truncate focus:outline-none">
                                     {{ displayLabel }}
                                 </button>
 
-                                <div
-                                    v-if="showModal"
-                                    class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-                                >
-                                    <div
-                                        @click.stop
-                                        class="bg-white w-[480px] p-6 rounded-xl shadow-lg max-h-[80vh] flex flex-col"
-                                    >
-                                        <h2
-                                            class="text-lg font-semibold text-center mb-4"
-                                        >
-                                            เลือกกลุ่ม Action Type
-                                        </h2>
-                                        <div
-                                            class="space-y-3 text-sm overflow-y-auto pr-2 flex-1"
-                                        >
-                                            <label
-                                                class="flex items-center gap-2 font-semibold border-b pb-2"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    v-model="isAllSelected"
-                                                />
+                                <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                                    <div @click.stop class="bg-white w-[480px] p-6 rounded-xl shadow-lg max-h-[80vh] flex flex-col">
+                                        <h2 class="text-lg font-semibold text-center mb-4">เลือกกลุ่ม Action Type</h2>
+                                        <div class="space-y-3 text-sm overflow-y-auto pr-2 flex-1">
+                                            <label class="flex items-center gap-2 font-semibold border-b pb-2">
+                                                <input type="checkbox" v-model="isAllSelected" />
                                                 เลือกทั้งหมด
                                             </label>
-                                            <label
-                                                v-for="item in actionGroups"
-                                                :key="item.value"
-                                                class="flex items-start gap-2 cursor-pointer"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    :value="item.value"
-                                                    v-model="tempSelected"
-                                                    class="mt-1"
-                                                />
+                                            <label v-for="item in actionGroups" :key="item.value" class="flex items-start gap-2 cursor-pointer">
+                                                <input type="checkbox" :value="item.value" v-model="tempSelected" class="mt-1" />
                                                 <div class="flex flex-col">
-                                                    <span
-                                                        class="font-medium text-gray-800"
-                                                        >{{ item.label }}</span
-                                                    >
-                                                    <span
-                                                        class="text-xs text-gray-500"
-                                                        >{{ item.desc }}</span
-                                                    >
+                                                    <span class="font-medium text-gray-800">{{ item.label }}</span>
+                                                    <span class="text-xs text-gray-500">{{ item.desc }}</span>
                                                 </div>
                                             </label>
                                         </div>
-                                        <div
-                                            class="flex justify-between mt-6 pt-4 border-t"
-                                        >
-                                            <button
-                                                @click="clearAll"
-                                                class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                                            >
-                                                ล้างทั้งหมด
-                                            </button>
-                                            <button
-                                                @click="applyActionFilter"
-                                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                            >
-                                                ใช้ตัวกรองนี้
-                                            </button>
+                                        <div class="flex justify-between mt-6 pt-4 border-t">
+                                            <button @click="clearAll" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ล้างทั้งหมด</button>
+                                            <button @click="applyActionFilter" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">ใช้ตัวกรองนี้</button>
                                         </div>
                                     </div>
                                 </div>
@@ -200,42 +100,27 @@
                         </div>
 
                         <div class="flex gap-3 mt-4">
-                            <button
-                                @click="applyFilters"
-                                class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 text-sm"
-                            >
+                            <button @click="applyFilters" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 text-sm">
                                 <i class="fa-solid fa-filter mr-1"></i> ค้นหา
                             </button>
-                            <button
-                                @click="clearFilters"
-                                class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 text-sm"
-                            >
+                            <button @click="clearFilters" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 text-sm">
                                 ล้างตัวกรอง
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div
-                    class="bg-white border border-gray-300 rounded-lg shadow-sm"
-                >
-                    <div
-                        class="flex items-center justify-between px-4 py-4 border-b border-gray-200 sm:px-6"
-                    >
+                <div class="bg-white border border-gray-300 rounded-lg shadow-sm">
+                    <div class="flex items-center justify-between px-4 py-4 border-b border-gray-200 sm:px-6">
                         <div class="text-sm text-gray-600">
-                            หน้าที่ {{ pagination.page }} / {{ totalPages }} •
-                            ทั้งหมด {{ pagination.total }} รายการ
+                            หน้าที่ {{ pagination.page }} / {{ totalPages }} • ทั้งหมด {{ pagination.total }} รายการ
                         </div>
                     </div>
 
                     <div v-if="isLoading" class="p-8 text-center text-gray-500">
-                        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
-                        กำลังโหลดข้อมูล...
+                        <i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...
                     </div>
-                    <div
-                        v-else-if="loadError"
-                        class="p-8 text-center text-red-600"
-                    >
+                    <div v-else-if="loadError" class="p-8 text-center text-red-600">
                         {{ loadError }}
                     </div>
 
@@ -243,135 +128,64 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th
-                                        class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase"
-                                    >
-                                        Timestamp
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase"
-                                    >
-                                        User / IP
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase"
-                                    >
-                                        Action
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase"
-                                    >
-                                        Endpoint / Method
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase"
-                                    >
-                                        Result
-                                    </th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Timestamp</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">User / IP</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Action</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Endpoint / Method</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Result</th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">User Agent</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                <tr
-                                    v-for="log in logsList"
-                                    :key="log.id"
-                                    class="hover:bg-gray-50 transition-colors"
-                                >
-                                    <td
-                                        class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"
-                                    >
-                                        {{
-                                            formatDate(
-                                                log.actionTimeStamp ||
-                                                    log.createdAt,
-                                            )
-                                        }}
+                                <tr v-for="log in logsList" :key="log.id" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                                        {{ formatDate(log.actionTimeStamp || log.createdAt) }}
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div
-                                            class="text-sm font-medium text-gray-900"
-                                            :title="log.userId"
-                                        >
-                                            {{
-                                                truncateId(log.userId) ||
-                                                "System/Guest"
-                                            }}
+                                        <div class="text-sm font-medium text-gray-900" :title="log.userId">
+                                            {{ (log.user && log.user.username) ? log.user.username : "System/Guest" }}
                                         </div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ log.ipAddress || "-" }}
-                                        </div>
+                                        <div class="text-xs text-gray-500">{{ log.ipAddress || "-" }}</div>
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-700">
-                                        <span
-                                            class="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-medium"
-                                            >{{ log.action }}</span
-                                        >
+                                        <span class="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-xs font-medium whitespace-nowrap">{{ log.action }}</span>
                                     </td>
                                     <td class="px-4 py-3 text-sm">
                                         <div class="flex items-center gap-2">
-                                            <span
-                                                class="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                                                :class="
-                                                    getMethodClass(
-                                                        log.httpMethod,
-                                                    )
-                                                "
-                                            >
+                                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold" :class="getMethodClass(log.httpMethod)">
                                                 {{ log.httpMethod || "SYS" }}
                                             </span>
-                                            <span
-                                                class="text-gray-600 truncate max-w-[200px]"
-                                                :title="log.endpoint"
-                                            >
+                                            <span class="text-gray-600 truncate max-w-[200px]" :title="log.endpoint">
                                                 {{ log.endpoint }}
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3">
-                                        <span
-                                            :class="
-                                                getResultClass(log.accessResult)
-                                            "
-                                            class="px-2 py-1 rounded text-xs font-medium inline-flex items-center gap-1"
-                                        >
-                                            <i
-                                                :class="
-                                                    getResultIcon(
-                                                        log.accessResult,
-                                                    )
-                                                "
-                                            ></i>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <span :class="getResultClass(log.accessResult)" class="px-2 py-1 rounded text-xs font-medium inline-flex items-center gap-1">
+                                            <i :class="getResultIcon(log.accessResult)"></i>
                                             {{ log.accessResult }}
                                         </span>
-                                        <span
-                                            class="ml-2 text-xs text-gray-500 border-l pl-2 border-gray-300"
-                                            title="HTTP Status Code"
-                                        >
+                                        <span class="ml-2 text-xs text-gray-500 border-l pl-2 border-gray-300" title="HTTP Status Code">
                                             {{ log.httpStatusCode || "-" }}
                                         </span>
                                     </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700">
+                                        <div class="truncate max-w-[200px]" :title="log.userAgent">
+                                            {{ log.userAgent }}
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr v-if="!logsList.length">
-                                    <td
-                                        colspan="5"
-                                        class="px-4 py-10 text-center text-gray-500"
-                                    >
-                                        ไม่พบข้อมูล Audit Log
-                                    </td>
+                                    <td colspan="6" class="px-4 py-10 text-center text-gray-500">ไม่พบข้อมูล Audit Log</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div
-                        class="flex flex-col gap-3 px-4 py-4 border-t border-gray-200 sm:px-6 sm:flex-row sm:items-center sm:justify-between"
-                    >
+                    <div class="flex flex-col gap-3 px-4 py-4 border-t border-gray-200 sm:px-6 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex items-center gap-2 text-sm">
                             <span class="text-gray-500">แสดง:</span>
-                            <select
-                                v-model.number="pagination.limit"
-                                @change="applyFilters"
-                                class="px-2 py-1 border border-gray-300 rounded-md focus:ring-blue-500 outline-none"
-                            >
+                            <select v-model.number="pagination.limit" @change="applyFilters" class="px-2 py-1 border border-gray-300 rounded-md focus:ring-blue-500 outline-none">
                                 <option :value="25">25</option>
                                 <option :value="50">50</option>
                                 <option :value="100">100</option>
@@ -379,109 +193,63 @@
                         </div>
 
                         <nav class="flex items-center gap-1">
-                            <button
-                                class="px-3 py-2 text-sm border rounded-md disabled:opacity-50 hover:bg-gray-50"
-                                :disabled="pagination.page <= 1 || isLoading"
-                                @click="changePage(pagination.page - 1)"
-                            >
-                                Previous
-                            </button>
-
-                            <template
-                                v-for="(p, idx) in pageButtons"
-                                :key="`p-${idx}-${p}`"
-                            >
-                                <span
-                                    v-if="p === '…'"
-                                    class="px-2 text-sm text-gray-500"
-                                    >…</span
-                                >
-                                <button
-                                    v-else
-                                    class="px-3 py-2 text-sm border rounded-md"
-                                    :class="
-                                        p === pagination.page
-                                            ? 'bg-blue-50 text-blue-600 border-blue-200'
-                                            : 'hover:bg-gray-50'
-                                    "
-                                    :disabled="isLoading"
-                                    @click="changePage(p)"
-                                >
+                            <button class="px-3 py-2 text-sm border rounded-md disabled:opacity-50 hover:bg-gray-50" :disabled="pagination.page <= 1 || isLoading" @click="changePage(pagination.page - 1)">Previous</button>
+                            <template v-for="(p, idx) in pageButtons" :key="`p-${idx}-${p}`">
+                                <span v-if="p === '…'" class="px-2 text-sm text-gray-500">…</span>
+                                <button v-else class="px-3 py-2 text-sm border rounded-md" :class="p === pagination.page ? 'bg-blue-50 text-blue-600 border-blue-200' : 'hover:bg-gray-50'" :disabled="isLoading" @click="changePage(p)">
                                     {{ p }}
                                 </button>
                             </template>
-
-                            <button
-                                class="px-3 py-2 text-sm border rounded-md disabled:opacity-50 hover:bg-gray-50"
-                                :disabled="
-                                    pagination.page >= totalPages || isLoading
-                                "
-                                @click="changePage(pagination.page + 1)"
-                            >
-                                Next
-                            </button>
+                            <button class="px-3 py-2 text-sm border rounded-md disabled:opacity-50 hover:bg-gray-50" :disabled="pagination.page >= totalPages || isLoading" @click="changePage(pagination.page + 1)">Next</button>
                         </nav>
                     </div>
                 </div>
 
-                <div
-                    v-if="showExportModal"
-                    class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-                >
-                    <div
-                        @click.stop
-                        class="relative bg-white w-[500px] p-6 rounded-xl shadow-lg"
-                    >
-                        <button
-                            @click="closeExportModal"
-                            class="absolute top-3 right-3 text-red-500 hover:text-red-700"
-                        >
-                            ✕
+                <div v-if="showExportModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div @click.stop class="relative bg-white w-[500px] p-6 rounded-xl shadow-lg">
+                        <button @click="closeExportModal" class="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors">
+                            <i class="fa-solid fa-xmark text-lg"></i>
                         </button>
                         <h2 class="text-lg font-semibold mb-4">Export Logs</h2>
-                        <p class="text-sm text-gray-600 mb-4">
-                            ระบบจะส่งออกข้อมูลตามตัวกรองปัจจุบันที่คุณเลือกไว้
-                        </p>
+                        <p class="text-sm text-gray-600 mb-4">ระบบจะส่งออกข้อมูลตามตัวกรองปัจจุบันที่คุณเลือกไว้</p>
 
-                        <div class="space-y-2 text-sm">
-                            <label class="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    v-model="exportIncludeNationalId"
-                                />
-                                แนบข้อมูลเลขบัตรประชาชน (Include National ID)
-                            </label>
+                        <div class="space-y-4 text-sm">
+                            <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <label class="block mb-2 font-medium text-gray-800">
+                                    <i class="fa-solid fa-user-shield mr-2 text-blue-600"></i>เลือกข้อมูลผู้ใช้ที่ต้องการแนบ (User Snapshot)
+                                </label>
+                                <div class="grid grid-cols-2 gap-3 mt-3">
+                                    <label v-for="field in availableUserFields" :key="field.value" class="flex items-center gap-2 cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            :value="field.value" 
+                                            v-model="selectedExportUserFields" 
+                                            class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" 
+                                        />
+                                        <span class="text-gray-700">{{ field.label }}</span>
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3 pt-3 border-t border-gray-200">
+                                    * ข้อมูล PII บางส่วนจะถูกเข้ารหัส (Masked) ตาม Privacy Policy ของระบบ
+                                </p>
+                            </div>
 
-                            <div class="mt-4">
-                                <label
-                                    class="block mb-1 font-medium text-gray-800"
-                                    >รูปแบบไฟล์ (Format):</label
-                                >
-                                <select
-                                    v-model="exportFormat"
-                                    class="w-full px-3 py-2 border rounded-md focus:ring-blue-500 outline-none text-sm"
-                                >
-                                    <option value="csv">
-                                        CSV (Comma-separated values)
-                                    </option>
-                                    <option value="json">
-                                        JSON (JavaScript Object Notation)
-                                    </option>
+                            <div class="mt-4 border-t pt-4">
+                                <label class="block mb-1 font-medium text-gray-800">รูปแบบไฟล์ (Format):</label>
+                                <select v-model="exportFormat" class="w-full px-3 py-2 border rounded-md focus:ring-blue-500 outline-none text-sm bg-white">
+                                    <option value="csv">CSV (Comma-separated values)</option>
+                                    <option value="json">JSON (JavaScript Object Notation)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div class="mt-6">
-                            <button
-                                @click="confirmExport"
-                                :disabled="isExporting"
-                                class="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                <span v-if="isExporting"
-                                    ><i class="fa-solid fa-spinner fa-spin"></i>
-                                    กำลังเตรียมไฟล์...</span
-                                >
-                                <span v-else>ดาวน์โหลดไฟล์</span>
+                        <div class="mt-6 flex gap-3">
+                            <button @click="closeExportModal" type="button" class="w-1/3 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 transition-colors">
+                                ยกเลิก
+                            </button>
+                            <button @click="confirmExport" :disabled="isExporting" class="w-2/3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex justify-center items-center gap-2 transition-colors">
+                                <i v-if="isExporting" class="fa-solid fa-spinner fa-spin"></i>
+                                <span>{{ isExporting ? 'กำลังเตรียมไฟล์...' : 'ดาวน์โหลดไฟล์' }}</span>
                             </button>
                         </div>
                     </div>
@@ -489,11 +257,7 @@
             </div>
         </main>
 
-        <div
-            id="overlay"
-            class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden"
-            @click="closeMobileSidebar"
-        ></div>
+        <div id="overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden" @click="closeMobileSidebar"></div>
     </div>
 </template>
 
@@ -503,6 +267,7 @@ import { useCookie, useRuntimeConfig } from "#app";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
+// สมมติว่ามี components และ composables เหล่านี้อยู่แล้ว
 import AdminHeader from "~/components/admin/AdminHeader.vue";
 import AdminSidebar from "~/components/admin/AdminSidebar.vue";
 import { useToast } from "~/composables/useToast";
@@ -510,11 +275,14 @@ import { useAdminSidebar } from "~/composables/useAdminSidebar";
 
 dayjs.locale("th");
 dayjs.extend(buddhistEra);
-
-definePageMeta({ middleware: ["admin-auth"] });
+useHead({
+    title: 'TailAdmin Dashboard',
+    link: [{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' }],
+})
+definePageMeta({ middleware: ['admin-auth'] })
 
 const { toast } = useToast();
-useAdminSidebar();
+const { closeMobileSidebar } = useAdminSidebar(); 
 const config = useRuntimeConfig();
 
 // --- State ---
@@ -530,67 +298,33 @@ const filters = reactive({
     userId: "",
     ipAddress: "",
     accessResult: "",
+    username: "",
 });
 
 // --- Action Type Modal ---
 const showModal = ref(false);
 
-// จับกลุ่ม Enum ให้ส่งไปแบบ Comma-separated ตามที่ Controller ต้องการ
 const actionGroups = [
-    {
-        label: "Authentication",
-        desc: "เข้าสู่ระบบ, ล็อกเอาท์, เปลี่ยนรหัสผ่าน",
-        value: "LOGIN_SUCCESS,LOGIN_FAILED,LOGOUT,SESSION_EXPIRED,PASSWORD_CHANGED,PASSWORD_RESET_REQUESTED,VERIFY_PASSWORD_FAILED,VERIFY_PASSWORD_SUCCESS",
-    },
-    {
-        label: "User Management",
-        desc: "สมัครสมาชิก, จัดการโปรไฟล์, อัปโหลดเอกสาร",
-        value: "USER_REGISTERED,USER_DELETED,PROFILE_VIEWED,PROFILE_UPDATED,PROFILE_PICTURE_UPLOADED,NATIONAL_ID_UPLOADED,NATIONAL_ID_VIEWED,SELFIE_UPLOADED,USER_DATA_EXPORT_REQUESTED",
-    },
-    {
-        label: "Vehicle Management",
-        desc: "เพิ่ม แก้ไข ลบ ดูข้อมูลรถ",
-        value: "VEHICLE_CREATED,VEHICLE_UPDATED,VEHICLE_DELETED,VEHICLE_VIEWED",
-    },
-    {
-        label: "Booking",
-        desc: "การสร้าง ตอบรับ และยกเลิกการจอง",
-        value: "BOOKING_CREATED,BOOKING_CONFIRMED,BOOKING_REJECTED,BOOKING_CANCELLED,BOOKING_COMPLETED,BOOKING_VIEWED",
-    },
-    {
-        label: "Route",
-        desc: "การจัดการเส้นทางเดินรถ",
-        value: "ROUTE_CREATED,ROUTE_UPDATED,ROUTE_VIEWED,ROUTE_CANCELLED,ROUTE_STARTED,ROUTE_COMPLETED",
-    },
-    {
-        label: "Driver Verification",
-        desc: "ตรวจสอบเอกสารคนขับ",
-        value: "DRIVER_VERIFICATION_SUBMITTED,DRIVER_VERIFICATION_APPROVED,DRIVER_VERIFICATION_REJECTED,DRIVER_LICENSES_VIEWED",
-    },
-    {
-        label: "System & Admin Actions",
-        desc: "การทำงานของแอดมินและข้อผิดพลาดระบบ",
-        value: "REVIEW_CREATED,ADMIN_USER_VIEWED,ADMIN_USER_SUSPENDED,ADMIN_USER_UNSUSPENDED,ADMIN_USER_DELETED,ADMIN_BOOKING_VIEWED,ADMIN_ROUTE_VIEWED,ADMIN_VERIFICATION_VIEWED,ADMIN_LOG_VIEWED,ADMIN_LOG_EXPORTED,ADMIN_EXPORT_REQUEST_CREATED,SYSTEM_ERROR,UNAUTHORIZED_ACCESS_ATTEMPT,RATE_LIMIT_EXCEEDED",
-    },
+    { label: "Authentication", desc: "เข้าสู่ระบบ, ล็อกเอาท์, เปลี่ยนรหัสผ่าน", value: "LOGIN_SUCCESS,LOGIN_FAILED,LOGOUT,SESSION_EXPIRED,PASSWORD_CHANGED,PASSWORD_RESET_REQUESTED,VERIFY_PASSWORD_FAILED,VERIFY_PASSWORD_SUCCESS" },
+    { label: "User Management", desc: "สมัครสมาชิก, จัดการโปรไฟล์, อัปโหลดเอกสาร", value: "USER_REGISTERED,USER_DELETED,PROFILE_VIEWED,PROFILE_UPDATED,PROFILE_PICTURE_UPLOADED,NATIONAL_ID_UPLOADED,NATIONAL_ID_VIEWED,SELFIE_UPLOADED,USER_DATA_EXPORT_REQUESTED" },
+    { label: "Vehicle Management", desc: "เพิ่ม แก้ไข ลบ ดูข้อมูลรถ", value: "VEHICLE_CREATED,VEHICLE_UPDATED,VEHICLE_DELETED,VEHICLE_VIEWED" },
+    { label: "Booking", desc: "การสร้าง ตอบรับ และยกเลิกการจอง", value: "BOOKING_CREATED,BOOKING_CONFIRMED,BOOKING_REJECTED,BOOKING_CANCELLED,BOOKING_COMPLETED,BOOKING_VIEWED" },
+    { label: "Route", desc: "การจัดการเส้นทางเดินรถ", value: "ROUTE_CREATED,ROUTE_UPDATED,ROUTE_VIEWED,ROUTE_CANCELLED,ROUTE_STARTED,ROUTE_COMPLETED" },
+    { label: "Driver Verification", desc: "ตรวจสอบเอกสารคนขับ", value: "DRIVER_VERIFICATION_SUBMITTED,DRIVER_VERIFICATION_APPROVED,DRIVER_VERIFICATION_REJECTED,DRIVER_LICENSES_VIEWED" },
+    { label: "System & Admin Actions", desc: "การทำงานของแอดมินและข้อผิดพลาดระบบ", value: "REVIEW_CREATED,ADMIN_USER_VIEWED,ADMIN_USER_SUSPENDED,ADMIN_USER_UNSUSPENDED,ADMIN_USER_DELETED,ADMIN_BOOKING_VIEWED,ADMIN_ROUTE_VIEWED,ADMIN_VERIFICATION_VIEWED,ADMIN_LOG_VIEWED,ADMIN_LOG_EXPORTED,ADMIN_EXPORT_REQUEST_CREATED,SYSTEM_ERROR,UNAUTHORIZED_ACCESS_ATTEMPT,RATE_LIMIT_EXCEEDED" },
 ];
 
 const selectedActions = ref([]);
 const tempSelected = ref([]);
 
 const displayLabel = computed(() => {
-    if (
-        selectedActions.value.length === 0 ||
-        selectedActions.value.length === actionGroups.length
-    )
-        return "ทั้งหมด";
+    if (selectedActions.value.length === 0 || selectedActions.value.length === actionGroups.length) return "ทั้งหมด";
     return `${selectedActions.value.length} หมวดหมู่ที่เลือก`;
 });
 
 const isAllSelected = computed({
     get: () => tempSelected.value.length === actionGroups.length,
-    set: (val) => {
-        tempSelected.value = val ? actionGroups.map((o) => o.value) : [];
-    },
+    set: (val) => { tempSelected.value = val ? actionGroups.map((o) => o.value) : []; },
 });
 
 function openModal() {
@@ -607,11 +341,22 @@ function clearAll() {
     showModal.value = false;
 }
 
-// --- Export Modal ---
+// --- Export Modal State ---
 const showExportModal = ref(false);
 const isExporting = ref(false);
 const exportFormat = ref("csv");
-const exportIncludeNationalId = ref(false);
+
+// ตัวแปรที่ใช้ดึง Checkbox ว่าจะเลือก UserFields อะไรบ้างไป Export
+const availableUserFields = [
+    { label: "Username", value: "username" },
+    { label: "First Name", value: "firstName" },
+    { label: "Last Name", value: "lastName" },
+    { label: "Email", value: "email" },
+    { label: "Phone Number", value: "phoneNumber" },
+    { label: "National ID", value: "nationalIdNumber" },
+    { label: "User Role", value: "role" }
+];
+const selectedExportUserFields = ref([]);
 
 function onExportLog() {
     showExportModal.value = true;
@@ -621,9 +366,7 @@ function closeExportModal() {
 }
 
 // --- Pagination Controls ---
-const totalPages = computed(() =>
-    Math.max(1, Math.ceil(pagination.total / pagination.limit)),
-);
+const totalPages = computed(() => Math.max(1, Math.ceil(pagination.total / pagination.limit)));
 
 const pageButtons = computed(() => {
     const total = totalPages.value;
@@ -659,6 +402,7 @@ function clearFilters() {
     filters.userId = "";
     filters.ipAddress = "";
     filters.accessResult = "";
+    filters.username = "";
     selectedActions.value = [];
     pagination.page = 1;
     fetchLogs();
@@ -668,13 +412,6 @@ function clearFilters() {
 function formatDate(dateString) {
     if (!dateString) return "-";
     return dayjs(dateString).format("DD MMM BB HH:mm:ss");
-}
-
-function truncateId(id) {
-    if (!id) return "";
-    return id.length > 15
-        ? id.substring(0, 8) + "..." + id.substring(id.length - 4)
-        : id;
 }
 
 function getResultClass(res) {
@@ -705,11 +442,10 @@ function buildQueryParams() {
     if (filters.endDate) params.append("endDate", filters.endDate);
     if (filters.userId) params.append("userId", filters.userId);
     if (filters.ipAddress) params.append("ipAddress", filters.ipAddress);
-    if (filters.accessResult)
-        params.append("accessResult", filters.accessResult);
-
+    if (filters.accessResult) params.append("accessResult", filters.accessResult);
+    if (filters.username) params.append("username", filters.username);
+    
     if (selectedActions.value.length > 0) {
-        // แตก value จากกลุ่มมารวมกันด้วย comma
         const mergedActions = selectedActions.value.join(",");
         params.append("action", mergedActions);
     }
@@ -721,16 +457,14 @@ async function fetchLogs() {
     isLoading.value = true;
     loadError.value = "";
     try {
-        const token =
-            useCookie("token").value ||
-            (process.client ? localStorage.getItem("token") : "");
-        const baseUrl = config.public.apiBase || "http://localhost:3000/api";
+        const token = useCookie("token").value || (process.client ? localStorage.getItem("token") : "");
+        const baseUrl = config.public.apiBase;
 
         const params = buildQueryParams();
         params.append("page", pagination.page);
         params.append("pageLimit", pagination.limit);
 
-        const res = await fetch(`${baseUrl}/logs?${params.toString()}`, {
+        const res = await fetch(`${baseUrl}logs?${params.toString()}`, {
             headers: {
                 Accept: "application/json",
                 ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -738,8 +472,7 @@ async function fetchLogs() {
         });
 
         const body = await res.json();
-        if (!res.ok)
-            throw new Error(body?.message || `Request failed: ${res.status}`);
+        if (!res.ok) throw new Error(body?.message || `Request failed: ${res.status}`);
 
         logsList.value = body.data || body.logs || [];
         pagination.total = body.pagination?.total || body.total || 0;
@@ -758,10 +491,7 @@ async function verifyLogIntegrity() {
         const token = useCookie("token").value || localStorage.getItem("token");
         const baseUrl = config.public.apiBase || "http://localhost:3000/api";
 
-        toast.info(
-            "กำลังตรวจสอบ",
-            "ระบบกำลังสแกนความสมบูรณ์ของประวัติ Logs (Verify intergrityHash)",
-        );
+        toast.info("กำลังตรวจสอบ", "ระบบกำลังสแกนความสมบูรณ์ของประวัติ Logs");
 
         const res = await fetch(`${baseUrl}/logs/verify`, {
             headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -769,15 +499,9 @@ async function verifyLogIntegrity() {
         const body = await res.json();
 
         if (body.success && body.data?.valid) {
-            toast.success(
-                "ตรวจสอบสำเร็จ",
-                `ข้อมูล Logs ล่าสุดสมบูรณ์ ไม่ถูกดัดแปลง (ตรวจสอบ ${body.data.totalChecked} รายการ)`,
-            );
+            toast.success("ตรวจสอบสำเร็จ", `ข้อมูล Logs ล่าสุดสมบูรณ์ ไม่ถูกดัดแปลง (ตรวจสอบ ${body.data.totalChecked} รายการ)`);
         } else {
-            toast.error(
-                "พบความผิดปกติ!",
-                body.message || "โครงสร้างข้อมูลอาจถูกแทรกแซง",
-            );
+            toast.error("พบความผิดปกติ!", body.message || "โครงสร้างข้อมูลอาจถูกแทรกแซง");
         }
     } catch (err) {
         toast.error("ผิดพลาด", "ไม่สามารถเชื่อมต่อระบบตรวจสอบได้");
@@ -792,8 +516,10 @@ async function confirmExport() {
 
         const params = buildQueryParams();
         params.append("format", exportFormat.value);
-        if (exportIncludeNationalId.value) {
-            params.append("includeNationalId", "true");
+        
+        // แนบฟิลด์ผู้ใช้ที่เลือก (ถ้ามี) ไปที่ Backend ผ่าน param ชื่อ userFields
+        if (selectedExportUserFields.value.length > 0) {
+            params.append("userFields", selectedExportUserFields.value.join(","));
         }
 
         const res = await fetch(`${baseUrl}/logs/export?${params.toString()}`, {
@@ -818,10 +544,7 @@ async function confirmExport() {
         toast.success("ส่งออกสำเร็จ", "ดาวน์โหลดไฟล์ Log เรียบร้อย");
         closeExportModal();
     } catch (err) {
-        toast.error(
-            "ส่งออกข้อมูลล้มเหลว",
-            "เกิดข้อผิดพลาดขณะสร้างไฟล์ดาวน์โหลด",
-        );
+        toast.error("ส่งออกข้อมูลล้มเหลว", "เกิดข้อผิดพลาดขณะสร้างไฟล์ดาวน์โหลด");
     } finally {
         isExporting.value = false;
     }
