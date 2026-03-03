@@ -219,7 +219,7 @@
                     </button>
 
                     <button
-                        class="bg-red-500 hover:bg-red-600  text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="!isValidEmail || isLoading"
                         @click="goToPasswordStep"
                     >
@@ -242,7 +242,7 @@
                     </button>
                 </div>
             </div>
-            
+
             <!-- STEP 3: กรอกรหัสผ่านยืนยันตัวตน -->
             <div v-else-if="step === 3">
                 <h3 class="text-center font-semibold text-lg">
@@ -251,29 +251,29 @@
                 <p class="text-red-600 text-center text-sm">
                     กรุณาระบุรหัสผ่านของคุณเพื่อยืนยันตัวตนก่อนดำเนินการลบบัญชีผู้ใช้
                 </p>
-                 <input
+                <input
                     type="password"
                     v-model="password"
                     placeholder="กรอกรหัสผ่านของคุณ"
                     class="w-full border px-3 py-2 rounded-md my-4"
                 />
-                
-                <div class="flex justify-center space-x-4 mt-4">
-                <button
-                    class="border px-4 py-2 rounded-md"
-                    @click="step = 2"
-                    :disabled="isLoading"
-                >
-                    ย้อนกลับ
-                </button>
 
-                 <button
-                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                    :disabled="!isValidPassword || isLoading"
-                    @click="step = 4"
+                <div class="flex justify-center space-x-4 mt-4">
+                    <button
+                        class="border px-4 py-2 rounded-md"
+                        @click="step = 2"
+                        :disabled="isLoading"
+                    >
+                        ย้อนกลับ
+                    </button>
+
+                    <button
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="!isValidPassword || isLoading"
+                        @click="verifyPassword"
                     >
                         <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
-                         <span v-else class="flex items-center gap-2"
+                        <span v-else class="flex items-center gap-2"
                             ><svg
                                 width="24"
                                 height="24"
@@ -290,26 +290,26 @@
                         >
                     </button>
                 </div>
-             </div>
-            
+            </div>
+
             <!-- STEP 4: ปุ่มยืนยันการลบ -->
-             <div v-else-if="step === 4" class="text-center">
+            <div v-else-if="step === 4" class="text-center">
                 <ExclamationCircleIcon
-                        class="w-32 h-32 text-red-600 mx-auto mb-4"
-                    />
+                    class="w-32 h-32 text-red-600 mx-auto mb-4"
+                />
                 <h3 class="text-red-600 font-bold mb-4">
                     คุณแน่ใจหรือไม่ว่าต้องการลบบัญชีนี้?
                 </h3>
                 <div class="flex justify-center space-x-4 mt-4">
-                     <button
-                    class="border px-4 py-2 rounded-md"
-                    @click="step = 3"
-                >
-                    ย้อนกลับ
-                </button>
-                <button
+                    <button
+                        class="border px-4 py-2 rounded-md"
+                        @click="step = 3"
+                    >
+                        ย้อนกลับ
+                    </button>
+                    <button
                         class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        :disabled="!password || isLoading"
+                        :disabled="isLoading"
                         @click="deleteAccount"
                     >
                         <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
@@ -329,10 +329,8 @@
                             กำลังดำเนินการ...</span
                         >
                     </button>
-               
                 </div>
-             </div>
-
+            </div>
 
             <!-- STEP 5: ลบบัญชีสำเร็จ -->
             <div v-else-if="step === 5" class="text-center">
@@ -386,9 +384,8 @@
                     </button>
                 </div>
             </div>
-       </div> 
-  </div>
-
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -436,7 +433,7 @@ const verifyPassword = async () => {
     try {
         isLoading.value = true;
 
-        await $fetch("/auth/verify-password", {
+        const res = await $fetch("/auth/verify-user", {
             method: "POST",
             baseURL: config.public.apiBase,
             headers: {
@@ -446,51 +443,63 @@ const verifyPassword = async () => {
                 password: password.value,
             },
         });
-
         // ถ้ารหัสผ่านถูก
         step.value = 4;
-
     } catch (error) {
         errorMessage.value = "รหัสผ่านไม่ถูกต้อง";
         step.value = 6;
     } finally {
+        password.value = "";
         isLoading.value = false;
     }
 };
-
 const deleteAccount = async () => {
-    try {
-        isLoading.value = true;
+  try {
+    isLoading.value = true;
 
-        await $fetch("/users/me", {
-            method: "DELETE",
-            baseURL: config.public.apiBase,
-            headers: {
-                Authorization: `Bearer ${token.value}`,
-            },
-        });
+    // เช็คก่อนว่าลบได้ไหม
+    const check = await $fetch("/users/check-deletion-status", {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
-        await sendBackupToEmail();
-
-        step.value = 5; // สำเร็จ
-
-    } catch (error) {
-
-        if (error?.data?.message) {
-            errorMessage.value = error.data.message;
-        } else {
-            errorMessage.value = "ไม่สามารถลบบัญชีได้";
-        }
-
-        step.value = 6; // ติดพันธะ
-
-    } finally {
-        isLoading.value = false;
+    if (!check?.canDelete) {
+      errorMessage.value =
+        check?.message ?? "ไม่สามารถลบบัญชีได้ในขณะนี้";
+      step.value = 6; // ติดพันธะ
+      return;
     }
+
+    // ส่ง backup ก่อน
+    await sendBackupToEmail();
+
+    // ลบบัญชี
+    await $fetch("/users/me", {
+      method: "DELETE",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    step.value = 5; // สำเร็จ
+  } catch (error) {
+    errorMessage.value =
+      error?.response?._data?.message ??
+      error?.data?.message ??
+      "ไม่สามารถลบบัญชีได้";
+
+    step.value = 6; // error
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const isValidPassword = computed(() => {
-  return password.value.length >= 8;
+    return password.value.length >= 8;
 });
 
 const startCountdown = () => {
@@ -558,8 +567,28 @@ const downloadMyData = async () => {
     window.URL.revokeObjectURL(url);
 };
 
-const sendBackupToEmail = async () => {
+const verifyUser = async () => {
     if (!token.value) {
+        throw new Error("Unauthorized: token not found in verify user");
+    }
+    if (!password.value) {
+        throw new Error("Password must be not empty");
+    }
+
+    const res = $fetch(`/auth/verify-user`, {
+        method: "POST",
+        baseURL: config.public.apiBase,
+        headers: {
+            Authorization: `Bearer ${token.value}`,
+        },
+        body: {
+            password: password.value,
+        },
+    });
+};
+const sendBackupToEmail = async () => {
+    try{
+        if (!token.value) {
         throw new Error(
             "Unauthorized: token not found in send backup to email",
         );
@@ -574,6 +603,12 @@ const sendBackupToEmail = async () => {
             email: email.value,
         },
     });
+    
+    }catch(error){
+        console.error("Error sending backup to email: ", error);
+         throw new Error("Failed to send backup to email");
+    }
+    
 };
 
 // เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ
