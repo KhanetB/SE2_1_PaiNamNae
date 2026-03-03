@@ -1,4 +1,8 @@
-require("dotenv").config();
+if (process.env.NODE_ENV === "test") {
+  require("dotenv").config({ path: ".env.test" });
+} else {
+  require("dotenv").config();
+}
 
 const express = require("express");
 const cors = require("cors");
@@ -14,6 +18,7 @@ const { metricsMiddleware } = require("./src/middlewares/metrics");
 const ensureAdmin = require("./src/bootstrap/ensureAdmin");
 const { startCleanuoCron } = require("./src/cron/cleanupCron");
 const exportRoutes = require("./src/routes/export.routes");
+const logger = require("./src/middlewares/logger");
 
 const app = express();
 promClient.collectDefaultMetrics();
@@ -45,6 +50,10 @@ app.use(express.json());
 //     legacyHeaders: false,
 // });
 // app.use(limiter);
+
+// Logger Middleware
+app.set("etag", false);
+app.use(logger);
 
 //Metrics Middleware
 app.use(metricsMiddleware);

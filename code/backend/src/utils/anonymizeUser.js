@@ -17,32 +17,38 @@ function isUserDeleted(user) {
  * @param {Object} user - user object ที่ต้องการ anonymize
  * @returns {Object} - user object ที่ถูก anonymize แล้ว
  */
-function anonymizeUser(user) {
-  if (!user) return user;
-  
-  // ถ้า user ไม่ได้ถูก soft delete ให้คืนค่าเดิม
-  if (!isUserDeleted(user)) {
-    return user;
+function anonymizeUser(user, options = {}) {
+  const role = options.role || user?.role || 'USER';
+
+  // 🔥 กรณี relation เป็น null
+  if (!user) {
+    return createDeletedUserPlaceholder(role);
   }
 
-  // Anonymous ข้อมูลส่วนตัว
+  // ยังไม่ถูกลบ
+  if (!isUserDeleted(user)) {
+    return {
+      ...user,
+      isAnonymized: false,
+    };
+  }
+
+  // soft deleted
   return {
     ...user,
     username: 'deleted_user',
     email: 'deleted@user.local',
-    firstName: 'Deleted',
-    lastName: 'User',
+    firstName: role === 'DRIVER' ? 'ผู้ขับขี่' : 'ผู้ใช้',
+    lastName: '',
     gender: null,
     phoneNumber: null,
     profilePicture: null,
     nationalIdNumber: null,
     nationalIdPhotoUrl: null,
     selfiePhotoUrl: null,
-    // เก็บข้อมูลที่จำเป็นสำหรับระบบ
-    id: user.id,
-    role: user.role,
     isVerified: false,
     isActive: false,
+    isAnonymized: true,
     deletedAt: user.deletedAt,
   };
 }
@@ -59,10 +65,12 @@ function anonymizeUsersInObject(data, userFields = ['driver', 'passenger', 'user
   const result = { ...data };
   
   for (const field of userFields) {
-    if (result[field]) {
-      result[field] = anonymizeUser(result[field]);
-    }
+  if (result[field] !== undefined) {
+    result[field] = anonymizeUser(result[field], {
+      role: field === 'driver' ? 'DRIVER' : 'USER',
+    });
   }
+}
 
   return result;
 }
@@ -86,42 +94,61 @@ function anonymizeUsersInArray(dataArray, userFields = ['driver', 'passenger', '
  * @returns {*} - ข้อมูลที่ถูก anonymize แล้ว
  */
 function anonymizeUsersRecursive(data, userFields = ['driver', 'passenger', 'user']) {
-  if (!data) return data;
+  if (data === null || data === undefined) {
+    return data;
+  }
 
-  // ถ้าเป็น array
+  // array
   if (Array.isArray(data)) {
     return data.map(item => anonymizeUsersRecursive(item, userFields));
   }
 
-  // ถ้าไม่ใช่ object ให้คืนค่าเดิม
+  // primitive
   if (typeof data !== 'object') {
     return data;
   }
 
-  // ถ้าเป็น Date object, RegExp, หรือ special objects อื่นๆ ให้คืนค่าเดิม
-  if (data instanceof Date || data instanceof RegExp || data.constructor.name !== 'Object') {
+  // special objects
+  if (data instanceof Date || data instanceof RegExp) {
     return data;
   }
 
-  // สร้าง object ใหม่
   const result = { ...data };
 
-  // ตรวจสอบและ anonymize user fields
-  for (const field of userFields) {
-    if (result[field]) {
-      result[field] = anonymizeUser(result[field]);
+  for (const key of Object.keys(result)) {
+    // 🔥 ถ้า key นี้คือ user field → anonymize ทันที (แม้ค่าเป็น null)
+    if (userFields.includes(key)) {
+      result[key] = anonymizeUser(result[key], {
+        role: key === 'driver' ? 'DRIVER' : 'USER',
+      });
+      continue;
     }
-  }
 
-  // ตรวจสอบ nested objects/arrays
-  for (const key in result) {
-    if (result[key] && typeof result[key] === 'object' && !userFields.includes(key)) {
-      result[key] = anonymizeUsersRecursive(result[key], userFields);
-    }
+    // 🔁 recursive ต่อ แม้ value จะเป็น null
+    result[key] = anonymizeUsersRecursive(result[key], userFields);
   }
 
   return result;
 }
+
+function createDeletedUserPlaceholder(role = 'USER') {
+  return {
+    id: 'deleted',
+    username: 'deleted_user',
+    email: 'deleted@user.local',
+    firstName: 'Deleted',
+    lastName: 'User',
+    gender: null,
+    phoneNumber: null,
+    profilePicture: null,
+    role,
+    isVerified: false,
+    isActive: false,
+    isAnonymized: true,
+    deletedAt: new Date().toISOString(),
+  };
+}
+
 
 module.exports = {
   isUserDeleted,
@@ -129,4 +156,5 @@ module.exports = {
   anonymizeUsersInObject,
   anonymizeUsersInArray,
   anonymizeUsersRecursive,
+  createDeletedUserPlaceholder,
 };

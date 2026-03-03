@@ -5,6 +5,8 @@
  *   description: User management endpoints (public, authenticated, and admin)
  */
 
+const swaggerJSDoc = require("swagger-jsdoc");
+
 /**
  * @swagger
  * /api/users:
@@ -156,6 +158,9 @@
  * /api/users/me:
  *   delete:
  *     summary: Delete the authenticated user's account (Soft Delete)
+ *     description: >
+ *       This endpoint does not accept any parameters or request body.
+ *       Authentication is required via Bearer Token.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -166,9 +171,40 @@
  *           application/json:
  *             example:
  *               success: true
- *               message: User account deleted successfully.
+ *               message: User account deleted successfully
  *               data:
- *                 deletedUserId: cmlj5daul00015nn9zxneqn5w
+ *                 deletedUserId: "cmlj5daul00015nn9zxneqn5w"
+ *       400:
+ *         description: Cannot delete account due to unfinished trips or bookings
+ *         content:
+ *           application/json:
+ *             examples:
+ *               driver_has_active_trip:
+ *                 summary: User has unfinished trips as a driver
+ *                 value:
+ *                   success: false
+ *                   message: "ไม่สามารถลบบัญชีได้: คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุด"
+ *                   data: null
+ *               passenger_has_active_booking:
+ *                 summary: User has unfinished trips as a passenger
+ *                 value:
+ *                   success: false
+ *                   message: "ไม่สามารถลบบัญชีได้: คุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด"
+ *                   data: null
+ *               driver_and_passenger_active:
+ *                 summary: User has unfinished trips as both driver and passenger
+ *                 value:
+ *                   success: false
+ *                   message: "ไม่สามารถลบบัญชีได้: คุณยังมีเส้นทางที่เป็นคนขับซึ่งยังไม่สิ้นสุดและคุณยังมีการจองเดินทางที่ยังไม่สิ้นสุด"
+ *                   data: null
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: Not authorized, token failed
+ *               data: null
  *       404:
  *         description: User not found or already deleted
  *         content:
@@ -177,17 +213,7 @@
  *               success: false
  *               message: User not found or already deleted
  *               data: null
- *       401:
- *         description: Unauthorized
- *         content:
- *           application/json:
- *             example:
- *              success: false
- *              message: Not authorized, token failed
- *              data: null
- * 
  */
-
 
 /**
  * @swagger

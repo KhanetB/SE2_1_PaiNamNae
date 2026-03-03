@@ -244,11 +244,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRuntimeConfig, useCookie } from '#app'
 import AdminHeader from '~/components/admin/AdminHeader.vue'
 import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
+import { useAdminSidebar } from '~/composables/useAdminSidebar'
+import { formatDate } from '~/utils/date'
 
 definePageMeta({ middleware: ['admin-auth'] })
 useHead({
@@ -257,6 +259,7 @@ useHead({
 })
 
 const { toast } = useToast()
+useAdminSidebar()
 
 /* route */
 const route = useRoute()
@@ -286,11 +289,8 @@ const licenseSelfiePreview = ref(null)
 const isSubmitting = ref(false)
 
 onMounted(async () => {
-  defineGlobalScripts()
-  if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
   await fetchDV()
 })
-onUnmounted(() => cleanupGlobalScripts())
 
 /* ---------- Fetch current DV ---------- */
 async function fetchDV() {
@@ -399,65 +399,6 @@ async function handleSubmit() {
 }
 
 /* ---------- Layout helpers (เหมือนหน้า create) ---------- */
-function closeMobileSidebar() {
-  const sidebar = document.getElementById('sidebar')
-  const overlay = document.getElementById('overlay')
-  if (!sidebar || !overlay) return
-  sidebar.classList.remove('mobile-open')
-  overlay.classList.add('hidden')
-}
-function defineGlobalScripts() {
-  window.toggleSidebar = function () {
-    const sidebar = document.getElementById('sidebar')
-    const mainContent = document.getElementById('main-content')
-    const toggleIcon = document.getElementById('toggle-icon')
-    if (!sidebar || !mainContent) return
-    sidebar.classList.toggle('collapsed')
-    if (sidebar.classList.contains('collapsed')) {
-      mainContent.style.marginLeft = '80px'
-      if (toggleIcon) toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right')
-    } else {
-      mainContent.style.marginLeft = '280px'
-      if (toggleIcon) toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left')
-    }
-  }
-  window.toggleMobileSidebar = function () {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.toggle('mobile-open')
-    overlay.classList.toggle('hidden')
-  }
-  window.toggleSubmenu = function (menuId) {
-    const menu = document.getElementById(menuId)
-    const icon = document.getElementById(menuId + '-icon')
-    if (!menu || !icon) return
-    menu.classList.toggle('hidden')
-    if (menu.classList.contains('hidden')) {
-      icon.classList.replace('fa-chevron-up', 'fa-chevron-down')
-    } else {
-      icon.classList.replace('fa-chevron-down', 'fa-chevron-up')
-    }
-  }
-  window.__adminResizeHandler__ = function () {
-    const sidebar = document.getElementById('sidebar')
-    const mainContent = document.getElementById('main-content')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !mainContent || !overlay) return
-    if (window.innerWidth >= 1024) {
-      sidebar.classList.remove('mobile-open')
-      overlay.classList.add('hidden')
-      if (sidebar.classList.contains('collapsed')) {
-        mainContent.style.marginLeft = '80px'
-      } else {
-        mainContent.style.marginLeft = '280px'
-      }
-    } else {
-      mainContent.style.marginLeft = '0'
-    }
-  }
-  window.addEventListener('resize', window.__adminResizeHandler__)
-}
 function cleanupGlobalScripts() {
   window.removeEventListener('resize', window.__adminResizeHandler__ || (() => {}))
   delete window.toggleSidebar

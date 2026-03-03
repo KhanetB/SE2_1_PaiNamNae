@@ -294,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useCookie } from '#app'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
@@ -302,6 +302,8 @@ import buddhistEra from 'dayjs/plugin/buddhistEra'
 import AdminHeader from '~/components/admin/AdminHeader.vue'
 import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
+import { useAdminSidebar } from '~/composables/useAdminSidebar'
+import { formatDate } from '~/utils/date'
 import ConfirmModal from '~/components/ConfirmModal.vue'
 
 
@@ -311,6 +313,7 @@ dayjs.extend(buddhistEra)
 definePageMeta({ middleware: ['admin-auth'] })
 
 const { toast } = useToast()
+useAdminSidebar()
 
 const isLoading = ref(false)
 const loadError = ref('')
@@ -350,10 +353,6 @@ function statusIcon(s) {
     if (s === 'REJECTED') return 'fa-circle-xmark'
     if (s === 'CANCELLED') return 'fa-ban'
     return 'fa-circle'
-}
-function formatDate(iso) {
-    if (!iso) return '-'
-    return dayjs(iso).format('D MMMM BBBB HH:mm')
 }
 function formatKm(meters) {
     if (!meters && meters !== 0) return '-'
@@ -608,65 +607,6 @@ useHead({
     title: 'TailAdmin Dashboard',
     link: [{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' }]
 })
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
-function defineGlobalScripts() {
-    window.toggleSidebar = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const toggleIcon = document.getElementById('toggle-icon')
-        if (!sidebar || !mainContent || !toggleIcon) return
-        sidebar.classList.toggle('collapsed')
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '80px'
-            toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right')
-        } else {
-            mainContent.style.marginLeft = '280px'
-            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left')
-        }
-    }
-    window.toggleMobileSidebar = function () {
-        const sidebar = document.getElementById('sidebar')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !overlay) return
-        sidebar.classList.toggle('mobile-open')
-        overlay.classList.toggle('hidden')
-    }
-    window.toggleSubmenu = function (menuId) {
-        const menu = document.getElementById(menuId)
-        const icon = document.getElementById(menuId + '-icon')
-        if (!menu || !icon) return
-        menu.classList.toggle('hidden')
-        if (menu.classList.contains('hidden')) {
-            icon.classList.replace('fa-chevron-up', 'fa-chevron-down')
-        } else {
-            icon.classList.replace('fa-chevron-down', 'fa-chevron-up')
-        }
-    }
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !mainContent || !overlay) return
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open')
-            overlay.classList.add('hidden')
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '80px'
-            } else {
-                mainContent.style.marginLeft = '280px'
-            }
-        } else {
-            mainContent.style.marginLeft = '0'
-        }
-    }
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
 function cleanupGlobalScripts() {
     window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
     delete window.toggleSidebar
@@ -677,11 +617,8 @@ function cleanupGlobalScripts() {
 }
 
 onMounted(() => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
     fetchBookings()
 })
-onUnmounted(() => { cleanupGlobalScripts() })
 </script>
 
 <style>

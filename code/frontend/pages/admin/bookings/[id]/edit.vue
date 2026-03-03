@@ -223,11 +223,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRoute, useRuntimeConfig, useCookie } from '#app'
 import AdminHeader from '~/components/admin/AdminHeader.vue'
 import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
+import { useAdminSidebar } from '~/composables/useAdminSidebar'
+import { formatDate } from '~/utils/date'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 dayjs.locale('th')
@@ -244,6 +246,7 @@ useHead({
 const route = useRoute()
 const bookingId = route.params.id
 const { toast } = useToast()
+useAdminSidebar()
 const config = useRuntimeConfig()
 const token = useCookie('token')?.value || (process.client ? localStorage.getItem('token') : '')
 
@@ -630,37 +633,15 @@ async function preloadBooking() {
 }
 
 /* ===== Layout helper (เหมือน create) ===== */
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open'); overlay.classList.add('hidden')
-}
-function defineGlobalScripts() {
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !mainContent || !overlay) return
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open'); overlay.classList.add('hidden')
-            mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '280px'
-        } else { mainContent.style.marginLeft = '0' }
-    }
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
 function cleanupGlobalScripts() {
     window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
     delete window.__adminResizeHandler__
 }
 
 onMounted(() => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
     nextTick(() => ensureInitAutocomplete())
     preloadBooking()
 })
-onUnmounted(() => { cleanupGlobalScripts() })
 </script>
 
 <style scoped>

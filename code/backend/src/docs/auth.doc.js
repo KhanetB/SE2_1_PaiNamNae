@@ -4,8 +4,8 @@
  *   name: Auth
  *   description: Authentication endpoints for login and password management
  */
-
 /**
+ *
  * @swagger
  * /api/auth/login:
  *   post:
@@ -107,4 +107,63 @@
  *         description: Validation error (e.g. passwords do not match)
  *       401:
  *         description: Unauthorized or incorrect current password
+ */
+/**
+ * @swagger
+ * /api/auth/verify-user:
+ *   post:
+ *     summary: Verify current user password (requires authentication)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 example: mycurrentpassword123
+ *     responses:
+ *       200:
+ *         description: Password verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Password verify successfully.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     verify:
+ *                       type: boolean
+ *                       example: true
+ *       401:
+ *         description: Unauthorized or password verification failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Password verification failed.
+ *                 data:
+ *                   nullable: true
+ *                   example: null
+ *       404:
+ *         description: User not found
  */
