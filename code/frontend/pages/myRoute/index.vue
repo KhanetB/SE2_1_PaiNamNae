@@ -550,7 +550,7 @@ const { toast } = useToast();
 
 // --- State Management ---
 // const activeTab = ref("pending");
-// const selectedTripId = ref(null);
+const selectedTripId = ref(null);
 // const isLoading = ref(false);
 // const mapContainer = ref(null);
 // const googleMap = useGoogleMap(mapContainer);
