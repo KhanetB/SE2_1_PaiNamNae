@@ -26,8 +26,6 @@ function computeHash(data) {
 
 async function createLog(data) {
   const now = new Date();
-  const expiresAt = new Date(now);
-  expiresAt.setDate(expiresAt.getDate() + 90);
   const logData = {
      userId: data.userId || null,
     action: data.action,
@@ -46,6 +44,7 @@ async function createLog(data) {
   };
   logData.integrityHash = computeHash(logData);
   const log = await prisma.auditLog.create({ data: logData });
+  console.log("Log: ", log.createdAt);
   return log;
 }
 
@@ -67,7 +66,12 @@ async function getAllLogs(filters = {}) {
   if (startDate || endDate) {
     where.createdAt = {};
     if (startDate) where.createdAt.gte = new Date(startDate);
-    if (endDate) where.createdAt.lte = new Date(endDate);
+    // if (endDate) where.createdAt.lte = new Date(endDate);
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23,59,59, 999);
+      where.createdAt.lte = new Date(end);
+    }
   }
 
   if (userId) {

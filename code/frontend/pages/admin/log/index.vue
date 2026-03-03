@@ -139,7 +139,7 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <tr v-for="log in logsList" :key="log.id" class="hover:bg-gray-50 transition-colors">
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                                        {{ formatDate(log.actionTimeStamp || log.createdAt) }}
+                                        {{ formatDate(log.createdAt) }}
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="text-sm font-medium text-gray-900" :title="log.userId">
@@ -267,7 +267,6 @@ import { useCookie, useRuntimeConfig } from "#app";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
 import buddhistEra from "dayjs/plugin/buddhistEra";
-// สมมติว่ามี components และ composables เหล่านี้อยู่แล้ว
 import AdminHeader from "~/components/admin/AdminHeader.vue";
 import AdminSidebar from "~/components/admin/AdminSidebar.vue";
 import { useToast } from "~/composables/useToast";
@@ -348,7 +347,6 @@ const showExportModal = ref(false);
 const isExporting = ref(false);
 const exportFormat = ref("csv");
 
-// ตัวแปรที่ใช้ดึง Checkbox ว่าจะเลือก UserFields อะไรบ้างไป Export
 const availableUserFields = [
     { label: "Username", value: "username" },
     { label: "First Name", value: "firstName" },
@@ -519,7 +517,6 @@ async function confirmExport() {
         const params = buildQueryParams();
         params.append("format", exportFormat.value);
         
-        // แนบฟิลด์ผู้ใช้ที่เลือก (ถ้ามี) ไปที่ Backend ผ่าน param ชื่อ userFields
         if (selectedExportUserFields.value.length > 0) {
             params.append("userFields", selectedExportUserFields.value.join(","));
         }
