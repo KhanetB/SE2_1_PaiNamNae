@@ -305,13 +305,15 @@ const filters = reactive({
 const showModal = ref(false);
 
 const actionGroups = [
-    { label: "Authentication", desc: "เข้าสู่ระบบ, ล็อกเอาท์, เปลี่ยนรหัสผ่าน", value: "LOGIN_SUCCESS,LOGIN_FAILED,LOGOUT,SESSION_EXPIRED,PASSWORD_CHANGED,PASSWORD_RESET_REQUESTED,VERIFY_PASSWORD_FAILED,VERIFY_PASSWORD_SUCCESS" },
-    { label: "User Management", desc: "สมัครสมาชิก, จัดการโปรไฟล์, อัปโหลดเอกสาร", value: "USER_REGISTERED,USER_DELETED,PROFILE_VIEWED,PROFILE_UPDATED,PROFILE_PICTURE_UPLOADED,NATIONAL_ID_UPLOADED,NATIONAL_ID_VIEWED,SELFIE_UPLOADED,USER_DATA_EXPORT_REQUESTED" },
+    { label: "Authentication", desc: "เข้าสู่ระบบ, ล็อกเอาท์, เปลี่ยนรหัสผ่าน", value: "LOGIN_SUCCESS,LOGIN_FAILED,LOGOUT,PASSWORD_CHANGED" },
+    { label: "User Management", desc: "สมัครสมาชิก, จัดการโปรไฟล์, อัปโหลดเอกสาร", value: "USER_REGISTERED,USER_DELETED,PROFILE_VIEWED,PROFILE_UPDATED,USER_DATA_EXPORT_REQUESTED" },
     { label: "Vehicle Management", desc: "เพิ่ม แก้ไข ลบ ดูข้อมูลรถ", value: "VEHICLE_CREATED,VEHICLE_UPDATED,VEHICLE_DELETED,VEHICLE_VIEWED" },
-    { label: "Booking", desc: "การสร้าง ตอบรับ และยกเลิกการจอง", value: "BOOKING_CREATED,BOOKING_CONFIRMED,BOOKING_REJECTED,BOOKING_CANCELLED,BOOKING_COMPLETED,BOOKING_VIEWED" },
-    { label: "Route", desc: "การจัดการเส้นทางเดินรถ", value: "ROUTE_CREATED,ROUTE_UPDATED,ROUTE_VIEWED,ROUTE_CANCELLED,ROUTE_STARTED,ROUTE_COMPLETED" },
-    { label: "Driver Verification", desc: "ตรวจสอบเอกสารคนขับ", value: "DRIVER_VERIFICATION_SUBMITTED,DRIVER_VERIFICATION_APPROVED,DRIVER_VERIFICATION_REJECTED,DRIVER_LICENSES_VIEWED" },
-    { label: "System & Admin Actions", desc: "การทำงานของแอดมินและข้อผิดพลาดระบบ", value: "REVIEW_CREATED,ADMIN_USER_VIEWED,ADMIN_USER_SUSPENDED,ADMIN_USER_UNSUSPENDED,ADMIN_USER_DELETED,ADMIN_BOOKING_VIEWED,ADMIN_ROUTE_VIEWED,ADMIN_VERIFICATION_VIEWED,ADMIN_LOG_VIEWED,ADMIN_LOG_EXPORTED,ADMIN_EXPORT_REQUEST_CREATED,SYSTEM_ERROR,UNAUTHORIZED_ACCESS_ATTEMPT,RATE_LIMIT_EXCEEDED" },
+    { label: "Booking", desc: "การสร้าง ตอบรับ และยกเลิกการจอง", value: "BOOKING_CREATED,BOOKING_UPDATED,BOOKING_DELETED,BOOKING_VIEWED" },
+    { label: "Review", desc: "การสร้างรีวิว", value: "REVIEW_CREATED"},
+    { label: "Route", desc: "การจัดการเส้นทางเดินรถ", value: "ROUTE_CREATED,ROUTE_UPDATED,ROUTE_VIEWED,ROUTE_DELETE" },
+    { label: "Driver Verification", desc: "ตรวจสอบเอกสารคนขับ", value: "DRIVER_VERIFICATION_SUBMITTED,DRIVER_VERIFICATION_UPDATED,DRIVER_LICENSES_VIEWED" },
+    { label: "Admin Actions", desc: "การดำเนินการของผู้ดูแลระบบ", value: "ADMIN_VIEWED,ADMIN_CREATED,ADMIN_UPDATED,ADMIN_DELETED,ADMIN_LOG_VIEWED,ADMIN_LOG_EXPORTED" },
+    { label: "System", desc: "เหตุการณ์ข้อผิดพลาดของระบบ", value: "SYSTEM_ERROR"},
 ];
 
 const selectedActions = ref([]);
