@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.0.1 (Python 3.13.2 on win32)" generated="2026-03-03T20:48:30.629883" rpa="false" schemaversion="5">
+<suite id="s1" name="Test Admin Log Viewing" source="D:\SoftENpainae\SE2_1_PaiNamNae\test\TS-F04\test_admin_log_viewing.robot">
+<test id="s1-t1" name="TS-F04-TC01: Admin Login Successfully" line="41">
+<kw name="Open Browser And Login As Admin" owner="common_keywords" type="SETUP">
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:30.951777" level="INFO">Opening browser at http://localhost:3001/login</msg>
+<arg>Opening browser at ${LOGIN_PAGE_URL}</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:30.951602" elapsed="0.000224"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:30.952166" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001/login'.</msg>
+<arg>${LOGIN_PAGE_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:48:30.951984" elapsed="1.513553"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-03-03T20:48:32.465993" elapsed="0.053601"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:32.520193" level="INFO">Waiting for login page to load</msg>
+<arg>Waiting for login page to load</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:32.519908" elapsed="0.000387"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>เข้าสู่ระบบ</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:48:32.520566" elapsed="0.550017"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:33.071191" level="INFO">Waiting for identifier input field</msg>
+<arg>Waiting for identifier input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.070918" elapsed="0.000354"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.071487" elapsed="0.097328"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:33.169181" level="INFO">Waiting for password input field</msg>
+<arg>Waiting for password input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.169028" elapsed="0.000197"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.169349" elapsed="0.017862"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:33.187522" level="INFO">Entering credentials</msg>
+<arg>Entering credentials</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.187389" elapsed="0.000171"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:33.187849" level="INFO">Typing text 'admin123' into text field 'css:input#identifier'.</msg>
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${ADMIN_USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.187666" elapsed="0.134758"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:33.323401" level="INFO">Typing text '123456789' into text field 'css:input#password'.</msg>
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${ADMIN_PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.322863" elapsed="0.103412"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:33.427277" level="INFO">Clicking login button</msg>
+<arg>Clicking login button</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.426855" elapsed="0.000547"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:33.428196" level="INFO">Clicking button 'css:button#loginButton'.</msg>
+<arg>${BTN_LOGIN}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.427711" elapsed="0.136915"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:33.565442" level="INFO">Waiting for home page after login</msg>
+<arg>Waiting for home page after login</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.565018" elapsed="0.000604"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.566224" elapsed="0.013040"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-03T20:48:34.581409" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-03T20:48:33.579691" elapsed="1.001957"/>
+</kw>
+<doc>Open browser, navigate to login page, and login as admin</doc>
+<status status="PASS" start="2026-03-03T20:48:30.950972" elapsed="3.630975"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:35.583667" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-1.png"&gt;&lt;img src="selenium-screenshot-1.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-03-03T20:48:35.584049" level="FAIL">Page should have contained element 'css:input#identifier' but did not.</msg>
+<arg>css:input#identifier</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="FAIL" start="2026-03-03T20:48:34.596242" elapsed="1.015922">Page should have contained element 'css:input#identifier' but did not.</status>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>css:input#password</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:35.658409" elapsed="0.000106"/>
+</kw>
+<kw name="Location Should Contain" owner="SeleniumLibrary">
+<arg>/</arg>
+<doc>Verifies that the current URL contains ``expected``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:35.718157" elapsed="0.000106"/>
+</kw>
+<kw name="Close All Browser Windows" owner="common_keywords" type="TEARDOWN">
+<kw name="Run Keyword And Ignore Error" owner="BuiltIn">
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:36.392343" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-2.png"&gt;&lt;img src="selenium-screenshot-2.png" width="800px"&gt;&lt;/a&gt;</msg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-03T20:48:35.759615" elapsed="0.632985"/>
+</kw>
+<arg>Capture Page Screenshot</arg>
+<doc>Runs the given keyword with the given arguments and ignores possible error.</doc>
+<status status="PASS" start="2026-03-03T20:48:35.758756" elapsed="0.634060"/>
+</kw>
+<kw name="Close All Browsers" owner="SeleniumLibrary">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2026-03-03T20:48:36.393217" elapsed="3.111271"/>
+</kw>
+<doc>Capture screenshot and close all browser windows</doc>
+<status status="PASS" start="2026-03-03T20:48:35.752965" elapsed="3.751657"/>
+</kw>
+<doc>Admin logs in successfully with valid credentials</doc>
+<tag>critical</tag>
+<tag>UST001</tag>
+<status status="FAIL" start="2026-03-03T20:48:30.950213" elapsed="8.555112">Page should have contained element 'css:input#identifier' but did not.</status>
+</test>
+<test id="s1-t2" name="TS-F04-TC02: View Admin Log Page And Display All Logs" line="52">
+<kw name="Open Browser And Login As Admin" owner="common_keywords" type="SETUP">
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:39.508687" level="INFO">Opening browser at http://localhost:3001/login</msg>
+<arg>Opening browser at ${LOGIN_PAGE_URL}</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:39.508409" elapsed="0.000361"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:39.509365" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001/login'.</msg>
+<arg>${LOGIN_PAGE_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:48:39.509017" elapsed="2.438941"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-03-03T20:48:41.948286" elapsed="0.046025"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:41.995023" level="INFO">Waiting for login page to load</msg>
+<arg>Waiting for login page to load</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:41.994690" elapsed="0.000458"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>เข้าสู่ระบบ</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:48:41.995510" elapsed="0.264818"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:42.261117" level="INFO">Waiting for identifier input field</msg>
+<arg>Waiting for identifier input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.260783" elapsed="0.000458"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.261563" elapsed="0.083561"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:42.345794" level="INFO">Waiting for password input field</msg>
+<arg>Waiting for password input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.345504" elapsed="0.000404"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.346227" elapsed="0.021068"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:42.367987" level="INFO">Entering credentials</msg>
+<arg>Entering credentials</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.367676" elapsed="0.000430"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:42.368921" level="INFO">Typing text 'admin123' into text field 'css:input#identifier'.</msg>
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${ADMIN_USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.368409" elapsed="0.164324"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:42.533630" level="INFO">Typing text '123456789' into text field 'css:input#password'.</msg>
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${ADMIN_PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.533113" elapsed="0.134808"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:42.668661" level="INFO">Clicking login button</msg>
+<arg>Clicking login button</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.668329" elapsed="0.000455"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:42.669526" level="INFO">Clicking button 'css:button#loginButton'.</msg>
+<arg>${BTN_LOGIN}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.669122" elapsed="0.143800"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:42.813707" level="INFO">Waiting for home page after login</msg>
+<arg>Waiting for home page after login</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.813380" elapsed="0.000473"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.814199" elapsed="0.013748"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-03T20:48:43.829771" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-03T20:48:42.828337" elapsed="1.001672"/>
+</kw>
+<doc>Open browser, navigate to login page, and login as admin</doc>
+<status status="PASS" start="2026-03-03T20:48:39.507962" elapsed="4.322317"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:43.847134" level="INFO">Opening url 'http://localhost:3001/admin/log'</msg>
+<arg>${LOG_PAGE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:48:43.846664" elapsed="0.348931"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:45.117585" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-3.png"&gt;&lt;img src="selenium-screenshot-3.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-03-03T20:48:45.118025" level="FAIL">InvalidSelectorException: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=145.0.7632.117); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff74ab3aa55
+	0x7ff74a898630
+	0x7ff74a62d75d
+	0x7ff74a6356c1
+	0x7ff74a6387e4
+	0x7ff74a6388af
+	0x7ff74a687dae
+	0x7ff74a68893c
+	0x7ff74a6d8db7
+	0x7ff74a6d591c
+	0x7ff74a679098
+	0x7ff74a679f83
+	0x7ff74ab67810
+	0x7ff74ab61afd
+	0x7ff74ab82c1a
+	0x7ff74a8b3345
+	0x7ff74a8bb81c
+	0x7ff74a8a1924
+	0x7ff74a8a1ad6
+	0x7ff74a887e47
+	0x7ffec825e8d7
+	0x7ffec906c40c
+</msg>
+<arg>css:h1:has-text("System Logs")</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="FAIL" start="2026-03-03T20:48:44.207377" elapsed="0.943771">InvalidSelectorException: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=145.0.7632.117); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff74ab3aa55
+	0x7ff74a898630
+	0x7ff74a62d75d
+	0x7ff74a6356c1
+	0x7ff74a6387e4
+	0x7ff74a6388af
+	0x7ff74a687dae
+	0x7ff74a68893c
+	0x7ff74a6d8db7
+	0x7ff74a6d591c
+	0x7ff74a679098
+	0x7ff74a679f83
+	0x7ff74ab67810
+	0x7ff74ab61afd
+	0x7ff74ab82c1a
+	0x7ff74a8b3345
+	0x7ff74a8bb81c
+	0x7ff74a8a1924
+	0x7ff74a8a1ad6
+	0x7ff74a887e47
+	0x7ffec825e8d7
+	0x7ffec906c40c
+</status>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>${BTN_EXPORT}</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:45.166141" elapsed="0.000150"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>${BTN_VERIFY_INTEGRITY}</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:45.246590" elapsed="0.000120"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>css:span:has-text("ตัวกรองระบบ")</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:45.314222" elapsed="0.000107"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<arg>${TABLE_LOGS}</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:45.344143" elapsed="0.000149"/>
+</kw>
+<kw name="Wait For Logs To Load" owner="admin_log_keywords">
+<doc>Wait for logs table to load</doc>
+<status status="NOT RUN" start="2026-03-03T20:48:45.406656" elapsed="0.000119"/>
+</kw>
+<kw name="Close All Browser Windows" owner="common_keywords" type="TEARDOWN">
+<kw name="Run Keyword And Ignore Error" owner="BuiltIn">
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:45.660028" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-4.png"&gt;&lt;img src="selenium-screenshot-4.png" width="800px"&gt;&lt;/a&gt;</msg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-03T20:48:45.470213" elapsed="0.190048"/>
+</kw>
+<arg>Capture Page Screenshot</arg>
+<doc>Runs the given keyword with the given arguments and ignores possible error.</doc>
+<status status="PASS" start="2026-03-03T20:48:45.459567" elapsed="0.200889"/>
+</kw>
+<kw name="Close All Browsers" owner="SeleniumLibrary">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2026-03-03T20:48:45.660830" elapsed="2.758936"/>
+</kw>
+<doc>Capture screenshot and close all browser windows</doc>
+<status status="PASS" start="2026-03-03T20:48:45.458723" elapsed="2.961257"/>
+</kw>
+<doc>Navigate to log page and verify all logs are displayed</doc>
+<tag>critical</tag>
+<tag>UST001</tag>
+<status status="FAIL" start="2026-03-03T20:48:39.506815" elapsed="8.914618">InvalidSelectorException: Message: invalid selector: An invalid or illegal selector was specified
+  (Session info: chrome=145.0.7632.117); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#invalidselectorexception
+Stacktrace:
+Symbols not available. Dumping unresolved backtrace:
+	0x7ff74ab3aa55
+	0x7ff74a898630
+	0x7ff74a62d75d
+	0x7ff74a6356c1
+	0x7ff74a6387e4
+	0x7ff74a6388af
+	0x7ff74a687dae
+	0x7ff74a68893c
+	0x7ff74a6d8db7
+	0x7ff74a6d591c
+	0x7ff74a679098
+	0x7ff74a679f83
+	0x7ff74ab67810
+	0x7ff74ab61afd
+	0x7ff74ab82c1a
+	0x7ff74a8b3345
+	0x7ff74a8bb81c
+	0x7ff74a8a1924
+	0x7ff74a8a1ad6
+	0x7ff74a887e47
+	0x7ffec825e8d7
+	0x7ffec906c40c
+</status>
+</test>
+<test id="s1-t3" name="TS-F04-TC03: Filter By Existing Username" line="73">
+<kw name="Open Browser And Login As Admin" owner="common_keywords" type="SETUP">
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:48.426731" level="INFO">Opening browser at http://localhost:3001/login</msg>
+<arg>Opening browser at ${LOGIN_PAGE_URL}</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:48.426431" elapsed="0.000389"/>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:48.427433" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001/login'.</msg>
+<arg>${LOGIN_PAGE_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:48:48.427079" elapsed="2.226575"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-03-03T20:48:50.654009" elapsed="0.045095"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:50.699786" level="INFO">Waiting for login page to load</msg>
+<arg>Waiting for login page to load</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:50.699477" elapsed="0.000429"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>เข้าสู่ระบบ</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:48:50.700226" elapsed="0.456148"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:51.157047" level="INFO">Waiting for identifier input field</msg>
+<arg>Waiting for identifier input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.156759" elapsed="0.000398"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.157494" elapsed="0.027122"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:51.185295" level="INFO">Waiting for password input field</msg>
+<arg>Waiting for password input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.184996" elapsed="0.000410"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.185732" elapsed="0.029962"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:51.216400" level="INFO">Entering credentials</msg>
+<arg>Entering credentials</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.216089" elapsed="0.000424"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:51.217367" level="INFO">Typing text 'admin123' into text field 'css:input#identifier'.</msg>
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${ADMIN_USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.216812" elapsed="0.208447"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:51.426228" level="INFO">Typing text '123456789' into text field 'css:input#password'.</msg>
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${ADMIN_PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.425671" elapsed="0.096249"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:51.522656" level="INFO">Clicking login button</msg>
+<arg>Clicking login button</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.522337" elapsed="0.000442"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:51.523547" level="INFO">Clicking button 'css:button#loginButton'.</msg>
+<arg>${BTN_LOGIN}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.523100" elapsed="0.101147"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:48:51.624991" level="INFO">Waiting for home page after login</msg>
+<arg>Waiting for home page after login</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.624674" elapsed="0.000480"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.625720" elapsed="0.012140"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-03T20:48:52.642663" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-03T20:48:51.638253" elapsed="1.004667"/>
+</kw>
+<doc>Open browser, navigate to login page, and login as admin</doc>
+<status status="PASS" start="2026-03-03T20:48:48.425962" elapsed="4.217349"/>
+</kw>
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:52.702629" level="INFO">Opening url 'http://localhost:3001/admin/log'</msg>
+<arg>${LOG_PAGE_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:48:52.702172" elapsed="0.928307"/>
+</kw>
+<kw name="Wait For Logs To Load" owner="admin_log_keywords">
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Element Should Be Visible" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:48:54.035518" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-5.png"&gt;&lt;img src="selenium-screenshot-5.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-03-03T20:48:54.040099" level="FAIL">Element with locator 'css:i[class*="fa-spinner"]' not found.</msg>
+<arg>${LOADING_INDICATOR}</arg>
+<doc>Verifies that the element identified by ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-03-03T20:48:53.637444" elapsed="0.420721">Element with locator 'css:i[class*="fa-spinner"]' not found.</status>
+</kw>
+<msg time="2026-03-03T20:48:54.058596" level="INFO">${spinner_visible} = False</msg>
+<var>${spinner_visible}</var>
+<arg>Element Should Be Visible</arg>
+<arg>${LOADING_INDICATOR}</arg>
+<doc>Runs the given keyword with given arguments and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-03-03T20:48:53.636999" elapsed="0.421678"/>
+</kw>
+<kw name="Run Keyword If" owner="BuiltIn">
+<arg>${spinner_visible}</arg>
+<arg>Wait Until Element Is Not Visible</arg>
+<arg>${LOADING_INDICATOR}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="PASS" start="2026-03-03T20:48:54.059075" elapsed="0.000414"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:49:04.387298" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-6.png"&gt;&lt;img src="selenium-screenshot-6.png" width="800px"&gt;&lt;/a&gt;</msg>
+<msg time="2026-03-03T20:49:04.387637" level="FAIL">Element 'css:table' not visible after 10 seconds.</msg>
+<arg>css:table</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="FAIL" start="2026-03-03T20:48:54.059879" elapsed="10.339811">Element 'css:table' not visible after 10 seconds.</status>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${PAGE_INDICATOR}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:04.400257" elapsed="0.000098"/>
+</kw>
+<doc>Wait for logs table to load</doc>
+<status status="FAIL" start="2026-03-03T20:48:53.636285" elapsed="10.764487">Element 'css:table' not visible after 10 seconds.</status>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>${FILTER_USERNAME}</arg>
+<arg>admin123</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:04.421370" elapsed="0.000117"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<arg>${BTN_SEARCH}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:04.427364" elapsed="0.000108"/>
+</kw>
+<kw name="Wait For Logs To Load" owner="admin_log_keywords">
+<doc>Wait for logs table to load</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:04.428351" elapsed="0.000106"/>
+</kw>
+<kw name="Get Element Count" owner="SeleniumLibrary">
+<var>${rows_count}</var>
+<arg>${TABLE_LOGS}</arg>
+<doc>Returns the number of elements matching ``locator``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:04.429195" elapsed="0.000094"/>
+</kw>
+<kw name="Should Be True" owner="BuiltIn">
+<arg>${rows_count} &gt;= 1</arg>
+<arg>Logs should be displayed for existing username</arg>
+<doc>Fails if the given condition is not true.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:04.429990" elapsed="0.000087"/>
+</kw>
+<kw name="Close All Browser Windows" owner="common_keywords" type="TEARDOWN">
+<kw name="Run Keyword And Ignore Error" owner="BuiltIn">
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:49:04.648374" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="selenium-screenshot-7.png"&gt;&lt;img src="selenium-screenshot-7.png" width="800px"&gt;&lt;/a&gt;</msg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-03T20:49:04.435812" elapsed="0.212821"/>
+</kw>
+<arg>Capture Page Screenshot</arg>
+<doc>Runs the given keyword with the given arguments and ignores possible error.</doc>
+<status status="PASS" start="2026-03-03T20:49:04.435332" elapsed="0.213523"/>
+</kw>
+<kw name="Close All Browsers" owner="SeleniumLibrary">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2026-03-03T20:49:04.649301" elapsed="1.729072"/>
+</kw>
+<doc>Capture screenshot and close all browser windows</doc>
+<status status="PASS" start="2026-03-03T20:49:04.434476" elapsed="1.944087"/>
+</kw>
+<doc>Filter logs by username that exists in the system</doc>
+<tag>filter</tag>
+<tag>UST002</tag>
+<status status="FAIL" start="2026-03-03T20:48:48.424861" elapsed="17.955207">Element 'css:table' not visible after 10 seconds.</status>
+</test>
+<test id="s1-t4" name="TS-F04-TC04: Filter By Non-Existing Username" line="91">
+<kw name="Open Browser And Login As Admin" owner="common_keywords" type="SETUP">
+<kw name="Log" owner="BuiltIn">
+<arg>Opening browser at ${LOGIN_PAGE_URL}</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="FAIL" start="2026-03-03T20:49:06.383756" elapsed="0.000151">Execution terminated by signal</status>
+</kw>
+<kw name="Open Browser" owner="SeleniumLibrary">
+<arg>${LOGIN_PAGE_URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384043" elapsed="0.000024"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384157" elapsed="0.000019"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Waiting for login page to load</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384248" elapsed="0.000017"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>เข้าสู่ระบบ</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384338" elapsed="0.000018"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Waiting for identifier input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384429" elapsed="0.000018"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384518" elapsed="0.000018"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Waiting for password input field</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384761" elapsed="0.000023"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384861" elapsed="0.000018"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Entering credentials</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.384951" elapsed="0.000015"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>${INPUT_IDENTIFIER}</arg>
+<arg>${ADMIN_USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385034" elapsed="0.000016"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<arg>${INPUT_PASSWORD}</arg>
+<arg>${ADMIN_PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385123" elapsed="0.000015"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Clicking login button</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385203" elapsed="0.000015"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<arg>${BTN_LOGIN}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385281" elapsed="0.000021"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<arg>Waiting for home page after login</arg>
+<arg>INFO</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385372" elapsed="0.000015"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/</arg>
+<arg>${WAIT_TIME}</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385454" elapsed="0.000016"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="NOT RUN" start="2026-03-03T20:49:06.385535" elapsed="0.000016"/>
+</kw>
+<doc>Open browser, navigate to login page, and login as admin</doc>
+<status status="FAIL" start="2026-03-03T20:49:06.383527" elapsed="0.002154">Execution terminated by signal</status>
+</kw>
+<kw name="Close All Browser Windows" owner="common_keywords" type="TEARDOWN">
+<kw name="Run Keyword And Ignore Error" owner="BuiltIn">
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:49:06.387467" level="INFO">Cannot capture screenshot because no browser is open.</msg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-03T20:49:06.387379" elapsed="0.000136"/>
+</kw>
+<arg>Capture Page Screenshot</arg>
+<doc>Runs the given keyword with the given arguments and ignores possible error.</doc>
+<status status="PASS" start="2026-03-03T20:49:06.387239" elapsed="0.000329"/>
+</kw>
+<kw name="Close All Browsers" owner="SeleniumLibrary">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2026-03-03T20:49:06.387663" elapsed="0.000086"/>
+</kw>
+<doc>Capture screenshot and close all browser windows</doc>
+<status status="PASS" start="2026-03-03T20:49:06.386971" elapsed="0.000831"/>
+</kw>
+<doc>Filter logs by username that does not exist</doc>
+<tag>filter</tag>
+<tag>UST003</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.382662" elapsed="0.005946">Setup failed:
+Execution terminated by signal</status>
+</test>
+<test id="s1-t5" name="TS-F04-TC05: Filter By Existing IP Address" line="108">
+<doc>Filter logs by IP address that exists</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST004</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.391273" elapsed="0.000472">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t6" name="TS-F04-TC06: Filter By Non-Existing IP Address" line="132">
+<doc>Filter logs by IP address that does not exist</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST005</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.392347" elapsed="0.000304">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t7" name="TS-F04-TC07: Filter By SUCCESS Result" line="149">
+<doc>Filter logs by SUCCESS result status</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST006</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.393195" elapsed="0.000413">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t8" name="TS-F04-TC08: Filter By DENIED Result" line="172">
+<doc>Filter logs by DENIED result status</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST007</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.394125" elapsed="0.000396">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t9" name="TS-F04-TC09: Filter By ERROR Result" line="195">
+<doc>Filter logs by ERROR result status</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST008</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.394964" elapsed="0.000317">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t10" name="TS-F04-TC10: Filter By Authentication Action Category" line="218">
+<doc>Filter logs by Authentication action category</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST009</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.396069" elapsed="0.000358">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t11" name="TS-F04-TC11: Filter By User Management Action Category" line="244">
+<doc>Filter logs by User Management action category</doc>
+<tag>filter</tag>
+<tag>robot:exit</tag>
+<tag>UST010</tag>
+<status status="FAIL" start="2026-03-03T20:49:06.397091" elapsed="0.000345">Test execution stopped due to a fatal error.</status>
+</test>
+<test id="s1-t12" name="TS-F04-TC12: Filter By Vehicle Management Action Category" line="270">
+<errors>
+<msg time="2026-03-03T20:49:06.399644" level="ERROR">Execution stopped by user.</msg>
+</errors>
+</robot>
