@@ -93,7 +93,8 @@ const logger = (req, res, next) => {
         path.includes("/heath") ||
         path.includes("/metrics") ||
         path.includes("/documentation") ||
-        path.includes("/favicon")
+        path.includes("/favicon") ||
+        path.includes("/notifications")
       ) {
         return;
       }
