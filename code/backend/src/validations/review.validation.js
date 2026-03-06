@@ -13,12 +13,7 @@ const createReviewSchema = {
     rating: z.coerce.number().min(0).max(5),
     comment: z.string().trim().max(1000).optional(),
     labels: z.string().optional(),
-    now: z
-      .coerce
-      .number()
-      .int()
-      .positive()
-      .optional(),
+    now: z.string().optional(), // for testing purposes
   }),
 
   files: z

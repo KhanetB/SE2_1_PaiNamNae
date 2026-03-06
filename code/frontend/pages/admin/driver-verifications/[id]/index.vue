@@ -173,11 +173,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, defineComponent, h } from 'vue'
+import { ref, onMounted, defineComponent, h } from 'vue'
 import { useRoute, useRuntimeConfig, useCookie } from '#app'
 import AdminHeader from '~/components/admin/AdminHeader.vue'
 import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
+import { useAdminSidebar } from '~/composables/useAdminSidebar'
+import { formatDate } from '~/utils/date'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 dayjs.locale('th')
@@ -240,6 +242,7 @@ const InfoBox = defineComponent({
 })
 
 const { toast } = useToast()
+useAdminSidebar()
 const route = useRoute()
 const dvId = route.params.id as string
 
@@ -251,11 +254,9 @@ const isPatchingStatus = ref(false)
 const targetStatus = ref<VerificationStatus | ''>('')
 
 onMounted(async () => {
-    defineGlobalScripts()
     if (typeof (window as any).__adminResizeHandler__ === 'function') (window as any).__adminResizeHandler__()
     await fetchDV()
 })
-onUnmounted(() => cleanupGlobalScripts())
 
 async function fetchDV() {
     isLoading.value = true
@@ -334,29 +335,6 @@ async function patchStatus(status: VerificationStatus) {
 }
 
 /* Layout helpers */
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
-function defineGlobalScripts() {
-    ; (window as any).__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !mainContent || !overlay) return
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open')
-            overlay.classList.add('hidden')
-            mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '280px'
-        } else {
-            mainContent.style.marginLeft = '0'
-        }
-    }
-    window.addEventListener('resize', (window as any).__adminResizeHandler__)
-}
 function cleanupGlobalScripts() {
     window.removeEventListener('resize', (window as any).__adminResizeHandler__ || (() => { }))
     delete (window as any).__adminResizeHandler__

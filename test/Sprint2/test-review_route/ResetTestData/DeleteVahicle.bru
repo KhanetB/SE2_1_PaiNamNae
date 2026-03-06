@@ -17,6 +17,14 @@ headers {
   Authorization: Bearer {{admin_token}}
 }
 
+script:pre-request {
+  var vehicle_id = bru.getEnvVar("vehicle_id");
+  if(!vehicle_id){
+    bru.runner.skipRequest();
+    console.log("Skip: doesn't have vehicle_id")
+  }
+}
+
 script:post-response {
   bru.setEnvVar("passenger_token","")
   bru.setEnvVar("driver_token","")

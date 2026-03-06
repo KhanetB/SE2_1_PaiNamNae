@@ -1,10 +1,6 @@
 <template>
     <div>
-        <AdminHeader />
-        <AdminSidebar />
-
-        <main id="main-content" class="main-content mt-16 ml-0 lg:ml-[280px] p-6">
-            <!-- Back -->
+        <!-- Back -->
             <div class="mb-8">
                 <NuxtLink to="/admin/users"
                     class="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
@@ -23,11 +19,9 @@
 
                     <!-- Verify switch -->
                     <div v-if="user" class="flex items-center gap-2">
-                        <label class="inline-flex items-center cursor-pointer select-none switch">
-                            <input type="checkbox" class="switch-input" :checked="user.isVerified"
-                                :disabled="isLoading || toggling" @change="onToggleVerify($event.target.checked)" />
-                            <span class="switch-slider"></span>
-                        </label>
+                        <ToggleSwitch :model-value="user.isVerified"
+                            :disabled="isLoading || toggling"
+                            @update:model-value="onToggleVerify($event)" />
                         <span class="text-sm" :class="user.isVerified ? 'text-green-700' : 'text-gray-500'">
                             {{ user.isVerified ? 'Verified' : 'Unverified' }}
                         </span>
@@ -273,25 +267,15 @@
                     </div>
                 </div>
             </div>
-        </main>
-
-        <!-- Mobile Overlay -->
-        <div id="overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden"
-            @click="closeMobileSidebar"></div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRuntimeConfig, useCookie } from '#app'
-import dayjs from 'dayjs'
-import 'dayjs/locale/th'
-import AdminHeader from '~/components/admin/AdminHeader.vue'
-import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
-
-dayjs.locale('th')
-definePageMeta({ middleware: ['admin-auth'] })
+import { formatDate } from '~/utils/date'
+definePageMeta({ layout: 'admin', middleware: ['admin-auth'] })
 useHead({
     title: 'ดูรายละเอียดผู้ใช้ • Admin',
     link: [{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' }]
@@ -393,11 +377,6 @@ async function sendNotification() {
 }
 
 
-function formatDate(iso, withTime = false) {
-    if (!iso) return '-'
-    return withTime ? dayjs(iso).format('D MMM BBBB HH:mm') : dayjs(iso).format('D MMM BBBB')
-}
-
 /* ---------- GET: fetch user ---------- */
 async function fetchUser() {
     isLoading.value = true
@@ -467,97 +446,9 @@ async function onToggleVerify(next) {
     }
 }
 
-/* ---------- layout helpers ---------- */
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
-function defineGlobalScripts() {
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !mainContent || !overlay) return
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open'); overlay.classList.add('hidden')
-            mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '280px'
-        } else {
-            mainContent.style.marginLeft = '0'
-        }
-    }
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
-function cleanupGlobalScripts() {
-    window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
-    delete window.__adminResizeHandler__
-}
-
 onMounted(async () => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
     await fetchUser()
 })
-onUnmounted(() => cleanupGlobalScripts())
 </script>
 
-<style>
-.main-content {
-    transition: margin-left 0.3s ease;
-}
 
-/* สวิตช์ (แบบเดียวกับหน้า list) */
-.switch {
-    position: relative;
-    width: 42px;
-    height: 24px;
-}
-
-.switch-input {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 42px;
-    height: 24px;
-    margin: 0;
-    outline: none;
-    position: relative;
-    cursor: pointer;
-}
-
-.switch-slider {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    background: #e5e7eb;
-    border-radius: 9999px;
-    transition: background .2s ease;
-}
-
-.switch-input:checked+.switch-slider {
-    background: #22c55e;
-}
-
-.switch-slider::after {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    background: #fff;
-    border-radius: 9999px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
-    transition: transform .2s ease;
-}
-
-.switch-input:checked+.switch-slider::after {
-    transform: translateX(18px);
-}
-
-.switch-input:disabled+.switch-slider {
-    filter: grayscale(.4);
-    opacity: .6;
-}
-</style>
