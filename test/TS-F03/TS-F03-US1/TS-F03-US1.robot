@@ -95,7 +95,7 @@ TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
     [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
     Switch Browser    passenger_window
     Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
-    Deletes Account Passenger    ${PASSENGER_EMAIL}
+    Deletes Account Passenger  ${PASSENGER_EMAIL}   ${PASSENGER_PASS}
 
 TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
     Switch Browser    driver_window
@@ -191,7 +191,7 @@ TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
     [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
     Switch Browser    passenger_window
     Login To System    ${PASSENGER_USER}    ${PASSENGER_PASS}
-    Deletes Account    ${PASSENGER_EMAIL}
+    Deletes Account Passenger  ${PASSENGER_EMAIL}   ${PASSENGER_PASS}
 
 TC12 Driver เห็นข้อมูล Passenger เป็น Anonymous
     Switch Browser    driver_window

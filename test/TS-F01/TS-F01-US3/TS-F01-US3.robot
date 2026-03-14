@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   US1-การ anonymous ฝั่งผู้ใช้ที่เป็น Passenger
+Documentation   US3- กรณีที่กรอก Password ผิด
 Resource        ../common_resource.resource
 
 # 1. เปลี่ยนมาเรียกใช้ Keyword ตัวเดียวให้ดูสะอาดขึ้น
@@ -17,11 +17,22 @@ Prepare Environment
 *** Test Cases ***
 
 
-TC10, TC11 Passenger ทำการลบบัญชีผู้ใช้
+TC07,TC08 สร้าง Account Passenger และ Driver ผ่าน Web UI และเข้าหน้า Home
+    [Documentation]    สมัครสมาชิกผ่านหน้าเว็บทั้งสอง Role แล้วทดสอบล็อกอิน
+    # ================= ฝั่ง Passenger (หน้าต่างซ้าย) =================
+    sleep    5s
+    Register User Via Web UI
+    ...    username=${TEST_USER}    email=${TEST_EMAIL}    password=${TEST_PASS}
+    ...    firstname=Test           lastname=User             phone=0812345678
+    ...    gender=male                   national_id=9351407024077   expiry=31/12/2030
+    # ทดสอบเข้าสู่ระบบฝั่ง Passenger
+    Login To System    ${TEST_USER}    ${TEST_PASS}
+
+TC09 Passenger ทำการลบบัญชีผู้ใช้
     [Documentation]    รวบ TC11 (Login) และ TC12 (Delete) เข้าด้วยกันตาม Flow ใช้งานจริง
     Login To System    ${TEST_USER}    ${TEST_PASS}
-    Deletes Account Passenger   ${TEST_EMAIL}    ${TEST_PASS}
-
+    Deletes Account Passenger   ${TEST_EMAIL}    1234567891
+    
 *** Comments ***
 
 TC01 สร้าง Account Passenger และ Driver ผ่าน Web UI และเข้าหน้า Home

@@ -211,7 +211,7 @@
                                     }"
                                 >
                                     <button
-                                        v-if="route.status === 'available'"
+                                        v-if="route.status === 'available' || route.status === 'full'"
                                         @click.stop="confirmTrip(route.id)"
                                         class="px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700"
                                     >
@@ -550,7 +550,7 @@ const { toast } = useToast();
 
 // --- State Management ---
 // const activeTab = ref("pending");
-// const selectedTripId = ref(null);
+const selectedTripId = ref(null);
 // const isLoading = ref(false);
 // const mapContainer = ref(null);
 // const googleMap = useGoogleMap(mapContainer);

@@ -310,7 +310,7 @@
                     <button
                         class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="isLoading"
-                        @click="deleteAccount"
+                        @click="confirmDelete"
                     >
                         <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
                         <span v-else class="flex items-center gap-2"
@@ -453,32 +453,49 @@ const verifyPassword = async () => {
         isLoading.value = false;
     }
 };
-
 const deleteAccount = async () => {
-    try {
-        isLoading.value = true;
-        await $fetch("/users/me", {
-            method: "DELETE",
-            baseURL: config.public.apiBase,
-            headers: {
-                Authorization: `Bearer ${token.value}`,
-            },
-        });
+  try {
+    isLoading.value = true;
 
-        await sendBackupToEmail();
+    // เช็คก่อนว่าลบได้ไหม
+    const check = await $fetch("/users/check-deletion-status", {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
 
-        step.value = 5; // สำเร็จ
-    } catch (error) {
-        if (error?.data?.message) {
-            errorMessage.value = error.data.message;
-        } else {
-            errorMessage.value = "ไม่สามารถลบบัญชีได้";
-        }
-
-        step.value = 6; // ติดพันธะ
-    } finally {
-        isLoading.value = false;
+    if (!check?.canDelete) {
+      errorMessage.value =
+        check?.message ?? "ไม่สามารถลบบัญชีได้ในขณะนี้";
+      step.value = 6; // ติดพันธะ
+      return;
     }
+
+    // ส่ง backup ก่อน
+    await sendBackupToEmail();
+
+    // ลบบัญชี
+    await $fetch("/users/me", {
+      method: "DELETE",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    step.value = 5; // สำเร็จ
+  } catch (error) {
+    errorMessage.value =
+      error?.response?._data?.message ??
+      error?.data?.message ??
+      "ไม่สามารถลบบัญชีได้";
+
+    step.value = 6; // error
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const isValidPassword = computed(() => {
@@ -570,7 +587,8 @@ const verifyUser = async () => {
     });
 };
 const sendBackupToEmail = async () => {
-    if (!token.value) {
+    try{
+        if (!token.value) {
         throw new Error(
             "Unauthorized: token not found in send backup to email",
         );
@@ -585,6 +603,12 @@ const sendBackupToEmail = async () => {
             email: email.value,
         },
     });
+    
+    }catch(error){
+        console.error("Error sending backup to email: ", error);
+         throw new Error("Failed to send backup to email");
+    }
+    
 };
 
 // เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ
@@ -613,9 +637,6 @@ const confirmDelete = async () => {
         // useCookie("user").value = null;
         // useCookie("session").value = null;
 
-        if (process.client) {
-            localStorage.removeItem("token");
-        }
 
         step.value = 3;
     } catch (error) {
@@ -631,7 +652,7 @@ const confirmDelete = async () => {
             errorMessage.value = "เกิดข้อผิดพลาด ไม่สามารถลบบัญชีผู้ใช้ได้";
         }
 
-        step.value = 4;
+        step.value = 6;
     } finally {
         isLoading.value = false;
     }

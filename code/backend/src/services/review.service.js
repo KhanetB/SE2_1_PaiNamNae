@@ -22,7 +22,7 @@ const createReview = async ({
   labels,
   files = [],
   userId,
-  now = Date.now(),
+  now = new Date().toISOString() // for testing purposes,
 }) => {
   // 1. ตรวจสอบ booking
   const booking = await prisma.booking.findUnique({
@@ -59,7 +59,8 @@ const createReview = async ({
   if (!completedAt) {
     throw new ApiError(400, "Booking not completed yet");
   }
-  const diffInDays = (now - completedAt.getTime()) / (1000 * 60 * 60 * 24);
+  const diffInDays = (new Date(now) - completedAt) / (1000 * 60 * 60 * 24);
+  console.log('diffInDays:', diffInDays);
   if (diffInDays > 7) {
     throw new ApiError(400, "You can create review only within 7 days");
   }

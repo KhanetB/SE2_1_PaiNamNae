@@ -19,7 +19,7 @@ ${DRIVER_USER}          driverdel
 ${DRIVER_PASS}          123456789
 ${ADMIN_USER}           admin123
 ${ADMIN_PASS}           123456789
-${TEST_EMAIL}           testuser@gmail.com
+${TEST_EMAIL}           test@gmail.com
 ${TEST_USER}            testUser
 ${TEST_PASS}            123456789
 ${IDCARD_PATH}          ${CURDIR}/idcard.jpeg
@@ -312,7 +312,7 @@ Deletes Account Passenger
     Wait Until Page Contains         ลบบัญชีสำเร็จแล้ว   timeout=10s
 
 Deletes Account driver
-    [Arguments]   ${EMAIL}
+    [Arguments]    ${EMAIL}    ${PASSWORD}
     Wait Until Element Is Visible    xpath=(//div[contains(@class, 'dropdown-trigger')])[2]/div    timeout=10s
     Mouse Over                       xpath=(//div[contains(@class, 'dropdown-trigger')])[2]/div
     Sleep                                ${DELAY}
@@ -332,7 +332,12 @@ Deletes Account driver
     Input Text                       xpath=//input[@placeholder='กรอกอีเมลของคุณ']    ${EMAIL}
     Wait Until Element Is Enabled    xpath=//button[contains(., 'ยืนยันการลบบัญชี')]    timeout=10s
     Click Button                     xpath=//button[contains(., 'ยืนยันการลบบัญชี')]
-    Wait Until Page Contains    ลบบัญชีสำเร็จแล้ว   timeout=10s 
+    Wait Until Element Is Visible    xpath=//input[@placeholder="กรอกรหัสผ่านของคุณ"]    timeout=10s
+    Input Password                   xpath=//input[@placeholder="กรอกรหัสผ่านของคุณ"]    ${PASSWORD}
+    Wait Until Element Is Enabled    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]    timeout=10s
+    Click Element                    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]
+    Wait Until Element Is Enabled    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]    timeout=10s
+    Click Element                    xpath=//button[span[text()="ยืนยันการลบบัญชี"]]
     
 # ================= Dual Window Setup =================
 Open Passenger And Driver Browsers
