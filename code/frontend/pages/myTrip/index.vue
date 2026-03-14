@@ -326,6 +326,7 @@
             :is-submitting="isSubmittingReview"
             @submit="handleReviewSubmit"
             @close="closeReviewModal"
+            @toast="handleToast"
         />
     </div>
     <div
@@ -413,6 +414,9 @@ const { toast } = useToast();
 const mapContainer = ref(null);
 const googleMap = useGoogleMap(mapContainer);
 
+function handleToast(payload) {
+    toast[payload.type]?.(payload.title, payload.message)
+}
 
 
 useHead({
@@ -560,6 +564,7 @@ async function handleReviewSubmit(reviewData) {
     isSubmittingReview.value = true;
     try {
         await submitReview(tripToReview.value.id, reviewData);
+        await fetchMyTrips(doReverseGeocode);
         closeReviewModal();
     } catch (error) {
         toast.error(
