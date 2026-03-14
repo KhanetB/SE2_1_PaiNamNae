@@ -150,15 +150,35 @@
                                 v-if="trip.review"
                                 class="p-4 mt-4 bg-gray-50 border border-gray-200 rounded-lg"
                                 >
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="font-medium text-gray-800">
-                                    รีวิวของฉัน
+                                <div class="flex items-center justify-between mb-2 text-xl">
+                                    
+                                    <div class="font-semibold text-gray-800">
+                                        <i class="fa-solid fa-pen-to-square mr-2"></i>
+                                        รีวิวของฉัน
                                     </div>
-                                    <div class="text-yellow-500 font-semibold">
-                                    ⭐ {{ trip.review.rating }}
+
+                                    <div class="flex items-center gap-2 text-yellow-500">
+                                    
+                                    <!-- ดาว -->
+                                    <div>
+                                        <i
+                                        v-for="n in 5"
+                                        :key="n"
+                                        :class="[getStarClass(n, trip.review.rating), 'text-yellow-500']"
+                                        ></i>
                                     </div>
+
+                                    <!-- ตัวเลขคะแนน -->
+                                    <span class="text-gray-700 font-semibold text-base">
+                                        {{ trip.review.rating }} / 5
+                                    </span>
+
+                                    </div>
+
                                 </div>
-                                 <span
+
+
+                                 <!-- <span
                                         v-if="
                                             trip.status === 'completed' &&
                                             trip.hasReview
@@ -166,7 +186,7 @@
                                         class="px-4 py-2 text-green-700 rounded-2xl bg-green-100 text-sm font-medium"
                                     >
                                         คุณได้เขียนรีวิวนี้ไปแล้ว
-                                    </span>
+                                    </span> -->
                                     <span
                                         v-if="
                                             trip.status === 'completed' &&
@@ -189,17 +209,17 @@
                                     class="flex flex-wrap gap-2 mt-2"
                                 >
                                     <span
-                                    v-for="label in trip.review.labels"
-                                    :key="label"
-                                    class="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded-full"
+                                        v-for="label in trip.review.labels"
+                                        :key="label"
+                                        class="px-2 py-1 text-xs text-blue-700 bg-blue-100 rounded-full"
                                     >
-                                    {{ label }}
+                                        {{ REVIEW_TAG_MAP_REVERSE[label] || label }}
                                     </span>
                                 </div>
                                 <!--  -->
                                 <div
                                     v-if="trip.review.files?.length"
-                                    class="flex gap-2 mt-3"
+                                    class="flex gap-2 mt-5"
                                 >
                                 <div
                                     v-for="file in trip.review.files"
@@ -353,6 +373,27 @@ import { useMyTrips } from "~/composables/useMyTrips";
 import { useGoogleMap } from "~/composables/useGoogleMap";
 import { useToast } from "~/composables/useToast";
 
+const REVIEW_TAG_MAP_REVERSE = {
+  SAFE_DRIVING: "ขับขี่ปลอดภัย",
+  CLEAN_CAR: "รถสะอาดน่านั่ง",
+  FRIENDLY_DRIVER: "คนขับอัธยาศัยดี",
+  GOOD_MUSIC: "ชอบเพลงที่เปิด",
+}
+
+const getStarClass = (index, rating) => {
+  const r = Math.round(Number(rating) * 2) / 2 // ปัดเป็น .0 หรือ .5
+
+  if (r >= index) {
+    return "fa-solid fa-star"
+  } 
+  else if (r >= index - 0.5) {
+    return "fa-solid fa-star-half-stroke"
+  } 
+  else {
+    return "fa-regular fa-star"
+  }
+}
+
 const previewFile = ref(null)
 const isPreviewOpen = ref(false)
 
@@ -372,6 +413,8 @@ const { toast } = useToast();
 const mapContainer = ref(null);
 const googleMap = useGoogleMap(mapContainer);
 
+
+
 useHead({
     title: "การเดินทางของฉัน - ไปนำแหน่",
     link: [
@@ -379,6 +422,7 @@ useHead({
             rel: "stylesheet",
             href: "https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap",
         },
+        { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' },
     ],
     script:
         process.client && !window.google?.maps
