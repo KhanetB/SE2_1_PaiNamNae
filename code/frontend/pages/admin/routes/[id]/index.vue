@@ -483,34 +483,9 @@ async function fetchRoute() {
 }
 
 
-function defineGlobalScripts() {
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !mainContent || !overlay) return
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open'); overlay.classList.add('hidden')
-            mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '280px'
-        } else { mainContent.style.marginLeft = '0' }
-
-        // --- เพิ่ม: บังคับให้แผนที่ปรับขนาด + fitBounds ใหม่เมื่อเลย์เอาต์เปลี่ยน ---
-        if (gmap && mapReady.value) {
-            google.maps.event.trigger(gmap, 'resize')
-            if (routeData.value) drawRouteOnMap(routeData.value)
-        }
-    }
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
 function cleanupGlobalScripts() {
     window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
     delete window.__adminResizeHandler__
-}
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open'); overlay.classList.add('hidden')
 }
 
 function formatDistance(input, distanceMeters) {
@@ -605,8 +580,6 @@ watch(isLoading, async (loading) => {
 })
 
 onMounted(async () => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
 
     // โหลด Google Maps ถ้ายังไม่ถูกโหลด
     if (!window.google?.maps) {
@@ -630,7 +603,6 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-    cleanupGlobalScripts()
     clearMap()
 })
 </script>

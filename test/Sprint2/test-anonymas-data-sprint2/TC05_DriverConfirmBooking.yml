@@ -1,0 +1,39 @@
+info:
+  name: TC05_DriverConfirmBooking
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/bookings/{{booking_id}}/status
+  headers:
+    - name: Authorization
+      value: Bearer {{driver_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "status": "CONFIRMED"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("get HTTP 200",function(){
+          const status = res.getStatus();
+          expect(status).to.equal(200);
+        })
+
+        test("update booking status success", function(){
+          const body = res.getBody();
+          expect(body.success).to.equal(true);
+          expect(body.data.status).to.equal("CONFIRMED")
+        })
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
