@@ -118,7 +118,8 @@
                     ยกเลิก
                 </button>
 
-                <button @click="submit" :disabled="isSubmitting || !localRating"
+                <!-- <button @click="submit" :disabled="isSubmitting || !localRating" -->
+                <button @click="submit" :disabled="isSubmitting"
                     class="cursor-pointer px-6 py-2.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40">
                     {{ isSubmitting ? "กำลังส่ง..." : "ส่งรีวิว" }}
                 </button>
