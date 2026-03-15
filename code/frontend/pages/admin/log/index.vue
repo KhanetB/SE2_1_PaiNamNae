@@ -784,6 +784,7 @@ async function confirmExport() {
     }
 
     const res = await fetch(`${baseUrl}/logs/export?${params.toString()}`, {
+      method: "POST",
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     });
 

@@ -81,7 +81,6 @@ const exportLogs = asyncHandler(async (req, res, next) => {
 
   const publicKey =
     process.env.SYSTEM_PUBLIC_KEY || "PUBLIC KEY NOT CONFIGURED";
-  console.log("Public Key: ", publicKey, process.env.SYSTEM_PUBLIC_KEY);
   const howtoContent = `คู่มือการตรวจสอบควาถูกต้องของไฟล์ (Audit Log Integrity Verification)
   ข้อมูลในแพ็กเกจนี้ประกอบด้วย
   1. audit_log.csv - ข้อมูลบันทึกการใช้งานระบบ

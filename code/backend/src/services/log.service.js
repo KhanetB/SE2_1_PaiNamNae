@@ -349,17 +349,6 @@ async function exportLogSecurely(
 
   const signature = generateExportSignature(csvContent);
 
-  await createLog({
-    userId: adminId,
-    action: "ADMIN_LOG_EXPORTED",
-    ipAddress: adminIp,
-    resourceType: "AuditLog",
-    metaData: {
-      exportedRows: logs.length,
-      filtersApplied: filters,
-    },
-  });
-
   return {
     csvContent,
     signature,

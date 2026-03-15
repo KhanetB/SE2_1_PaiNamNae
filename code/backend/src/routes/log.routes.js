@@ -14,6 +14,6 @@ router.get("/", logController.getLogs);
 router.get("/verify", logController.verifyIntegrity);
 
 // GET /api/logs/export
-router.get("/export", logController.exportLogs);
+router.post("/export", logController.exportLogs);
 
 module.exports = router;
