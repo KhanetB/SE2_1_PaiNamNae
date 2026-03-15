@@ -50,3 +50,28 @@ exports.sendBackupEmail = async (toEmail, userData) => {
         throw new Error("Failed to send backup email");
     }
 };
+
+exports.sendOtpEmail = async (toEmail, otpCode) => {
+    const mailOptions = {
+        from: `"PaiNumNae Support" <${process.env.EMAIL_USER}>`,
+        to: toEmail,
+        subject: 'รหัส OTP สำหรับยืนยันการลบบัญชี (Account Deletion)',
+        html: `
+            <h3>เรียนผู้ใช้งาน,</h3>
+            <p>คุณได้ทำการร้องขอเพื่อลบบัญชีผู้ใช้งานของคุณ</p>
+            <p>รหัส OTP ของคุณคือ: <strong style="font-size: 24px; color: #d9534f;">${otpCode}</strong></p>
+            <p>รหัสนี้มีอายุการใช้งาน <strong>5 นาที</strong></p>
+            <br>
+            <p style="color: red;">หากคุณไม่ได้เป็นผู้ดำเนินการ โปรดเพิกเฉยต่ออีเมลฉบับนี้ และแนะนำให้เปลี่ยนรหัสผ่านทันที</p>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`OTP Email sent to ${toEmail}`);
+        return true;
+    } catch (error) {
+        console.error("Error sending OTP email:", error);
+        throw new Error("Failed to send OTP email");
+    }
+};
