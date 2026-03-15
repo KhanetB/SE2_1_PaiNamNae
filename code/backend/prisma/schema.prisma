@@ -64,10 +64,15 @@ enum NotificationType {
 }
 
 enum ReviewLabel {
-  SAFE_DRIVING // ขับขี่ปลอดภัย
-  CLEAN_CAR // สะอาด รถน่านั่ง
-  FRIENDLY_DRIVER // คนขับอัธยาศัยดี
-  GOOD_MUSIC // ชอบเพลงที่เปิด
+  SAFE_DRIVING        // ขับขี่ปลอดภัย
+  CLEAN_CAR           // สะอาด รถน่านั่ง
+  FRIENDLY_DRIVER     // คนขับอัธยาศัยดี
+  GOOD_MUSIC          // ชอบเพลงที่เปิด
+}
+
+enum ReviewFileType {
+  IMAGE
+  VIDEO
 }
 
 enum ActionType {
@@ -193,11 +198,12 @@ model User {
   notification            Notification[]
   createdRoutes           Route[]             @relation("DriverRoutes")
   bookings                Booking[]           @relation("PassengerBookings")
-  deletedAt               DateTime?
-  deletedBy               String?
+  deletedAt               DateTime?          
+  deletedBy               String?           
 
-  PassengerReviews Review[]   @relation("PassengerReviews")
-  DriverReviews    Review[]   @relation("DriverReviews")
+  PassengerReviews        Review[]            @relation("PassengerReviews")
+  DriverReviews           Review[]            @relation("DriverReviews")
+
   auditLog         AuditLog[]
 
   @@index([role])
@@ -231,8 +237,8 @@ model DriverVerification {
 
 model Notification {
   id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String? 
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type     NotificationType @default(SYSTEM)
   title    String
@@ -274,10 +280,10 @@ model Vehicle {
 
 model Route {
   id              String      @id @default(cuid())
-  driverId        String
-  driver          User        @relation("DriverRoutes", fields: [driverId], references: [id], onDelete: Cascade)
-  vehicleId       String
-  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId        String?
+  driver          User?        @relation("DriverRoutes", fields: [driverId], references: [id], onDelete: SetNull)
+  vehicleId       String?
+  vehicle         Vehicle?     @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
   startLocation   Json        @db.Json
   endLocation     Json        @db.Json
   departureTime   DateTime
@@ -312,10 +318,10 @@ model Route {
 
 model Booking {
   id              String        @id @default(cuid())
-  routeId         String
-  route           Route         @relation(fields: [routeId], references: [id], onDelete: Cascade)
-  passengerId     String
-  passenger       User          @relation("PassengerBookings", fields: [passengerId], references: [id], onDelete: Cascade)
+  routeId         String?
+  route           Route?         @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  passengerId     String?
+  passenger       User?          @relation("PassengerBookings", fields: [passengerId], references: [id], onDelete: SetNull)
   numberOfSeats   Int
   status          BookingStatus @default(PENDING)
   cancelledAt     DateTime?
@@ -325,34 +331,35 @@ model Booking {
   dropoffLocation Json          @db.Json
   createdAt       DateTime      @default(now())
 
-  inTransitAt          DateTime?
+  inTransitAt     DateTime?
   passengerComfirmedAt DateTime?
-  completedAt          DateTime?
-
-  review Review?
+  completedAt     DateTime?
+  
+  review          Review?
 }
 
 model Review {
-  id String @id @default(cuid())
+  id          String        @id @default(cuid())
 
-  bookingId String  @unique
-  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId   String        @unique
+  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  driverId String
-  driver   User   @relation("DriverReviews", fields: [driverId], references: [id], onDelete: Cascade)
+  driverId    String? 
+  driver      User?          @relation("DriverReviews", fields: [driverId], references: [id], onDelete: SetNull)
 
-  passengerId String
-  passenger   User   @relation("PassengerReviews", fields: [passengerId], references: [id], onDelete: Cascade)
+  passengerId String?
+  passenger   User?          @relation("PassengerReviews", fields: [passengerId], references: [id], onDelete: SetNull)
 
-  rating  Float
-  comment String?
+  rating      Float
+  comment     String?
 
-  images String[]
-  labels ReviewLabel[]
+  files       Json? // [{url , type}]
+  labels      ReviewLabel[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([driverId, createdAt])
   @@index([passengerId, createdAt])
 }
+

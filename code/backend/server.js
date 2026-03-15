@@ -1,4 +1,8 @@
-require("dotenv").config();
+if (process.env.NODE_ENV === "test") {
+  require("dotenv").config({ path: ".env.test" });
+} else {
+  require("dotenv").config();
+}
 
 const express = require("express");
 const cors = require("cors");
@@ -28,6 +32,7 @@ const corsOptions = {
     "https://amazing-crisp-9bcb1a.netlify.app",
     "https://backend-se.pasitlab.com",
     "https://csse1669.cpkku.com",
+    "https://backend-se.pasitgut.com"
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -81,6 +86,9 @@ app.use("/api", routes);
 
 // Export Data Route
 app.use("/api/export", exportRoutes);
+
+// Export Data Route
+app.use('/api/export', exportRoutes);
 
 app.use((req, res, next) => {
   next(new ApiError(404, `Cannot ${req.method} ${req.originalUrl}`));

@@ -3,6 +3,10 @@ const ApiError = require("../utils/ApiError");
 const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 
+// Check routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
+const ACTIVE_ROUTE_STATUSES = ["AVAILABLE", "FULL", "IN_TRANSIT"];
+const ACTIVE_BOOKING_STATUSES = ["PENDING", "CONFIRMED"];
+
 const searchUsers = async (opts = {}) => {
   const {
     page = 1,
@@ -23,22 +27,22 @@ const searchUsers = async (opts = {}) => {
     ...(typeof isVerified === "boolean" ? { isVerified } : {}),
     ...(createdFrom || createdTo
       ? {
-          createdAt: {
-            ...(createdFrom ? { gte: new Date(createdFrom) } : {}),
-            ...(createdTo ? { lte: new Date(createdTo) } : {}),
-          },
-        }
+        createdAt: {
+          ...(createdFrom ? { gte: new Date(createdFrom) } : {}),
+          ...(createdTo ? { lte: new Date(createdTo) } : {}),
+        },
+      }
       : {}),
     ...(q
       ? {
-          OR: [
-            { email: { contains: q, mode: "insensitive" } },
-            { username: { contains: q, mode: "insensitive" } },
-            { firstName: { contains: q, mode: "insensitive" } },
-            { lastName: { contains: q, mode: "insensitive" } },
-            { phoneNumber: { contains: q, mode: "insensitive" } },
-          ],
-        }
+        OR: [
+          { email: { contains: q, mode: "insensitive" } },
+          { username: { contains: q, mode: "insensitive" } },
+          { firstName: { contains: q, mode: "insensitive" } },
+          { lastName: { contains: q, mode: "insensitive" } },
+          { phoneNumber: { contains: q, mode: "insensitive" } },
+        ],
+      }
       : {}),
   };
 
@@ -109,13 +113,13 @@ const getAllUsers = async () => {
 
   // หรือจะสร้าง object ใหม่แบบนี้ก็ได้ (ปลอดภัยกว่า)
   /*
-	  const safeUsers = users.map(user => ({
-		id: user.id,
-		email: user.email,
-		username: user.username,
-		// ... เอาฟิลด์อื่นๆ ที่ต้องการมาใส่ ...
-	  }));
-	  */
+    const safeUsers = users.map(user => ({
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    // ... เอาฟิลด์อื่นๆ ที่ต้องการมาใส่ ...
+    }));
+    */
 
   return users.map((user) => {
     const { password, ...safeUser } = user;
@@ -247,35 +251,122 @@ const deleteUser = async (id) => {
 const softDeleteUser = async (
   id,
   deletedBy = "USER",
-  deleteDate = new Date(),
+  deleteDate = new Date()
 ) => {
-  const checkDeletionStatus = await checkUserDeletionStatus(id);
-  if (!checkDeletionStatus.canDelete) {
-    throw new ApiError(
-      400,
-      `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`,
-    );
-  }
-  // if user already soft deleted
-  const existingUser = await prisma.user.findUnique({ where: { id } });
-  if (!existingUser || existingUser.deletedAt) {
-    throw new ApiError(404, "User not found or already deleted");
-  }
-  const user = await prisma.user.update({
-    where: { id },
-    data: {
-      deletedAt: deleteDate,
-      deletedBy,
-      isActive: false,
-    },
-  });
-  const { password, ...safeUser } = user;
-  return safeUser;
-};
+  return prisma.$transaction(async (tx) => {
+    const checkDeletionStatus = await checkUserDeletionStatus(id);
+    if (!checkDeletionStatus.canDelete) {
+      throw new ApiError(
+        400,
+        `ไม่สามารถลบบัญชีได้: ${checkDeletionStatus.message}`
+      );
+    }
 
-// Check routes status for checking before using softDeleteUser (if status is AVAILABLE or FULL)
-const ACTIVE_ROUTE_STATUSES = ["AVAILABLE", "FULL", "IN_TRANSIT"];
-const ACTIVE_BOOKING_STATUSES = ["PENDING", "CONFIRMED"];
+    const existingUser = await tx.user.findUnique({ where: { id } });
+    if (!existingUser || existingUser.deletedAt) {
+      throw new ApiError(404, "User not found or already deleted");
+    }
+
+    /* =========================
+       1. Soft delete + mask USER
+    ========================= */
+    const user = await tx.user.update({
+      where: { id },
+      data: {
+        email: `deleted_${id}@anonymous.local`,
+        username: `deleted_user_${id}`,
+        password: await bcrypt.hash(
+          `deleted_${id}_${Date.now()}`,
+          SALT_ROUNDS
+        ),
+
+        firstName: null,
+        lastName: null,
+        phoneNumber: null,
+        gender: null,
+        nationalIdNumber: null,
+        nationalIdExpiryDate: null,
+        nationalIdPhotoUrl: null,
+        selfiePhotoUrl: null,
+
+        isActive: false,
+        isVerified: false,
+        deletedAt: deleteDate,
+        deletedBy,
+      },
+    });
+
+    /* =========================
+       2. Anonymize RELATIONS
+    ========================= */
+
+    // DriverVerification
+    await tx.driverVerification.deleteMany({
+      where: { userId: id },
+    });
+
+    // Vehicle
+    const vehicles = await tx.vehicle.findMany({
+      where: { userId: id },
+      select: { id: true },
+    });
+
+    for (const v of vehicles) {
+      await tx.vehicle.update({
+        where: { id: v.id },
+        data: {
+          licensePlate: `ANON-${v.id}`,
+          photos: null,
+          amenities: [],
+          vehicleModel: "ANONYMIZED",
+          color: "ANONYMIZED",
+        },
+      });
+    }
+
+    // Route
+    await tx.route.updateMany({
+      where: { driverId: id },
+      data: {
+        driverId: null,
+        cancelledBy: "SYSTEM",
+      },
+    });
+
+    // Booking
+    await tx.booking.updateMany({
+      where: { passengerId: id },
+      data: {
+        passengerId: null,
+      },
+    });
+
+    // Review
+    await tx.review.updateMany({
+      where: {
+        OR: [{ driverId: id }, { passengerId: id }],
+      },
+      data: {
+        driverId: null,
+        passengerId: null,
+        comment: "[deleted user]",
+        files: null,
+      },
+    });
+
+    // Notification
+    await tx.notification.updateMany({
+      where: { userId: id },
+      data: {
+        userId: null,
+        metadata: null,
+      },
+    });
+
+    const { password, ...safeUser } = user;
+    return safeUser;
+  });
+};
 
 const checkUserDeletionStatus = async (userId) => {
   // Check if user has any active driver routes or passenger bookings
@@ -315,6 +406,7 @@ const checkUserDeletionStatus = async (userId) => {
     message: "ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้",
   };
 };
+
 
 // const setUserStatusActive = async (id, isActive) => {
 //     const updatedUser = await prisma.user.update({

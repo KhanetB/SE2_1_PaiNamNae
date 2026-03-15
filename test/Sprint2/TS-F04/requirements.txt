@@ -1,0 +1,23 @@
+# Robot Framework Test Suite Requirements
+# TS-F04: Admin Log Viewing
+
+# Core dependencies
+robotframework>=6.1,<7.1
+robotframework-seleniumlibrary>=6.0,<7.0
+
+# Supporting libraries
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# WebDriver manager (optional, for automatic WebDriver management)
+webdriver-manager>=4.0.0
+
+# For parallel test execution (optional)
+robotframework-pabot>=2.18.0
+
+# Code analysis and quality (optional)
+pylint>=2.15.0
+pycodestyle>=2.10.0
+
+# For environment variable management (optional)
+python-dotenv>=1.0.0

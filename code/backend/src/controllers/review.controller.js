@@ -1,8 +1,9 @@
-const asyncHandler = require("express-async-handler");
+const asyncHandler = require('express-async-handler');
 const userService = require("../services/user.service");
-const ApiError = require("../utils/ApiError");
-const { uploadToCloudinary } = require("../utils/cloudinary");
-const reviewService = require("../services/review.service");
+const ApiError = require('../utils/ApiError');
+const { uploadToCloudinary } = require('../utils/cloudinary');
+const reviewService = require('../services/review.service');
+const { success } = require('zod/v4-mini');
 
 // GET /reviews/user
 const getReviewsForUser = asyncHandler(async (req, res) => {
@@ -16,7 +17,7 @@ const getReviewById = asyncHandler(async (req, res, next) => {
   try {
     const reviewId = req.params.reviewId;
     const userId = req.user.sub;
-    const review = await reviewService.getReviewById(reviewId, userId);
+    const review = await reviewService.getReviewById(userId, reviewId);
     res.json(review);
   } catch (error) {
     next(
@@ -55,6 +56,7 @@ const createReview = async (req, res, next) => {
       files: req.files,
       userId: req.user.sub,
       labels: req.body.labels,
+      now : req.body.now,
     });
 
     res.status(201).json({

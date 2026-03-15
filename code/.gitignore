@@ -1,11 +1,6 @@
 node_modules
 .env
+**/.env.*
 
-Back-end/prisma/migrations/
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/Thanathat_2110-test_review
->>>>>>> origin/Pasit_0207
+backend/prisma/migrations/

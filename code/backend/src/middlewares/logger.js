@@ -40,11 +40,11 @@ function mapToActionType(req, statusCode) {
   const resourceMapping = {
     VEHICLE: { POST: "VEHICLE_CREATED", PUT: "VEHICLE_UPDATED", PATCH: "VEHICLE_UPDATED", DELETE: "VEHICLE_DELETED", GET: "VEHICLE_VIEWED" },
     ROUTE: { POST: "ROUTE_CREATED", PUT: "ROUTE_UPDATED", PATCH: "ROUTE_UPDATED", DELETE: "ROUTE_CANCELLED", GET: "ROUTE_VIEWED" },
-    BOOKING: { POST: "BOOKING_CREATED", PUT: "BOOKING_UPDATED", PATCH: "BOOKING_UPDATED", DELETE: "BOOKING_DELETED", GET: "BOOKING_VIEWED"},
-    REVIEW: { POST: "REVIEW_CREATED", PUT: null, PATCH: null, DELETE: null, GET: null},
-    DRIVER_VERIFICATION: { POST: "DRIVER_VERIFICATION_SUBMITTED",PUT: "DRIVER_VERIFICATION_UPDATED", PATCH: "DRIVER_VERIFICATION_UPDATED", DELETE: null, GET: "DRIVER_LICENSES_VIEWED"},
-    USER: { POST: "USER_REGISTERED", PUT: "PROFILE_UPDATED", PATCH: "PROFILE_UPDATED", DELETE: "USER_DELETED", GET: "PROFILE_VIEWED"},
-    EXPORT: { POST: "USER_DATA_EXPORT_REQUESTED", PUT: null, PATCH: null, DELETE: null, GET: "USER_DATA_EXPORT_REQUESTED"},
+    BOOKING: { POST: "BOOKING_CREATED", PUT: "BOOKING_UPDATED", PATCH: "BOOKING_UPDATED", DELETE: "BOOKING_DELETED", GET: "BOOKING_VIEWED" },
+    REVIEW: { POST: "REVIEW_CREATED", PUT: null, PATCH: null, DELETE: null, GET: null },
+    DRIVER_VERIFICATION: { POST: "DRIVER_VERIFICATION_SUBMITTED", PUT: "DRIVER_VERIFICATION_UPDATED", PATCH: "DRIVER_VERIFICATION_UPDATED", DELETE: null, GET: "DRIVER_LICENSES_VIEWED" },
+    USER: { POST: "USER_REGISTERED", PUT: "PROFILE_UPDATED", PATCH: "PROFILE_UPDATED", DELETE: "USER_DELETED", GET: "PROFILE_VIEWED" },
+    EXPORT: { POST: "USER_DATA_EXPORT_REQUESTED", PUT: null, PATCH: null, DELETE: null, GET: "USER_DATA_EXPORT_REQUESTED" },
   }
 
 
@@ -60,7 +60,7 @@ function extractResourceType(path) {
   const segments = cleanPath.split("/").filter(Boolean);
   const resourceSegment =
     segments[0] === "api" ? segments[1] : segments[0];
-    if (!resourceSegment) return null;
+  if (!resourceSegment) return null;
   const map = {
     auth: "AUTH",
     users: "USER",
@@ -82,7 +82,7 @@ const logger = (req, res, next) => {
   next();
   res.on("finish", async () => {
     try {
-      
+
       const path = req.originalUrl || req.path || "";
 
       if (
@@ -96,9 +96,9 @@ const logger = (req, res, next) => {
       }
 
       const action = mapToActionType(req, res.statusCode);
- 
+
       const ua = uap(req.headers["user-agent"]);
-      const deviceInfo = ua.os.name 
+      const deviceInfo = ua.os.name
         ? `${ua.os.name} ${ua.os.version || ''} (${ua.browser.name || 'Unknown Browser'})`
         : "Unknown Device";
       const metaDataObj = logService.maskPII(req.body);
@@ -109,6 +109,7 @@ const logger = (req, res, next) => {
           : res.statusCode === 401 || res.statusCode === 403
             ? "DENIED"
             : "ERROR";
+      console.log(extractResourceType(path))
 
       await logService.createLog({
         action: action || "UNKNOWN",

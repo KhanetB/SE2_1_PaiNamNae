@@ -17,5 +17,4 @@
 --     DELETE Booking
 -- END
 
-
 REVOKE UPDATE, DELETE ON public."AuditLog" FROM PUBLIC;

@@ -211,7 +211,7 @@
                                     }"
                                 >
                                     <button
-                                        v-if="route.status === 'available'"
+                                        v-if="route.status === 'available' || route.status === 'full'"
                                         @click.stop="confirmTrip(route.id)"
                                         class="px-4 py-2 text-sm text-white bg-green-600 rounded-md hover:bg-green-700"
                                     >
@@ -537,10 +537,25 @@ import TripRouteDetail from "~/components/TripRouteDetail.vue";
 import { useMyRoutes, reasonLabel } from "~/composables/useMyRoutes";
 import { useGoogleMap } from "~/composables/useGoogleMap";
 import { useToast } from "~/composables/useToast";
+import { useAuth } from "~/composables/useAuth";
+import dayjs from "dayjs";
+import buddhistEra from "dayjs/plugin/buddhistEra";
 
-definePageMeta({ middleware: "auth" });
+const { token } = useAuth();
+
+const config = useRuntimeConfig();
+const { $api } = useNuxtApp();
 
 const { toast } = useToast();
+
+// --- State Management ---
+// const activeTab = ref("pending");
+const selectedTripId = ref(null);
+// const isLoading = ref(false);
+// const mapContainer = ref(null);
+// const googleMap = useGoogleMap(mapContainer);
+
+// const { toast } = useToast();
 const mapContainer = ref(null);
 const googleMap = useGoogleMap(mapContainer);
 
@@ -576,7 +591,6 @@ const {
     copyEmail,
 } = useMyRoutes();
 
-const selectedTripId = ref(null);
 
 const selectedLabel = computed(() => {
     if (activeTab.value === "myRoutes") {

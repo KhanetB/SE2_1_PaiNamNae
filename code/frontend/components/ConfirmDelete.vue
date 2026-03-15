@@ -453,7 +453,50 @@ const verifyPassword = async () => {
         isLoading.value = false;
     }
 };
+const deleteAccount = async () => {
+  try {
+    isLoading.value = true;
 
+    // เช็คก่อนว่าลบได้ไหม
+    const check = await $fetch("/users/check-deletion-status", {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    if (!check?.canDelete) {
+      errorMessage.value =
+        check?.message ?? "ไม่สามารถลบบัญชีได้ในขณะนี้";
+      step.value = 6; // ติดพันธะ
+      return;
+    }
+
+    // ส่ง backup ก่อน
+    await sendBackupToEmail();
+
+    // ลบบัญชี
+    await $fetch("/users/me", {
+      method: "DELETE",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    step.value = 5; // สำเร็จ
+  } catch (error) {
+    errorMessage.value =
+      error?.response?._data?.message ??
+      error?.data?.message ??
+      "ไม่สามารถลบบัญชีได้";
+
+    step.value = 6; // error
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 const isValidPassword = computed(() => {
     return password.value.length >= 8;
@@ -544,7 +587,8 @@ const verifyUser = async () => {
     });
 };
 const sendBackupToEmail = async () => {
-    if (!token.value) {
+    try{
+        if (!token.value) {
         throw new Error(
             "Unauthorized: token not found in send backup to email",
         );
@@ -559,6 +603,12 @@ const sendBackupToEmail = async () => {
             email: email.value,
         },
     });
+    
+    }catch(error){
+        console.error("Error sending backup to email: ", error);
+         throw new Error("Failed to send backup to email");
+    }
+    
 };
 
 // เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ
