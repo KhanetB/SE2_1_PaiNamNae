@@ -188,63 +188,15 @@
                     <button
                         class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="!acceptTerms"
-                        @click="goToEmailStep"
+                        @click="goToPasswordStep"
                     >
                         ยืนยันการลบ
                     </button>
                 </div>
             </div>
 
-            <!-- STEP 2: กรอกอีเมลยืนยัน -->
+            <!-- STEP 2: กรอกรหัสผ่านยืนยันตัวตน -->
             <div v-else-if="step === 2">
-                <h3 class="text-center font-semibold text-lg">
-                    กรุณากรอกอีเมลเพื่อยืนยัน
-                </h3>
-                <p class="text-red-600 text-center text-sm">
-                    ข้อมูลจะถูกส่งไปยังอีเมลที่คุณระบุ กรุณาระบุอีเมลให้ถูกต้อง
-                </p>
-                <input
-                    type="email"
-                    v-model="email"
-                    placeholder="กรอกอีเมลของคุณ"
-                    class="w-full border px-3 py-2 rounded-md my-4"
-                />
-
-                <div class="flex justify-center space-x-4">
-                    <button
-                        class="border px-4 py-2 rounded-md"
-                        @click="step = 1"
-                    >
-                        ย้อนกลับ
-                    </button>
-
-                    <button
-                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        :disabled="!isValidEmail || isLoading"
-                        @click="goToPasswordStep"
-                    >
-                        <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
-                        <span v-else class="flex items-center gap-2"
-                            ><svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    fill="white"
-                                    d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"
-                                    class="spinner_P7sC"
-                                />
-                            </svg>
-                            กำลังดำเนินการ...</span
-                        >
-                    </button>
-                </div>
-            </div>
-
-            <!-- STEP 3: กรอกรหัสผ่านยืนยันตัวตน -->
-            <div v-else-if="step === 3">
                 <h3 class="text-center font-semibold text-lg">
                     กรุณากรอกรหัสผ่านเพื่อยืนยันตัวตนก่อนลบบัญชี
                 </h3>
@@ -261,7 +213,7 @@
                 <div class="flex justify-center space-x-4 mt-4">
                     <button
                         class="border px-4 py-2 rounded-md"
-                        @click="step = 2"
+                        @click="step = 1"
                         :disabled="isLoading"
                     >
                         ย้อนกลับ
@@ -291,9 +243,72 @@
                     </button>
                 </div>
             </div>
+            <!--STEP 3:การส่ง OTP ไปยังเมล-->
+            
+            <div v-else-if="step === 3" class="text-center">
 
-            <!-- STEP 4: ปุ่มยืนยันการลบ -->
+            <h3 class="text-lg font-semibold">
+            กำลังส่ง OTP ไปยัง Email ของคุณ
+            </h3>
+
+            <p class="text-gray-500">
+            กรุณารอสักครู่
+            </p>
+            </div>
+
+            <!-- STEP 4: OTP -->
             <div v-else-if="step === 4" class="text-center">
+
+                <h3 class="text-lg font-semibold">
+                    กรุณากรอกหมายเลข OTP
+                </h3>
+
+                <div class="flex justify-center gap-2 my-4">
+
+                    <input
+                        v-for="(digit,index) in otp"
+                        :key="index"
+                        v-model="otp[index]"
+                        maxlength="1"
+                        class="w-12 h-12 border text-center text-xl rounded"
+                        @input="handleOTPInput(index,$event)"
+                    />
+
+                </div>
+
+                <p class="text-red-500 text-sm">
+                    กรุณากรอกภายใน
+                    <span class="font-bold">
+                        {{ otpMinutes }}:{{ otpSeconds }}
+                    </span>
+                </p>
+
+                <p v-if="otpError" class="text-red-500 text-sm mt-2">
+                    {{ otpError }}
+                </p>
+
+                <div class="flex justify-center gap-4 mt-4">
+
+                    <button
+                        class="border px-4 py-2 rounded"
+                        @click="resendOTP"
+                        :disabled="otpTimer > 0"
+                    >
+                        ส่งใหม่
+                    </button>
+
+                    <button
+                        class="bg-red-500 text-white px-6 py-2 rounded"
+                        @click="verifyOTP"
+                    >
+                        ยืนยัน
+                    </button>
+
+                </div>
+
+            </div>
+            <!-- STEP 5: ปุ่มยืนยันการลบ -->
+            <div v-else-if="step === 5" class="text-center">
                 <ExclamationCircleIcon
                     class="w-32 h-32 text-red-600 mx-auto mb-4"
                 />
@@ -332,8 +347,8 @@
                 </div>
             </div>
 
-            <!-- STEP 5: ลบบัญชีสำเร็จ -->
-            <div v-else-if="step === 5" class="text-center">
+            <!-- STEP 6: ลบบัญชีสำเร็จ -->
+            <div v-else-if="step === 6" class="text-center">
                 <div class="py-6">
                     <CheckCircleIcon
                         class="w-32 h-32 text-green-600 mx-auto mb-4 items-center-safe"
@@ -362,8 +377,8 @@
                 </div>
             </div>
 
-            <!-- STEP 6 ถ้้ายังมีพันธะอยู่ ถ้าจะใช้ตรงคอมเม้นอันนี้ก่อนค่อยใช้อันก่อนหน้า-->
-            <div v-else-if="step === 6" class="text-center">
+            <!-- STEP 7 ถ้ายังมีพันธะอยู่ ถ้าจะใช้ตรงคอมเม้นอันนี้ก่อนค่อยใช้อันก่อนหน้า-->
+            <div v-else-if="step === 7" class="text-center">
                 <div class="py-6">
                     <ExclamationCircleIcon
                         class="w-32 h-32 text-red-600 mx-auto mb-4"
@@ -414,6 +429,11 @@ const isLoading = ref(false);
 
 const countDown = ref(5);
 let intervalId = null;
+const otp = ref(["","","","","",""])
+const otpError = ref("")
+
+const otpTimer = ref(300)
+let otpInterval = null
 
 onBeforeUnmount(() => {
     if (intervalId) {
@@ -426,9 +446,9 @@ watch(step, (newStep) => {
     }
 });
 const goToPasswordStep = () => {
-    if (!isValidEmail.value) return;
-    step.value = 3;
-};
+    if (!acceptTerms.value) return
+    step.value = 2
+}
 const verifyPassword = async () => {
     try {
         isLoading.value = true;
@@ -444,15 +464,100 @@ const verifyPassword = async () => {
             },
         });
         // ถ้ารหัสผ่านถูก
-        step.value = 4;
+        step.value = 3;
     } catch (error) {
         errorMessage.value = "รหัสผ่านไม่ถูกต้อง";
-        step.value = 6;
+        step.value = 7;
     } finally {
         password.value = "";
         isLoading.value = false;
     }
 };
+const sendOTP = async () => {
+    try {
+
+        await $fetch("/auth/send-delete-otp", {
+            method: "POST",
+            baseURL: config.public.apiBase,
+            headers: {
+                Authorization: `Bearer ${token.value}`,
+            },
+        });
+
+        step.value = 4;
+
+        startOTPTimer();
+
+    } catch (error) {
+
+        errorMessage.value = "ไม่สามารถส่ง OTP ได้";
+        step.value = 7;
+
+    }
+};
+const startOTPTimer = () => {
+
+    otpTimer.value = 300
+
+    otpInterval = setInterval(() => {
+
+        otpTimer.value--
+
+        if (otpTimer.value <= 0) {
+            clearInterval(otpInterval)
+        }
+
+    }, 1000)
+}
+const otpMinutes = computed(()=>{
+    return String(Math.floor(otpTimer.value / 60)).padStart(2,"0")
+})
+
+const otpSeconds = computed(()=>{
+    return String(otpTimer.value % 60).padStart(2,"0")
+})
+const handleOTPInput = (index,event)=>{
+
+    if(event.target.value && index <5){
+        event.target.nextElementSibling.focus()
+    }
+
+}
+const verifyOTP = async () => {
+
+    try {
+
+        const code = otp.value.join("");
+
+        await $fetch("/auth/verify-delete-otp", {
+            method: "POST",
+            baseURL: config.public.apiBase,
+            headers: {
+                Authorization: `Bearer ${token.value}`,
+            },
+            body: {
+                otp: code,
+            },
+        });
+
+        clearInterval(otpInterval)
+
+        step.value = 5
+
+    } catch (error) {
+
+        otpError.value = "OTP ไม่ถูกต้อง"
+
+    }
+
+}
+const resendOTP = async () => {
+
+    otp.value = ["","","","","",""]
+
+    await sendOTP()
+
+}
 const deleteAccount = async () => {
   try {
     isLoading.value = true;
@@ -638,7 +743,7 @@ const confirmDelete = async () => {
         // useCookie("session").value = null;
 
 
-        step.value = 3;
+        step.value = 6;
     } catch (error) {
         console.error("Error deleting account: ", error.data);
         if (error?.data?.message) {
@@ -652,7 +757,7 @@ const confirmDelete = async () => {
             errorMessage.value = "เกิดข้อผิดพลาด ไม่สามารถลบบัญชีผู้ใช้ได้";
         }
 
-        step.value = 6;
+        step.value = 7;
     } finally {
         isLoading.value = false;
     }
