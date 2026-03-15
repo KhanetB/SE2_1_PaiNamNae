@@ -1,12 +1,13 @@
 const crypto = require("crypto");
 const prisma = require("../utils/prisma");
-const { includes } = require("zod/v4");
 
+const SYSTEM_PRIVATE_KEY = process.env.SYSTEM_PRIVATE_KEY || "";
 /**
  * Compute SHA-256 hash for log entry key field.
  **/
-function computeHash(data) {
+function computeHash(data, previousHash = "GENESIS") {
   const payload = [
+    previousHash,
     data.action,
     data.userId || "",
     data.ipAddress,
@@ -23,11 +24,10 @@ function computeHash(data) {
   return crypto.createHash("sha256").update(payload).digest("hex");
 }
 
-
 async function createLog(data) {
   const now = new Date();
   const logData = {
-     userId: data.userId || null,
+    userId: data.userId || null,
     action: data.action,
     actionTimeStamp: data.actionTimeStamp || now,
     ipAddress: data.ipAddress || "unknown",
@@ -69,7 +69,7 @@ async function getAllLogs(filters = {}) {
     // if (endDate) where.createdAt.lte = new Date(endDate);
     if (endDate) {
       const end = new Date(endDate);
-      end.setHours(23,59,59, 999);
+      end.setHours(23, 59, 59, 999);
       where.createdAt.lte = new Date(end);
     }
   }
@@ -160,7 +160,21 @@ async function verifyChainIntegrity(limit = 500) {
 function logsToCSV(logs, selectedUserFields = []) {
   if (!logs || logs.length === 0) return "";
 
-  const baseHeaders = ["id", "userId", "ipAddress", "action", "createdAt"];
+  const baseHeaders = [
+    "id",
+    "userId",
+    "action",
+    "ipAddress",
+    "userAgent",
+    "deviceInfo",
+    "httpMethod",
+    "endpoint",
+    "resourceType",
+    "httpStatusCode",
+    "accessResult",
+    "metaData",
+    "createdAt",
+  ];
   const headers = [...baseHeaders, ...selectedUserFields];
 
   const rows = logs.map((log) => {
@@ -253,7 +267,7 @@ async function getLogsToExport(filters = {}, selectedUserFields = []) {
     },
   });
 
-  return logs;
+  return logs.map((log) => maskPII(log));
 }
 
 function maskPII(data) {
@@ -282,6 +296,9 @@ function maskPII(data) {
     },
     nationalIdNumber: (val) =>
       val ? val.replace(/(\d{1})\d{8}(\d{4})/, "$1XXXXXXXX$2") : val,
+    username: (val) => (val ? `${val.substring(0, 3)}***` : val),
+    firstName: (val) => (val ? `${val.charAt(0)}***` : val),
+    lastName: (val) => (val ? `${val.charAt(0)}***` : val),
   };
 
   for (const field of sensitiveFields) {
@@ -291,7 +308,63 @@ function maskPII(data) {
   for (const [field, masker] of Object.entries(partialFields)) {
     if (sanitized[field]) sanitized[field] = masker(sanitized[field]);
   }
+
+  if (sanitized.user && typeof sanitized.user === "object") {
+    for (const field of sensitiveFields) {
+      if (sanitized.user[field]) sanitized.user[field] = "[REDACTED]";
+    }
+
+    for (const [field, masker] of Object.entries(partialFields)) {
+      if (sanitized.user[field])
+        sanitized.user[field] = masker(sanitized.user[field]);
+    }
+  }
   return sanitized;
+}
+
+function generateExportSignature(csvContent) {
+  if (!SYSTEM_PRIVATE_KEY) {
+    console.warn(
+      "WARNING: SYSTEM PRIVATE KEY is not set in env. Using dummy signature.",
+    );
+    return "DUMMY_SIGNATURE_NEED_PRIVATE_KEY";
+  }
+
+  const sign = crypto.createSign("SHA256");
+  sign.update(csvContent);
+  sign.end();
+
+  return sign.sign(SYSTEM_PRIVATE_KEY, "base64");
+}
+
+async function exportLogSecurely(
+  filters = {},
+  selectedUserFields = [],
+  adminId,
+  adminIp,
+) {
+  const logs = await getLogsToExport(filters, selectedUserFields);
+
+  const csvContent = logsToCSV(logs, selectedUserFields);
+
+  const signature = generateExportSignature(csvContent);
+
+  await createLog({
+    userId: adminId,
+    action: "ADMIN_LOG_EXPORTED",
+    ipAddress: adminIp,
+    resourceType: "AuditLog",
+    metaData: {
+      exportedRows: logs.length,
+      filtersApplied: filters,
+    },
+  });
+
+  return {
+    csvContent,
+    signature,
+    filename: `audit_export_${new Date().getTime()}.csv`,
+  };
 }
 
 module.exports = {
@@ -301,4 +374,5 @@ module.exports = {
   logsToCSV,
   getLogsToExport,
   maskPII,
+  exportLogSecurely,
 };
