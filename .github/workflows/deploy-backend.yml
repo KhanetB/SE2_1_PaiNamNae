@@ -3,8 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: ["main"]
-    paths:
-      - "code/backend/**"
+    paths: 
+      - 'code/backend/**'
 
 env:
   REGISTRY: ghcr.io
@@ -13,7 +13,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions:
+    permissions: 
       contents: read
       packages: write
 
@@ -21,69 +21,58 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Convert Image Name to lowercase
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Log in to GHCR
+      - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Lowercase Image Name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Build and push docker image
         uses: docker/build-push-action@v5
         with:
           context: ./code/backend
           push: true
-          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
   deploy:
     needs: build-and-push
     runs-on: self-hosted
+    permissions:
+      contents: read 
+      packages: read 
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Convert Image Name to lowercase
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Login to GHCR
+      - name: Lowercase Image Name
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-      - name: Create .env file
-        shell: bash
-        env:
-          PRIVATE_KEY: ${{ secrets.SYSTEM_PRIVATE_KEY }}
-          PUBLIC_KEY: ${{ secrets.SYSTEM_PUBLIC_KEY }}
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Create .env file 
         run: |
-          # สร้างไฟล์ .env และเขียนค่าทั่วไป
-          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" > .env
           echo "PORT=3000" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
-          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
-          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
-          echo "NUXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" >> .env
-          echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
-          echo "ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}" >> .env
-          echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
-          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
-          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
+          echo "${{ secrets.ENV_FILE }}" > .env
+
           echo "NODE_ENV=production" >> .env
-
-          # ใช้ printf เพื่อรักษาความถูกต้องของ RSA Keys ที่มีหลายบรรทัด
-          printf "SYSTEM_PRIVATE_KEY=\"$PRIVATE_KEY\"\n" >> .env
-          printf "SYSTEM_PUBLIC_KEY=\"$PUBLIC_KEY\"\n" >> .env
-
-      - name: Pull new Docker image
-        run: docker compose pull
-
-      - name: Restart containers
-        run: docker compose up -d
-
-      - name: Clean unused images
-        run: docker image prune -af
+      - name: Check .env file
+        run: |
+          cat .env
+      - name: Pull and Restart
+        run: |
+          
+          docker compose pull
+          
+          docker compose up -d
+          
+          docker image prune -f
+        env:
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
