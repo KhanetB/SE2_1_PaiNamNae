@@ -18,6 +18,7 @@ const { metricsMiddleware } = require("./src/middlewares/metrics");
 const ensureAdmin = require("./src/bootstrap/ensureAdmin");
 const { startCleanuoCron } = require("./src/cron/cleanupCron");
 const exportRoutes = require("./src/routes/export.routes");
+const logger = require("./src/middlewares/logger");
 
 const app = express();
 promClient.collectDefaultMetrics();
@@ -27,9 +28,11 @@ app.use(helmet());
 const corsOptions = {
   origin: [
     "http://localhost:3001",
+    "http://localhost:3002",
     "https://amazing-crisp-9bcb1a.netlify.app",
     "https://backend-se.pasitlab.com",
     "https://csse1669.cpkku.com",
+    "https://backend-se.pasitgut.com"
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -49,6 +52,10 @@ app.use(express.json());
 //     legacyHeaders: false,
 // });
 // app.use(limiter);
+
+// Logger Middleware
+app.set("etag", false);
+app.use(logger);
 
 //Metrics Middleware
 app.use(metricsMiddleware);
@@ -79,6 +86,9 @@ app.use("/api", routes);
 
 // Export Data Route
 app.use("/api/export", exportRoutes);
+
+// Export Data Route
+app.use('/api/export', exportRoutes);
 
 app.use((req, res, next) => {
   next(new ApiError(404, `Cannot ${req.method} ${req.originalUrl}`));

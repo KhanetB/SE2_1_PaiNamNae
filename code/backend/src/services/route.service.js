@@ -396,7 +396,7 @@ const startRoute = async (routeId, driverId) => {
     throw new ApiError(400, 'Route is already in transit');
   }
 
-  if (route.status !== RouteStatus.AVAILABLE) {
+  if (route.status !== RouteStatus.AVAILABLE && route.status !== RouteStatus.FULL) {
     throw new ApiError(400, 'Route is not in a state that can be started');
   }
 
@@ -411,7 +411,7 @@ const startRoute = async (routeId, driverId) => {
   });
 
   if (pendingBooking) {
-    throw new ApiError(400,'Cannot start route with pending bookings. Please confirm or reject all bookings first.');
+    throw new ApiError(400, 'Cannot start route with pending bookings. Please confirm or reject all bookings first.');
   }
 
   // Update route
@@ -482,7 +482,7 @@ const completeRoute = async (routeId, driverId) => {
       completedAt: new Date(),
     },
   });
-  return updatedRoute;  
+  return updatedRoute;
 }
 
 

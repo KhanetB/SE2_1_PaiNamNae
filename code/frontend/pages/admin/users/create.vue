@@ -180,14 +180,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import AdminHeader from '~/components/admin/AdminHeader.vue'
 import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
+import { useAdminSidebar } from '~/composables/useAdminSidebar'
+import { formatDate } from '~/utils/date'
 
 definePageMeta({ middleware: ['admin-auth'] })
 
 const { toast } = useToast()
+useAdminSidebar()
 
 // ---------- STATE ----------
 const form = reactive({
@@ -217,62 +220,7 @@ useHead({
     link: [{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' }]
 })
 
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
 
-function defineGlobalScripts() {
-    window.toggleSidebar = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const toggleIcon = document.getElementById('toggle-icon')
-        if (!sidebar || !mainContent) return
-        sidebar.classList.toggle('collapsed')
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '80px'
-            if (toggleIcon) toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right')
-        } else {
-            mainContent.style.marginLeft = '280px'
-            if (toggleIcon) toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left')
-        }
-    }
-
-    window.toggleMobileSidebar = function () {
-        const sidebar = document.getElementById('sidebar')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !overlay) return
-        sidebar.classList.toggle('mobile-open')
-        overlay.classList.toggle('hidden')
-    }
-
-    // window.closeMobileSidebar = function () {
-    //     const sidebar = document.getElementById('sidebar')
-    //     const overlay = document.getElementById('overlay')
-    //     if (!sidebar || !overlay) return
-    //     sidebar.classList.remove('mobile-open')
-    //     overlay.classList.add('hidden')
-    // }
-
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar')
-        const mainContent = document.getElementById('main-content')
-        const overlay = document.getElementById('overlay')
-        if (!sidebar || !mainContent || !overlay) return
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open')
-            overlay.classList.add('hidden')
-            mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '280px'
-        } else {
-            mainContent.style.marginLeft = '0'
-        }
-    }
-
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
 
 function cleanupGlobalScripts() {
     window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
@@ -283,10 +231,7 @@ function cleanupGlobalScripts() {
 }
 
 onMounted(() => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
 })
-onUnmounted(() => { cleanupGlobalScripts() })
 
 // ---------- FILE PICKERS ----------
 function pick(refName) {

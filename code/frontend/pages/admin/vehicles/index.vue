@@ -1,10 +1,6 @@
 <template>
     <div>
-        <AdminHeader />
-        <AdminSidebar />
-
-        <main id="main-content" class="main-content mt-16 ml-0 lg:ml-[280px] p-6">
-            <div class="mx-auto max-w-8xl">
+        <div class="mx-auto max-w-8xl">
                 <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex items-center gap-3">
                         <h1 class="text-2xl font-semibold text-gray-800">Vehicle Management</h1>
@@ -199,10 +195,6 @@
                     </div>
                 </div>
             </div>
-        </main>
-
-        <div id="overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden"
-            @click="closeMobileSidebar"></div>
 
         <ConfirmModal :show="showDelete" :title="`ลบยานพาหนะ : ${deletingVehicle?.licensePlate || ''}`"
             message="การลบนี้เป็นการลบถาวร ข้อมูลทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้ คุณต้องการดำเนินการต่อหรือไม่?"
@@ -211,18 +203,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRuntimeConfig, useCookie } from '#app'
-import dayjs from 'dayjs'
-import 'dayjs/locale/th'
-import AdminHeader from '~/components/admin/AdminHeader.vue'
-import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import ConfirmModal from '~/components/ConfirmModal.vue'
 import { useToast } from '~/composables/useToast'
+import { formatDate } from '~/utils/date'
 
-dayjs.locale('th')
-
-definePageMeta({ middleware: ['admin-auth'] })
+definePageMeta({ layout: 'admin', middleware: ['admin-auth'] })
 useHead({
     title: 'Vehicle Management • Admin',
     link: [{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' }]
@@ -234,13 +221,6 @@ const isLoading = ref(true)
 const loadError = ref('')
 const vehicles = ref([])
 
-const pagination = reactive({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 1
-})
-
 const filters = reactive({
     q: '',
     vehicleType: '',  // SEDAN | SUV | PICKUP | VAN | MOTORCYCLE | ''
@@ -249,31 +229,9 @@ const filters = reactive({
     sort: 'createdAt:desc',
 })
 
-const totalPages = computed(() =>
-    Math.max(1, pagination.totalPages || Math.ceil((pagination.total || 0) / (pagination.limit || 10)))
-)
+import { usePagination } from '~/composables/usePagination'
 
-const pageButtons = computed(() => {
-    const total = totalPages.value
-    const current = pagination.page
-    if (!total || total < 1) return []
-    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
-    const set = new Set([1, total, current])
-    if (current > 2) set.add(current - 1)
-    if (current < total - 1) set.add(current + 1)
-    const pages = Array.from(set).sort((a, b) => a - b)
-    const out = []
-    for (let i = 0; i < pages.length; i++) {
-        if (i > 0 && pages[i] - pages[i - 1] > 1) out.push('…')
-        out.push(pages[i])
-    }
-    return out
-})
-
-function formatDate(iso, withTime = false) {
-  if (!iso) return '-'
-  return withTime ? dayjs(iso).format('D MMMM YYYY HH:mm') : dayjs(iso).format('D MMMM YYYY')
-}
+const { pagination, totalPages, pageButtons, setPagination } = usePagination(10)
 
 function parseSort(s) {
     const [by, order] = (s || '').split(':')
@@ -311,11 +269,7 @@ async function fetchVehicles(page = 1) {
         })
 
         vehicles.value = res?.data || []
-        const p = res?.pagination || {}
-        pagination.page = Number(p.page ?? page)
-        pagination.limit = Number(p.limit ?? pagination.limit)
-        pagination.total = Number(p.total ?? vehicles.value.length)
-        pagination.totalPages = Number(p.totalPages ?? Math.ceil(pagination.total / pagination.limit))
+        setPagination(res?.pagination || {}, page, vehicles.value.length)
     } catch (err) {
         console.error("Fetch Vehicles Error:", err)
         loadError.value = err?.data?.message || 'ไม่สามารถโหลดข้อมูลยานพาหนะได้'
@@ -397,126 +351,8 @@ function onEditVehicle(v) {
 /* --------------------------------- */
 
 
-/* ---------- Global Sidebar Scripts (Required for layout) ---------- */
-function closeMobileSidebar() {
-    const sidebar = document.getElementById('sidebar')
-    const overlay = document.getElementById('overlay')
-    if (!sidebar || !overlay) return
-    sidebar.classList.remove('mobile-open')
-    overlay.classList.add('hidden')
-}
-
-function defineGlobalScripts() {
-    window.toggleSidebar = function () {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const toggleIcon = document.getElementById('toggle-icon');
-        if (!sidebar || !mainContent || !toggleIcon) return;
-        sidebar.classList.toggle('collapsed');
-        if (sidebar.classList.contains('collapsed')) {
-            mainContent.style.marginLeft = '80px';
-            toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
-        } else {
-            mainContent.style.marginLeft = '280px';
-            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
-        }
-    }
-    window.toggleMobileSidebar = function () {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('overlay');
-        if (!sidebar || !overlay) return;
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('hidden');
-    }
-    window.toggleSubmenu = function (menuId) {
-        const menu = document.getElementById(menuId);
-        const icon = document.getElementById(menuId + '-icon');
-        if (!menu || !icon) return;
-        menu.classList.toggle('hidden');
-        if (menu.classList.contains('hidden')) {
-            icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-        } else {
-            icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-        }
-    }
-    window.__adminResizeHandler__ = function () {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        const overlay = document.getElementById('overlay');
-        if (!sidebar || !mainContent || !overlay) return;
-        if (window.innerWidth >= 1024) {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.add('hidden');
-            if (sidebar.classList.contains('collapsed')) {
-                mainContent.style.marginLeft = '80px';
-            } else {
-                mainContent.style.marginLeft = '280px';
-            }
-        } else {
-            mainContent.style.marginLeft = '0';
-        }
-    }
-    window.addEventListener('resize', window.__adminResizeHandler__)
-}
-
-function cleanupGlobalScripts() {
-    window.removeEventListener('resize', window.__adminResizeHandler__ || (() => { }))
-    delete window.toggleSidebar
-    delete window.toggleMobileSidebar
-    delete window.toggleSubmenu
-    delete window.__adminResizeHandler__
-}
-
 onMounted(() => {
-    defineGlobalScripts()
-    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__();
     fetchVehicles(1)
 })
-
-onUnmounted(() => {
-    cleanupGlobalScripts()
-})
-/* ----------------------------------------------------------------- */
-
 </script>
 
-<style>
-/* Global styles for admin layout, same as users/index.vue */
-.sidebar {
-    transition: width 0.3s ease;
-}
-.sidebar.collapsed {
-    width: 80px;
-}
-.sidebar:not(.collapsed) {
-    width: 280px;
-}
-.sidebar-item {
-    transition: all 0.3s ease;
-}
-.sidebar-item:hover {
-    background-color: rgba(59, 130, 246, 0.05);
-}
-.sidebar.collapsed .sidebar-text {
-    display: none;
-}
-.sidebar.collapsed .sidebar-item {
-    justify-content: center;
-}
-.main-content {
-    transition: margin-left 0.3s ease;
-}
-@media (max-width: 1024px) {
-    .sidebar {
-        position: fixed;
-        z-index: 1000;
-        transform: translateX(-100%);
-    }
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-    .main-content {
-        margin-left: 0 !important;
-    }
-}
-</style>
