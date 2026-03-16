@@ -58,7 +58,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.SYSTEM_PRIVATE_KEY }}
           PUBLIC_KEY: ${{ secrets.SYSTEM_PUBLIC_KEY }}
         run: |
-          # สร้างไฟล์ .env และเขียนค่าทั่วไป
+          # 1. สร้างไฟล์ .env ชั่วคราวใน workspace
           echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" > .env
           echo "PORT=3000" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
@@ -75,15 +75,22 @@ jobs:
           echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
           echo "NODE_ENV=production" >> .env
 
-          # ใช้ printf เพื่อรักษาความถูกต้องของ RSA Keys ที่มีหลายบรรทัด
+          # 2. ใช้ printf เพื่อรักษา format ของ RSA Keys (Newlines)
           printf "SYSTEM_PRIVATE_KEY=\"$PRIVATE_KEY\"\n" >> .env
           printf "SYSTEM_PUBLIC_KEY=\"$PUBLIC_KEY\"\n" >> .env
 
+          # 3. ก๊อปปี้ไฟล์ .env ไปวางที่โฟลเดอร์โครงการหลักใน VM
+          cp .env ~/se_project/.env
+
       - name: Pull new Docker image
-        run: docker compose pull
+        run: |
+          cd ~/se_project
+          docker compose pull
 
       - name: Restart containers
-        run: docker compose up -d
+        run: |
+          cd ~/se_project
+          docker compose up -d
 
       - name: Clean unused images
         run: docker image prune -af
