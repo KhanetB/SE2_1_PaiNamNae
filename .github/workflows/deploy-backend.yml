@@ -57,15 +57,11 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Create .env file 
+      - name: Create .env file
         run: |
-          echo "PORT=3000" >> .env
-          echo "${{ secrets.ENV_FILE }}" > .env
-
-          echo "NODE_ENV=production" >> .env
-      - name: Check .env file
-        run: |
-          cat .env
+          cat <<EOF > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
       - name: Pull and Restart
         run: |
           
