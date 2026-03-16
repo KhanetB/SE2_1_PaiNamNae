@@ -247,6 +247,10 @@
             
             <div v-else-if="step === 3" class="text-center">
 
+            <div class="w-25 h-25 flex items-center justify-center bg-blue-500 rounded-full mx-auto mb-4">
+            <i class="fa-solid fa-envelope text-6xl text-white"></i>
+            </div>
+
             <h3 class="text-lg font-semibold">
             กำลังส่ง OTP ไปยัง Email ของคุณ
             </h3>
@@ -465,6 +469,8 @@ const verifyPassword = async () => {
         });
         // ถ้ารหัสผ่านถูก
         step.value = 3;
+        
+        await sendOTP();
     } catch (error) {
         errorMessage.value = "รหัสผ่านไม่ถูกต้อง";
         step.value = 7;
