@@ -38,31 +38,51 @@ jobs:
           context: ./code/backend
           push: true
           tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+          deploy:
+            needs: build-and-push
+            runs-on: self-hosted
+            steps:
+              - name: Checkout repository
+                uses: actions/checkout@v4
 
-  deploy:
-    needs: build-and-push
-    runs-on: self-hosted
+              - name: Convert Image Name to lowercase
+                run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-    permissions:
-      contents: read
-      packages: read
+              - name: Login to GHCR
+                run: |
+                  echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+              - name: Create .env file
+                shell: bash
+                env:
+                  PRIVATE_KEY: ${{ secrets.SYSTEM_PRIVATE_KEY }}
+                  PUBLIC_KEY: ${{ secrets.SYSTEM_PUBLIC_KEY }}
+                run: |
+                  # สร้างไฟล์ .env
+                  echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" > .env
+                  echo "PORT=3000" >> .env
+                  echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+                  echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+                  echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+                  echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+                  echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+                  echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
+                  echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
+                  echo "ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}" >> .env
+                  echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
+                  echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
+                  echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
+                  echo "NODE_ENV=production" >> .env
 
-      - name: Convert Image Name to lowercase
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+                  # ใช้ printf เพื่อรักษา Newlines ของ RSA Keys
+                  printf "SYSTEM_PRIVATE_KEY=\"$PRIVATE_KEY\"\n" >> .env
+                  printf "SYSTEM_PUBLIC_KEY=\"$PUBLIC_KEY\"\n" >> .env
 
-      - name: Login to GHCR
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          
-      - name: Pull new Docker image
-        run: docker compose pull
+              - name: Pull new Docker image
+                run: docker compose pull
 
-      - name: Restart containers
-        run: docker compose up -d
+              - name: Restart containers
+                run: docker compose up -d
 
-      - name: Clean unused images
-        run: docker image prune -af
+              - name: Clean unused images
+                run: docker image prune -af
