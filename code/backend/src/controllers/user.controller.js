@@ -1,5 +1,7 @@
 const asyncHandler = require("express-async-handler");
+const bcrypt = require("bcrypt");
 const userService = require("../services/user.service");
+const otpService = require("../services/otp.service");
 const ApiError = require("../utils/ApiError");
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const notifService = require("../services/notification.service");
@@ -275,6 +277,78 @@ const handleAccountDeletion = async (req, res, next) => {
   }
 };
 
+const requestDeleteOtp = asyncHandler(async (req, res) => {
+  const userId = req.user.sub; // ใช้ req.user.sub ตามสไตล์โค้ดเดิมของคุณ
+  const { password } = req.body;
+
+  if (!password) {
+    throw new ApiError(400, "กรุณาระบุรหัสผ่านเพื่อยืนยันตัวตน");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    throw new ApiError(404, "ไม่พบผู้ใช้งาน");
+  }
+
+  // ตรวจสอบรหัสผ่าน
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new ApiError(401, "รหัสผ่านไม่ถูกต้อง");
+  }
+
+  // สร้างและส่ง OTP
+  await otpService.generateAndSendDeleteOtp(userId, user.email);
+
+  res.status(200).json({
+    success: true,
+    message: "ระบบได้ส่งรหัส OTP ไปยังอีเมลของคุณแล้ว (รหัสมีอายุ 5 นาที)",
+  });
+});
+
+const confirmDeleteAccount = asyncHandler(async (req, res) => {
+  const userId = req.user.sub;
+  const { otp } = req.body;
+
+  if (!otp) {
+    throw new ApiError(400, "กรุณาระบุรหัส OTP");
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new ApiError(404, "ไม่พบผู้ใช้งาน");
+
+  try {
+    // ตรวจสอบ OTP ผ่าน otpService
+    await otpService.verifyDeleteOtp(userId, otp);
+  } catch (error) {
+    // จัดการ Error ที่ throw มาจาก otp.service.js
+    if (error.message === "OTP_EXPIRED") throw new ApiError(400, "รหัส OTP หมดอายุแล้ว กรุณาทำรายการใหม่");
+    if (error.message === "INVALID_OTP") throw new ApiError(400, "รหัส OTP ไม่ถูกต้อง");
+    if (error.message === "OTP_NOT_REQUESTED") throw new ApiError(400, "ไม่พบคำขอ OTP กรุณาทำรายการใหม่");
+    throw new ApiError(500, "เกิดข้อผิดพลาดในการตรวจสอบ OTP");
+  }
+
+  // --- เมื่อ OTP ถูกต้อง ดำเนินการตาม Pipeline ---
+  
+  // 1. สร้างข้อมูล PDPA Backup
+  console.log("Generating PDPA data...");
+  const userData = await exportService.generateUserData(userId);
+
+  // 2. ส่งข้อมูล Backup ไปทางอีเมล
+  console.log(`Sending backup to ${user.email}...`);
+  await emailService.sendBackupEmail(user.email, userData);
+
+  // 3. ดำเนินการลบบัญชี (ใช้ Soft Delete ตามโครงสร้างเดิม)
+  // หากต้องการให้เป็น Hard Delete สามารถเปลี่ยนเป็น prisma.user.delete ได้
+  const deletedUser = await userService.softDeleteUser(userId, "USER");
+
+  res.status(200).json({
+    success: true,
+    message: "ลบบัญชีเสร็จสิ้น และระบบได้ส่งข้อมูลสำรองไปยังอีเมลของคุณเรียบร้อยแล้ว",
+    data: { deletedUserId: deletedUser.id }
+  });
+});
+
+
 module.exports = {
   adminListUsers,
   getAllUsers,
@@ -289,4 +363,6 @@ module.exports = {
   deleteUserController,
   checkUserDeletionStatus,
   handleAccountDeletion,
+  requestDeleteOtp,
+  confirmDeleteAccount,
 };
