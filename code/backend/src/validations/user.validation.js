@@ -3,7 +3,7 @@ const { Role } = require('@prisma/client')
 
 const createUserSchema = z.object({
     email: z.string().email("Invalid email format"),
-    username: z.string().min(6, "username is require"),
+    username: z.string().min(4, "username is require"),
     password: z.string().min(8, "password must be at least 8 characters"),
     firstName: z.string().min(1, "firstname is require"),
     lastName: z.string().min(1, "lastname is require"),

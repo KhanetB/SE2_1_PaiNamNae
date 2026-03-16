@@ -1,0 +1,39 @@
+info:
+  name: TC07_PassengerConfirmArrived
+  type: http
+  seq: 8
+
+http:
+  method: PATCH
+  url: http://localhost:3000/api/bookings/{{booking_id}}/passenger-confirm-dropoff
+  headers:
+    - name: Authorization
+      value: Bearer {{passenger_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "status": "COMPLETED"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("get HTTP 200",function(){
+          const status = res.getStatus();
+          expect(status).to.equal(200);
+        })
+
+        test("update booking status success", function(){
+          const body = res.getBody();
+          expect(body.success).to.equal(true);
+          expect(body.data.status).to.equal("PASSENGER_CONFIRMED_ARRIVAL")
+        })
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
