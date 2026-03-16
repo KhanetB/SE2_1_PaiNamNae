@@ -50,7 +50,6 @@ jobs:
 
       - name: Lowercase Image Name
         run: |
-          # แปลงเป็นตัวเล็กเก็บไว้ใช้ใน Job นี้
           echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
@@ -58,15 +57,21 @@ jobs:
 
       - name: Create .env file 
         run: |
-          # เขียนค่าจาก Secret ลงไฟล์ก่อน
-          echo "${{ secrets.ENV_FILE }}" > .env
-          echo "PORT=3000" >> .env
-          echo "NODE_ENV=production" >> .env
-          # ใส่ชื่อ Image ตัวเล็กลงในไฟล์ .env
-          echo "IMAGE_NAME=${{ env.IMAGE_NAME_LOWER }}" >> .env
+          # ใช้ cat เพื่อรับข้อมูลหลายบรรทัดจาก Secret และเขียนลงไฟล์ .env ทีเดียว
+          cat << 'EOF' > .env
+          ${{ secrets.ENV_FILE }}
+          NODE_ENV=production
+          # ดึงชื่อ Image ตัวเล็กมาใส่เพื่อให้ Docker Compose รู้จัก
+          IMAGE_NAME=${{ env.IMAGE_NAME_LOWER }}
+          EOF
+
+      - name: Check .env file (Debug)
+        run: |
+          # ตรวจสอบว่ามี DATABASE_URL อยู่ในไฟล์จริงไหม (จะแสดงแค่ชื่อตัวแปร ค่าจริงจะเป็น ***)
+          grep "DATABASE_URL" .env || echo "DATABASE_URL NOT FOUND!"
 
       - name: Pull and Restart
-        # บรรทัดสำคัญ: บังคับให้ docker compose เห็น IMAGE_NAME เป็นตัวพิมพ์เล็ก
+        # บังคับใช้ตัวแปรชื่อ Image ตัวพิมพ์เล็ก
         env:
           IMAGE_NAME: ${{ env.IMAGE_NAME_LOWER }}
         run: |
