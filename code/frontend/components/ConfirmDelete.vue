@@ -181,7 +181,7 @@
         <h3 class="text-center font-semibold text-lg">
           กรุณากรอกรหัสผ่านเพื่อยืนยันตัวตนก่อนลบบัญชี
         </h3>
-        <p class="text-red-600 text-center text-sm">
+        <p class="text-red-600 text-center text-sm mb-4">
           กรุณาระบุรหัสผ่านของคุณเพื่อยืนยันตัวตนก่อนดำเนินการลบบัญชีผู้ใช้
         </p>
         <input
@@ -190,6 +190,18 @@
           placeholder="กรอกรหัสผ่านของคุณ"
           class="w-full border px-3 py-2 rounded-md my-4"
         />
+
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-4">
+          <p class="text-sm font-medium text-gray-700 mb-2">
+            OTP และข้อมูลจะถูกส่งไปที่:
+          </p>
+          <p class="text-sm font-semibold text-blue-600 break-all">
+            {{ loadedEmail || "กำลังโหลด..." }}
+          </p>
+          <p class="text-xs text-gray-600 mt-2">
+            โปรดตรวจสอบให้แน่ใจว่าอีเมลนี้ถูกต้อง
+          </p>
+        </div>
 
         <div class="flex justify-center space-x-4 mt-4">
           <button
@@ -205,7 +217,7 @@
             :disabled="!isValidPassword || isLoading"
             @click="verifyPassword"
           >
-            <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
+            <span v-if="!isLoading">ส่ง OTP</span>
             <span v-else class="flex items-center gap-2"
               ><svg
                 width="24"
@@ -235,12 +247,28 @@
 
         <h3 class="text-lg font-semibold">กำลังส่ง OTP ไปยัง Email ของคุณ</h3>
 
-        <p class="text-gray-500">กรุณารอสักครู่</p>
+        <p class="text-gray-500 mb-4">กรุณารอสักครู่</p>
+
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <p class="text-sm text-gray-700">
+            OTP จะถูกส่งไปที่: <span class="font-semibold text-blue-600">{{ email }}</span>
+          </p>
+        </div>
       </div>
 
       <!-- STEP 4: OTP -->
       <div v-else-if="step === 4" class="text-center">
-        <h3 class="text-lg font-semibold">กรุณากรอกหมายเลข OTP</h3>
+        <h3 class="text-lg font-semibold mb-4">กรุณากรอกหมายเลข OTP</h3>
+
+        <!-- Email Confirmation -->
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-3 mb-6">
+          <p class="text-sm text-gray-700">
+            OTP ได้ถูกส่งไปที่: <span class="font-semibold text-blue-600">{{ email }}</span>
+          </p>
+          <p class="text-xs text-gray-600 mt-1">
+            กรุณาตรวจสอบอีเมลของคุณ
+          </p>
+        </div>
 
         <div class="flex justify-center gap-2 my-4">
           <input
@@ -248,8 +276,11 @@
             :key="index"
             v-model="otp[index]"
             maxlength="1"
+            type="text"
+            inputmode="numeric"
             class="w-12 h-12 border text-center text-xl rounded"
             @input="handleOTPInput(index, $event)"
+            @keydown="handleOTPKeydown(index, $event)"
           />
         </div>
 
@@ -265,6 +296,13 @@
         <div class="flex justify-center gap-4 mt-4">
           <button
             class="border px-4 py-2 rounded"
+            @click="cancelDelete"
+          >
+            ยกเลิก
+          </button>
+
+          <button
+            class="border px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             @click="resendOTP"
             :disabled="otpTimer > 0"
           >
@@ -272,33 +310,15 @@
           </button>
 
           <button
-            class="bg-red-500 text-white px-6 py-2 rounded"
+            class="bg-red-500 text-white px-6 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
             @click="verifyOTP"
+            :disabled="otp.join('').length !== 6 || isLoading"
           >
-            ยืนยัน
-          </button>
-        </div>
-      </div>
-      <!-- STEP 5: ปุ่มยืนยันการลบ -->
-      <div v-else-if="step === 5" class="text-center">
-        <ExclamationCircleIcon class="w-32 h-32 text-red-600 mx-auto mb-4" />
-        <h3 class="text-red-600 font-bold mb-4">
-          คุณแน่ใจหรือไม่ว่าต้องการลบบัญชีนี้?
-        </h3>
-        <div class="flex justify-center space-x-4 mt-4">
-          <button class="border px-4 py-2 rounded-md" @click="step = 3">
-            ย้อนกลับ
-          </button>
-          <button
-            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="isLoading"
-            @click="confirmDelete"
-          >
-            <span v-if="!isLoading">ยืนยันการลบบัญชี</span>
+            <span v-if="!isLoading">ยืนยัน</span>
             <span v-else class="flex items-center gap-2"
               ><svg
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -308,7 +328,7 @@
                   class="spinner_P7sC"
                 />
               </svg>
-              กำลังดำเนินการ...</span
+              กำลังตรวจสอบ...</span
             >
           </button>
         </div>
@@ -386,6 +406,7 @@ const emit = defineEmits(["close", "confirm"]);
 const step = ref(1);
 const acceptTerms = ref(false);
 const email = ref("");
+const loadedEmail = ref("");
 const password = ref("");
 const errorMessage = ref("");
 const isLoading = ref(false);
@@ -402,19 +423,26 @@ onBeforeUnmount(() => {
   if (intervalId) {
     clearInterval(intervalId);
   }
-});
-watch(step, (newStep) => {
-  if (newStep == 5) {
-    startCountdown();
+  if (otpInterval) {
+    clearInterval(otpInterval);
   }
 });
-const goToPasswordStep = () => {
+
+const goToPasswordStep = async () => {
   if (!acceptTerms.value) return;
+  // เคลียร์ข้อมูลเก่าทั้งหมด
+  errorMessage.value = "";
+  otpError.value = "";
+  otp.value = ["", "", "", "", "", ""];
+  password.value = "";
+  await fetchUserEmail();
   step.value = 2;
 };
+
 const verifyPassword = async () => {
   try {
     isLoading.value = true;
+    errorMessage.value = ""; // เคลียร์เมื่อเริ่มต้น
 
     const res = await $fetch("/auth/verify-user", {
       method: "POST",
@@ -426,21 +454,76 @@ const verifyPassword = async () => {
         password: password.value,
       },
     });
-    // ถ้ารหัสผ่านถูก
-    step.value = 3;
 
+    // ✅ Step 1: ยืนยันรหัสผ่านสำเร็จ
+
+    // ✅ Step 2: ตรวจสอบสถานะการลบ
+    const deletionStatus = await $fetch("/users/check-deletion-status", {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+
+    console.log("📋 Deletion Status:", deletionStatus);
+
+    // ถ้าไม่สามารถลบได้
+    if (!deletionStatus?.canDelete) {
+      errorMessage.value = deletionStatus?.message || "ไม่สามารถลบบัญชีได้ในขณะนี้";
+      step.value = 7;
+      return;
+    }
+
+    // ✅ Step 3: สถานะการลบ OK - ดึง email จาก user profile
+    await fetchUserEmail();
+    
+    // ถ้ารหัสผ่านถูก + สามารถลบได้ ไปที่ step loading
+    errorMessage.value = ""; // เคลียร์ก่อนไปยัง step ต่อไป
+    step.value = 3;
     await sendOTP();
   } catch (error) {
-    errorMessage.value = "รหัสผ่านไม่ถูกต้อง";
+    errorMessage.value = error?.data?.message || "รหัสผ่านไม่ถูกต้อง";
     step.value = 7;
   } finally {
-    password.value = "";
     isLoading.value = false;
   }
 };
+
+const fetchUserEmail = async () => {
+  try {
+    console.log("🔍 Token:", token.value);
+    console.log("🔍 API Base:", config.public.apiBase);
+    
+    const userProfile = await $fetch("/users/me", {
+      method: "GET",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+    });
+    
+    console.log("📧 User profile:", userProfile);
+    
+    if (userProfile?.data?.email) {
+      email.value = userProfile.data.email;
+      loadedEmail.value = userProfile.data.email;
+      console.log("✅ Email loaded:", loadedEmail.value);
+    } else {
+      console.warn("⚠️ No email in profile response");
+      loadedEmail.value = "ไม่พบอีเมลในโปรไฟล์";
+    }
+  } catch (error) {
+    console.error("❌ Error fetching user email:", error);
+    console.error("Error response:", error.data);
+    loadedEmail.value = `ข้อผิดพลาด: ${error.data?.message || error.message}`;
+  }
+};
+
 const sendOTP = async () => {
   console.log("Password Send OTP: ", password.value);
   try {
+    errorMessage.value = ""; // เคลียร์ error
     await $fetch("/users/me/delete/request-otp", {
       method: "POST",
       baseURL: config.public.apiBase,
@@ -452,14 +535,17 @@ const sendOTP = async () => {
       },
     });
 
+    // เคลียร์ error ก่อนไปยัง step 4
+    errorMessage.value = "";
+    otpError.value = "";
     step.value = 4;
-
     startOTPTimer();
   } catch (error) {
     errorMessage.value = "ไม่สามารถส่ง OTP ได้";
     step.value = 7;
   }
 };
+
 const startOTPTimer = () => {
   otpTimer.value = 300;
 
@@ -471,6 +557,7 @@ const startOTPTimer = () => {
     }
   }, 1000);
 };
+
 const otpMinutes = computed(() => {
   return String(Math.floor(otpTimer.value / 60)).padStart(2, "0");
 });
@@ -478,15 +565,47 @@ const otpMinutes = computed(() => {
 const otpSeconds = computed(() => {
   return String(otpTimer.value % 60).padStart(2, "0");
 });
+
 const handleOTPInput = (index, event) => {
-  if (event.target.value && index < 5) {
-    event.target.nextElementSibling.focus();
+  const input = event.target;
+  const value = input.value;
+
+  // ถ้ากรอกเลข ให้ย้ายไปกำแพงถัดไป
+  if (value && index < 5) {
+    otp.value[index] = value.slice(-1); // เก็บแค่ตัวสุดท้าย
+    input.nextElementSibling.focus();
+  }
+  // ถ้าลบ (backspace) และกำแพงปัจจุบันว่าง ให้ย้ายกลับไปกำแพงก่อนหน้า
+  else if (!value && index > 0) {
+    input.previousElementSibling.focus();
   }
 };
-const verifyOTP = async () => {
-  try {
-    const code = otp.value.join("");
 
+const handleOTPKeydown = (index, event) => {
+  // ถ้ากด Backspace และกำแพงปัจจุบันว่าง ให้ย้ายไปยัง box ก่อนหน้า
+  if (event.key === "Backspace" && !otp.value[index] && index > 0) {
+    otp.value[index - 1] = "";
+    event.preventDefault();
+    const inputs = document.querySelectorAll("input[maxlength='1']");
+    if (inputs[index - 1]) {
+      inputs[index - 1].focus();
+    }
+  }
+};
+
+const verifyOTP = async () => {
+  const code = otp.value.join("");
+
+  // ตรวจสอบว่า OTP ครบ 6 หลักหรือไม่
+  if (code.length !== 6) {
+    otpError.value = "กรุณากรอก OTP ให้ครบ 6 หลัก";
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    otpError.value = ""; // เคลียร์ error เมื่อเริ่มต้น
+    
     await $fetch("/users/me/delete/confirm", {
       method: "POST",
       baseURL: config.public.apiBase,
@@ -498,65 +617,86 @@ const verifyOTP = async () => {
       },
     });
 
+    // ✅ Success - เคลียร์ทั้งหมดก่อนเข้า Step 6
     clearInterval(otpInterval);
-
-    step.value = 5;
+    otpError.value = "";
+    errorMessage.value = "";
+    password.value = "";
+    otp.value = ["", "", "", "", "", ""];
+    email.value = "";
+    loadedEmail.value = "";
+    acceptTerms.value = false;
+    
+    // ลบบัญชีสำเร็จแล้ว ไปยัง step 6 โดยตรง
+    step.value = 6;
+    
+    // ✅ ทันทีที่ OTP verify สำเร็จ จะ logout และปิด modal
+    startCountdown();
+    
+    // ✅ เพิ่มการ logout ทันทีเพื่อให้แน่ใจว่า session จะหมด
+    // ถึงแม้ user ปิด modal หรือรีเฟรช
+    setTimeout(async () => {
+      try {
+        await logout();
+      } catch (error) {
+        console.error("Logout error:", error);
+        // Force redirect ถ้า logout ล้มเหลว
+        window.location.href = "/login";
+      }
+    }, 5000); // รอ 5 วินาทีก่อน logout
+    
   } catch (error) {
-    otpError.value = "OTP ไม่ถูกต้อง";
-  }
-};
-const resendOTP = async () => {
-  otp.value = ["", "", "", "", "", ""];
-
-  await sendOTP();
-};
-const deleteAccount = async () => {
-  try {
-    isLoading.value = true;
-
-    // เช็คก่อนว่าลบได้ไหม
-    const check = await $fetch("/users/check-deletion-status", {
-      method: "GET",
-      baseURL: config.public.apiBase,
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-
-    if (!check?.canDelete) {
-      errorMessage.value = check?.message ?? "ไม่สามารถลบบัญชีได้ในขณะนี้";
-      step.value = 6; // ติดพันธะ
-      return;
-    }
-
-    // ส่ง backup ก่อน
-    await sendBackupToEmail();
-
-    // ลบบัญชี
-    await $fetch("/users/me", {
-      method: "DELETE",
-      baseURL: config.public.apiBase,
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-
-    step.value = 5; // สำเร็จ
-  } catch (error) {
-    errorMessage.value =
-      error?.response?._data?.message ??
-      error?.data?.message ??
-      "ไม่สามารถลบบัญชีได้";
-
-    step.value = 6; // error
+    otpError.value = error?.data?.message || "OTP ไม่ถูกต้อง";
   } finally {
     isLoading.value = false;
   }
 };
 
+const resendOTP = async () => {
+  otp.value = ["", "", "", "", "", ""];
+  otpError.value = "";
+  await sendOTP();
+};
+
+const cancelDelete = () => {
+  step.value = 1;
+  otp.value = ["", "", "", "", "", ""];
+  otpError.value = "";
+  password.value = "";
+  email.value = "";
+  loadedEmail.value = "";
+  acceptTerms.value = false;
+  if (otpInterval) {
+    clearInterval(otpInterval);
+    otpInterval = null;
+  }
+  // รีเฟรชหน้าเพื่อเคลียร์ค่าทั้งหมด
+  location.reload();
+};
+
 const isValidPassword = computed(() => {
   return password.value.length >= 8;
 });
+
+const closeModal = () => {
+  // ถ้า step = 6 (success) ต้อง logout ก่อนปิด modal
+  if (step.value === 6) {
+    logout();
+    window.location.href = "/login";
+    return;
+  }
+  
+  step.value = 1;
+  acceptTerms.value = false;
+  email.value = "";
+  password.value = "";
+  otp.value = ["", "", "", "", "", ""];
+  otpError.value = "";
+  errorMessage.value = "";
+  if (intervalId) clearInterval(intervalId);
+  if (otpInterval) clearInterval(otpInterval);
+  emit("close");
+};
 
 const startCountdown = () => {
   countDown.value = 5;
@@ -572,142 +712,6 @@ const startCountdown = () => {
     }
   }, 1000);
 };
-const closeModal = () => {
-  step.value = 1;
-  acceptTerms.value = false;
-  email.value = "";
-  emit("close");
-};
-
-const goToEmailStep = () => {
-  if (!acceptTerms.value) return;
-  step.value = 2;
-};
-
-const downloadMyData = async () => {
-  if (!token.value) {
-    throw new Error("Unauthorized: token not found in download my data");
-  }
-  const response = await fetch(`${config.public.apiBase}export/me`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token.value}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Download failed");
-  }
-
-  const blob = await response.blob();
-
-  const contentDisposition = response.headers.get("content-disposition");
-  let fileName = "my-data.json";
-
-  if (contentDisposition) {
-    const match = contentDisposition.match(/filename="?(.+)"?/);
-    if (match?.[-1]) {
-      fileName = match[1];
-    }
-  }
-
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName;
-
-  document.body.appendChild(link);
-  link.click();
-
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
-};
-
-const verifyUser = async () => {
-  if (!token.value) {
-    throw new Error("Unauthorized: token not found in verify user");
-  }
-  if (!password.value) {
-    throw new Error("Password must be not empty");
-  }
-
-  const res = $fetch(`/auth/verify-user`, {
-    method: "POST",
-    baseURL: config.public.apiBase,
-    headers: {
-      Authorization: `Bearer ${token.value}`,
-    },
-    body: {
-      password: password.value,
-    },
-  });
-};
-const sendBackupToEmail = async () => {
-  try {
-    if (!token.value) {
-      throw new Error("Unauthorized: token not found in send backup to email");
-    }
-    await $fetch(`/export/email`, {
-      method: "POST",
-      baseURL: config.public.apiBase,
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
-      body: {
-        email: email.value,
-      },
-    });
-  } catch (error) {
-    console.error("Error sending backup to email: ", error);
-    throw new Error("Failed to send backup to email");
-  }
-};
-
-// เปลี่ยนตรงนี้ในการทดสอบเงื่อยนไขพันธะ
-const confirmDelete = async () => {
-  const router = useRouter();
-  try {
-    isLoading.value = true;
-
-    if (!token.value) {
-      throw new Error("Unauthorized");
-    }
-    // await Promise.all([downloadMyData(), sendBackupToEmail()]);
-
-    const response = await $fetch(`/users/me`, {
-      method: "DELETE",
-      baseURL: config.public.apiBase,
-      // query: { permanent: parmanent: "true" : "false "},
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token.value}`,
-      },
-    });
-    console.log("Delete success: ", response);
-    await sendBackupToEmail();
-    // useCookie("token").value = null;
-    // useCookie("user").value = null;
-    // useCookie("session").value = null;
-
-    step.value = 6;
-  } catch (error) {
-    console.error("Error deleting account: ", error.data);
-    if (error?.data?.message) {
-      console.error("Backend message: ", error.data.message);
-      if (error.data.message.includes(":")) {
-        errorMessage.value = error.data.message.split(":")[1].trim();
-      } else {
-        errorMessage.value = error.data.message;
-      }
-    } else {
-      errorMessage.value = "เกิดข้อผิดพลาด ไม่สามารถลบบัญชีผู้ใช้ได้";
-    }
-
-    step.value = 7;
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 const finishDelete = async () => {
   if (intervalId) {
@@ -719,13 +723,6 @@ const finishDelete = async () => {
   logout();
   closeModal();
 };
-
-const Email = ref("");
-
-const isValidEmail = computed(() => {
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailPattern.test(email.value);
-});
 </script>
 
 <style scoped>
