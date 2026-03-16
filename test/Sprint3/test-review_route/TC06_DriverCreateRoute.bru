@@ -1,0 +1,73 @@
+meta {
+  name: TC06_DriverCreateRoute
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:3000/api/routes
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{driver_token}}
+}
+
+body:json {
+  {
+    "vehicleId": "{{vehicle_id}}",
+    "startLocation": {
+      "lat": 16.4772,
+      "lng": 102.8141,
+      "name": "Khon Kaen University",
+      "address": "123 ถนนมิตรภาพ"
+    },
+    "endLocation": {
+      "lat": 16.445,
+      "lng": 102.834,
+      "name": "Central Plaza Khon Kaen",
+      "address": "ถ. ศรีจันทร์"
+    },
+    "departureTime": "2030-10-15T09:00:00Z",
+    "availableSeats": 3,
+    "pricePerSeat": 50,
+    "conditions": "ห้ามสูบบุหรี่ในรถ",
+    "waypoints": [
+      {
+        "lat": 16.46,
+        "lng": 102.82,
+        "name": "ตลาดต้นตาล"
+      }
+    ],
+    "optimizeWaypoints": true
+  }
+}
+
+script:pre-request {
+  const routeId = bru.getEnvVar("route_id")
+  if(routeId){
+    bru.runner.skipRequest();
+  }
+}
+
+script:post-response {
+  const body = res.getBody();
+  bru.setEnvVar("route_id",body.data.id)
+}
+
+tests {
+  test("get HTTP 201",function(){
+    const status = res.getStatus();
+    expect(status).to.equal(201);
+  })
+  test("get route id",function(){
+    const body = res.getBody();
+    expect(body.data).to.have.property("id");
+  })
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

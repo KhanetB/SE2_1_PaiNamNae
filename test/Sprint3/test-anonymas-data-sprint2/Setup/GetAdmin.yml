@@ -1,0 +1,41 @@
+info:
+  name: GetAdmin
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://localhost:3000/api/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "email":"admin@example.com",
+        "password":"123456"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const adminToken = bru.getEnvVar("admin_token")
+        if(adminToken){
+          bru.runner.skipRequest();
+        }
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        bru.setEnvVar("admin_token",body.data.token)
+    - type: tests
+      code: |-
+        test("get HTTP 200",function(){
+          const status = res.getStatus()
+          expect(status).to.equal(200)
+        })
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

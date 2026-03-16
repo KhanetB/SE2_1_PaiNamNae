@@ -159,11 +159,17 @@ const swaggerJSDoc = require("swagger-jsdoc");
  *   delete:
  *     summary: Delete the authenticated user's account (Soft Delete)
  *     description: >
- *       This endpoint does not accept any parameters or request body.
+ *       Supports soft delete by default. Provide the `permanent=true` query parameter to perform a hard delete.
  *       Authentication is required via Bearer Token.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: permanent
+ *         schema:
+ *           type: boolean
+ *         description: Set to true for hard delete, otherwise soft delete
  *     responses:
  *       200:
  *         description: User account deleted successfully
@@ -217,6 +223,100 @@ const swaggerJSDoc = require("swagger-jsdoc");
 
 /**
  * @swagger
+ * /api/users/check-deletion-status:
+ *   get:
+ *     summary: Check whether the authenticated user can delete their account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Deletion status returned
+ *         content:
+ *           application/json:
+ *             example:
+ *               canDelete: true
+ *               message: "ไม่พบเส้นทางหรือการจองที่ค้างอยู่ สามารถลบบัญชีได้"
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/users/me/delete/request-otp:
+ *   post:
+ *     summary: Request an OTP before deleting the authenticated user's account
+ *     description: User must provide their password to receive a deletion OTP via email.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *             properties:
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: "ระบบได้ส่งรหัส OTP ไปยังอีเมลของคุณแล้ว (รหัสมีอายุ 5 นาที)"
+ *       400:
+ *         description: Missing password
+ *       401:
+ *         description: Incorrect password
+ *       404:
+ *         description: User not found
+ */
+
+/**
+ * @swagger
+ * /api/users/me/delete/confirm:
+ *   post:
+ *     summary: Confirm account deletion with OTP
+ *     description: Generates PDPA backup, emails it to the user, then deletes the account (soft delete).
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - otp
+ *             properties:
+ *               otp:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Account deleted after OTP confirmation
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               message: "ลบบัญชีเสร็จสิ้น และระบบได้ส่งข้อมูลสำรองไปยังอีเมลของคุณเรียบร้อยแล้ว"
+ *               data:
+ *                 deletedUserId: "cmlj5daul00015nn9zxneqn5w"
+ *       400:
+ *         description: Missing, expired, or invalid OTP
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+
+/**
+ * @swagger
  * /api/users/admin:
  *   get:
  *     summary: Get all users (Admin only)
@@ -242,6 +342,14 @@ const swaggerJSDoc = require("swagger-jsdoc");
  *       - in: query
  *         name: isVerified
  *         schema: { type: boolean }
+ *       - in: query
+ *         name: createdFrom
+ *         schema: { type: string, format: date-time }
+ *         description: Filter users created on or after this date
+ *       - in: query
+ *         name: createdTo
+ *         schema: { type: string, format: date-time }
+ *         description: Filter users created on or before this date
  *       - in: query
  *         name: sortBy
  *         schema: { type: string, enum: [createdAt, lastLogin, email, username, firstName, lastName] }

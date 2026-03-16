@@ -1,0 +1,76 @@
+info:
+  name: CreateUser
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/api/users
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Content-Type
+      value: multipart/form-data
+  body:
+    type: multipart-form
+    data:
+      - name: email
+        type: text
+        value: verify_test@gmail.com
+      - name: username
+        type: text
+        value: VerifyTest
+      - name: password
+        type: text
+        value: "123456789"
+      - name: firstName
+        type: text
+        value: Test
+      - name: lastName
+        type: text
+        value: User
+      - name: phoneNumber
+        type: text
+        value: "08123456789"
+      - name: gender
+        type: text
+        value: MALE
+      - name: nationalIdNumber
+        type: text
+        value: "9351407024076"
+      - name: nationalIdExpiryDate
+        type: text
+        value: 2030-12-31T00:00:00.000Z
+      - name: nationalIdPhotoUrl
+        type: file
+        value:
+          - person.jpg
+        contentType: image/jpeg
+      - name: selfiePhotoUrl
+        type: file
+        value:
+          - person.jpg
+        contentType: image/jpeg
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("resposne status should return 201 Created", function(){
+          const status = res.getStatus()
+          console.log(res.getBody())
+          const expectedStatus = 201
+          expect(status).to.equal(expectedStatus);
+          if (status !== expectedStatus){
+            bru.runner.stopExecution();
+          }
+        });
+
+        // bru.setNextRequest("TC03_Login");
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
