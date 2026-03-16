@@ -3,8 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: ["main"]
-    paths: 
-      - 'code/backend/**'
+    paths:
+      - "code/backend/**"
 
 env:
   REGISTRY: ghcr.io
@@ -13,7 +13,8 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions: 
+
+    permissions:
       contents: read
       packages: write
 
@@ -21,54 +22,55 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to the Container registry
+      - name: Convert Image Name to lowercase
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Lowercase Image Name
-        run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Build and push docker image
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./code/backend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
 
   deploy:
     needs: build-and-push
     runs-on: self-hosted
+
     permissions:
-      contents: read 
-      packages: read 
+      contents: read
+      packages: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Lowercase Image Name
-        run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+      - name: Convert Image Name to lowercase
+        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-      - name: Log in to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Create .env file
         run: |
           cat <<EOF > .env
           ${{ secrets.ENV_FILE }}
+          NODE_ENV=production
+          PORT=3000
           EOF
-      - name: Pull and Restart
-        run: |
-          
-          docker compose pull
-          
-          docker compose up -d
-          
-          docker image prune -f
-        env:
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Pull new Docker image
+        run: docker compose pull
+
+      - name: Restart containers
+        run: docker compose up -d
+
+      - name: Clean unused images
+        run: docker image prune -af
