@@ -1,0 +1,43 @@
+meta {
+  name: DeleteVahicle
+  type: http
+  seq: 23
+  tags: [
+    reset
+  ]
+}
+
+delete {
+  url: http://localhost:3000/api/vehicles/admin/{{vehicle_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+script:pre-request {
+  var vehicle_id = bru.getEnvVar("vehicle_id");
+  if(!vehicle_id){
+    bru.runner.skipRequest();
+    console.log("Skip: doesn't have vehicle_id")
+  }
+}
+
+script:post-response {
+  bru.setEnvVar("passenger_token","")
+  bru.setEnvVar("driver_token","")
+  bru.setEnvVar("admin_token","")
+  bru.setEnvVar("driver_id","")
+  bru.setEnvVar("review_id","")
+  bru.setEnvVar("route_id","")
+  bru.setEnvVar("booking_id","")
+  bru.setEnvVar("vehicle_id","")
+  bru.setEnvVar("route_status","")
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

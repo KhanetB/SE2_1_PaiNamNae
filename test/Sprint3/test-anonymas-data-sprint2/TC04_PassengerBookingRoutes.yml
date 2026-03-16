@@ -1,0 +1,61 @@
+info:
+  name: TC04_PassengerBookingRoutes
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: http://localhost:3000/api/bookings
+  headers:
+    - name: Authorization
+      value: Bearer {{passenger_token}}
+  body:
+    type: json
+    data: |-
+      {
+        "routeId": "{{route_id}}",
+        "numberOfSeats": 2,
+        "pickupLocation": {
+          "lat": 16.4772,
+          "lng": 102.8141,
+          "name": "หน้ามข.",
+          "address": "ถนนหลังมอ"
+        },
+        "dropoffLocation": {
+          "lat": 16.4755,
+          "lng": 102.8256,
+          "name": "ปลายทางฝั่งตะวันออก",
+          "address": "ถนนสหศาสตร์"
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // const bookingId = bru.getEnvVar("booking_id")
+        // if(bookingId){
+        //   bru.runner.skipRequest();
+        // }
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        bru.setEnvVar("booking_id",body.data.id)
+    - type: tests
+      code: |-
+        test("get HTTP 201",function(){
+          const status = res.getStatus();
+          expect(status).to.equal(201);
+        })
+
+        test("get booking id",function(){
+          const body = res.getBody();
+          expect(body.data).to.have.property("id");
+        })
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
