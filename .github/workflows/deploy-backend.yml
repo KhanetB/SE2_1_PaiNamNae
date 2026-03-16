@@ -8,13 +8,14 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # เก็บชื่อ repo ไว้ (เช่น KhanetB/SE2_1_PaiNamNae)
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions: 
-      contents: read
+      contents: read 
       packages: write
 
     steps:
@@ -30,49 +31,43 @@ jobs:
 
       - name: Lowercase Image Name
         run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          # แปลงเป็นตัวพิมพ์เล็ก (เช่น khanetb/se2_1_painamnae)
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Build and push docker image
         uses: docker/build-push-action@v5
         with:
           context: ./code/backend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
 
   deploy:
     needs: build-and-push
     runs-on: self-hosted
-    permissions:
-      contents: read 
-      packages: read 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Lowercase Image Name
         run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Create .env file 
         run: |
-          echo "PORT=3000" >> .env
+          # เขียนค่าจาก Secret ลงไฟล์ก่อน (ใช้ > เพื่อสร้างไฟล์ใหม่/ล้างไฟล์เก่า)
           echo "${{ secrets.ENV_FILE }}" > .env
-
+          # เขียนค่าอื่นๆ ต่อท้าย (ใช้ >> เพื่อไม่ให้ทับของเดิม)
+          echo "PORT=3000" >> .env
           echo "NODE_ENV=production" >> .env
-      - name: Check .env file
-        run: |
-          cat .env
+          # ส่งชื่อ Image ตัวเล็กไปให้ docker-compose ใช้
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME_LOWER }}" >> .env
+
       - name: Pull and Restart
         run: |
-          
+          # ใช้ชื่อ Image จาก .env ที่เพิ่งสร้าง
           docker compose pull
-          
           docker compose up -d
-          
           docker image prune -f
-        env:
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
