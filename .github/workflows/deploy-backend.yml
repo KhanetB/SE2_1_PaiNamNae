@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # เก็บชื่อ repo ไว้ (เช่น KhanetB/SE2_1_PaiNamNae)
+  # ตรงนี้เป็นตัวพิมพ์ใหญ่ตามชื่อ Repo (ห้ามแก้เพราะ GitHub ใช้ระบุตัวตน)
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -31,7 +31,6 @@ jobs:
 
       - name: Lowercase Image Name
         run: |
-          # แปลงเป็นตัวพิมพ์เล็ก (เช่น khanetb/se2_1_painamnae)
           echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Build and push docker image
@@ -39,6 +38,7 @@ jobs:
         with:
           context: ./code/backend
           push: true
+          # ใช้ตัวพิมพ์เล็กที่แปลงแล้ว
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
 
   deploy:
@@ -50,6 +50,7 @@ jobs:
 
       - name: Lowercase Image Name
         run: |
+          # แปลงเป็นตัวเล็กเก็บไว้ใช้ใน Job นี้
           echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
@@ -57,17 +58,18 @@ jobs:
 
       - name: Create .env file 
         run: |
-          # เขียนค่าจาก Secret ลงไฟล์ก่อน (ใช้ > เพื่อสร้างไฟล์ใหม่/ล้างไฟล์เก่า)
+          # เขียนค่าจาก Secret ลงไฟล์ก่อน
           echo "${{ secrets.ENV_FILE }}" > .env
-          # เขียนค่าอื่นๆ ต่อท้าย (ใช้ >> เพื่อไม่ให้ทับของเดิม)
           echo "PORT=3000" >> .env
           echo "NODE_ENV=production" >> .env
-          # ส่งชื่อ Image ตัวเล็กไปให้ docker-compose ใช้
+          # ใส่ชื่อ Image ตัวเล็กลงในไฟล์ .env
           echo "IMAGE_NAME=${{ env.IMAGE_NAME_LOWER }}" >> .env
 
       - name: Pull and Restart
+        # บรรทัดสำคัญ: บังคับให้ docker compose เห็น IMAGE_NAME เป็นตัวพิมพ์เล็ก
+        env:
+          IMAGE_NAME: ${{ env.IMAGE_NAME_LOWER }}
         run: |
-          # ใช้ชื่อ Image จาก .env ที่เพิ่งสร้าง
           docker compose pull
           docker compose up -d
           docker image prune -f
