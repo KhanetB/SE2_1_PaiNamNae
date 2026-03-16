@@ -1,0 +1,20 @@
+meta {
+  name: DeleteReview
+  type: http
+  seq: 4
+}
+
+delete {
+  url: http://localhost:3000/api/reviews/{{review_id}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{passenger_token}}
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
