@@ -118,6 +118,7 @@
 
                 <div
                   v-if="showModal"
+                  @click="closeModal"
                   class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
                 >
                   <div
@@ -578,6 +579,10 @@ const isAllSelected = computed({
 function openModal() {
   tempSelected.value = [...selectedActions.value];
   showModal.value = true;
+}
+
+function closeModal() {
+  showModal.value = false;
 }
 function applyActionFilter() {
   selectedActions.value = [...tempSelected.value];

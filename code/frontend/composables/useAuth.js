@@ -3,7 +3,7 @@ import { useRouter } from "vue-router";
 
 export function useAuth() {
   const { $api } = useNuxtApp();
-
+  const config = useRuntimeConfig();
   const cookieOpts = {
     maxAge: 60 * 60 * 24 * 7,
     path: "/",
