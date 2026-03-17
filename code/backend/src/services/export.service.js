@@ -37,7 +37,6 @@ exports.generateUserData = async (userId) => {
         last_name: user.lastName,
         gender: user.gender,
         phone_number: user.phoneNumber,
-        nationalIdNumber: user.nationalIdNumber,
         profile_picture: user.profilePicture,
       },
       // ข้อมูลที่มีความละเอียดอ่อนสูง (Sensitive PII)

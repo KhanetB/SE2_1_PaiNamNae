@@ -19,12 +19,13 @@ const ensureAdmin = require("./src/bootstrap/ensureAdmin");
 const { startCleanuoCron } = require("./src/cron/cleanupCron");
 const exportRoutes = require("./src/routes/export.routes");
 const logger = require("./src/middlewares/logger");
+const morgan = require("morgan");
 
 const app = express();
 promClient.collectDefaultMetrics();
 
 app.use(helmet());
-
+app.use(morgan("combined"));
 const corsOptions = {
   origin: [
     "http://localhost:3001",

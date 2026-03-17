@@ -264,7 +264,7 @@
 
         <div class="flex justify-center gap-4 mt-4">
           <button
-            class="border px-4 py-2 rounded"
+            class="border px-4 py-2 rounded hover:bg-gray-200"
             @click="resendOTP"
             :disabled="otpTimer > 0"
           >
@@ -272,7 +272,7 @@
           </button>
 
           <button
-            class="bg-red-500 text-white px-6 py-2 rounded"
+            class="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
             @click="verifyOTP"
           >
             ยืนยัน
@@ -372,6 +372,10 @@ import { CheckCircleIcon } from "@heroicons/vue/24/solid";
 import { ExclamationCircleIcon } from "@heroicons/vue/24/solid";
 import { useAuth } from "~/composables/useAuth";
 
+import { useToast } from "~/composables/useToast";
+
+const toast = useToast();
+
 const { token, logout } = useAuth();
 const { $api } = useNuxtApp();
 
@@ -410,6 +414,7 @@ watch(step, (newStep) => {
 });
 const goToPasswordStep = () => {
   if (!acceptTerms.value) return;
+  password.value = "";
   step.value = 2;
 };
 const verifyPassword = async () => {
@@ -434,12 +439,11 @@ const verifyPassword = async () => {
     errorMessage.value = "รหัสผ่านไม่ถูกต้อง";
     step.value = 7;
   } finally {
-    password.value = "";
     isLoading.value = false;
   }
 };
-const sendOTP = async () => {
-  console.log("Password Send OTP: ", password.value);
+const resendOTP = async () => {
+  toast.success("สำเร็จ", "ส่ง OTP ใหม่อีกรอบแล้ว");
   try {
     await $fetch("/users/me/delete/request-otp", {
       method: "POST",
@@ -451,9 +455,32 @@ const sendOTP = async () => {
         password: password.value,
       },
     });
-
+    otpError.value = "";
+    otp.value = ["", "", "", "", "", ""];
     step.value = 4;
-
+    startOTPTimer();
+    toast.success("สำเร็จ", "ส่ง OTP ใหม่อีกรอบแล้ว");
+  } catch (error) {
+    toast.error("ไม่สำเร็จ", "กรุณาลองใหม่อีกครั้ง");
+    errorMessage.value = "ไม่สามารถส่ง OTP ได้";
+    step.value = 7;
+  }
+};
+const sendOTP = async () => {
+  try {
+    await $fetch("/users/me/delete/request-otp", {
+      method: "POST",
+      baseURL: config.public.apiBase,
+      headers: {
+        Authorization: `Bearer ${token.value}`,
+      },
+      body: {
+        password: password.value,
+      },
+    });
+    otpError.value = "";
+    otp.value = ["", "", "", "", "", ""];
+    step.value = 4;
     startOTPTimer();
   } catch (error) {
     errorMessage.value = "ไม่สามารถส่ง OTP ได้";
@@ -505,11 +532,7 @@ const verifyOTP = async () => {
     otpError.value = "OTP ไม่ถูกต้อง";
   }
 };
-const resendOTP = async () => {
-  otp.value = ["", "", "", "", "", ""];
 
-  await sendOTP();
-};
 const deleteAccount = async () => {
   try {
     isLoading.value = true;
