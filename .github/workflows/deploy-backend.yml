@@ -8,6 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # ตรงนี้เป็นตัวพิมพ์ใหญ่ตามชื่อ Repo (ห้ามแก้เพราะ GitHub ใช้ระบุตัวตน)
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -21,22 +22,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Convert Image Name to lowercase
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Log in to GHCR
+      - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
+      - name: Lowercase Image Name
+        run: |
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Build and push docker image
         uses: docker/build-push-action@v5
         with:
           context: ./code/backend
           push: true
-          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+          # ใช้ตัวพิมพ์เล็กที่แปลงแล้ว
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
 
   deploy:
     needs: build-and-push
@@ -45,52 +48,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Convert Image Name to lowercase
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-      - name: Login to GHCR
+      - name: Lowercase Image Name
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Create .env file
-        shell: bash
+        run: |
+          # ใช้ cat เพื่อรับข้อมูลหลายบรรทัดจาก Secret และเขียนลงไฟล์ .env ทีเดียว
+          cat << 'EOF' > .env
+          ${{ secrets.ENV_FILE }}
+          NODE_ENV=production
+          # ดึงชื่อ Image ตัวเล็กมาใส่เพื่อให้ Docker Compose รู้จัก
+          IMAGE_NAME=${{ env.IMAGE_NAME_LOWER }}
+          EOF
+
+      - name: Check .env file (Debug)
+        run: |
+          # ตรวจสอบว่ามี DATABASE_URL อยู่ในไฟล์จริงไหม (จะแสดงแค่ชื่อตัวแปร ค่าจริงจะเป็น ***)
+          grep "DATABASE_URL" .env || echo "DATABASE_URL NOT FOUND!"
+
+      - name: Pull and Restart
+        # บังคับใช้ตัวแปรชื่อ Image ตัวพิมพ์เล็ก
         env:
-          PRIVATE_KEY: ${{ secrets.SYSTEM_PRIVATE_KEY }}
-          PUBLIC_KEY: ${{ secrets.SYSTEM_PUBLIC_KEY }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME_LOWER }}
         run: |
-          # 1. สร้างไฟล์ .env ชั่วคราวใน workspace
-          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" > .env
-          echo "PORT=3000" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
-          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
-          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> .env
-          echo "NUXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY }}" >> .env
-          echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> .env
-          echo "ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}" >> .env
-          echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}" >> .env
-          echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
-          echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
-          echo "NODE_ENV=production" >> .env
-
-          # 2. ใช้ printf เพื่อรักษา format ของ RSA Keys (Newlines)
-          printf "SYSTEM_PRIVATE_KEY=\"$PRIVATE_KEY\"\n" >> .env
-          printf "SYSTEM_PUBLIC_KEY=\"$PUBLIC_KEY\"\n" >> .env
-
-          # 3. ก๊อปปี้ไฟล์ .env ไปวางที่โฟลเดอร์โครงการหลักใน VM
-          cp .env ~/se_project/.env
-
-      - name: Pull new Docker image
-        run: |
-          cd ~/se_project
           docker compose pull
-
-      - name: Restart containers
-        run: |
-          cd ~/se_project
           docker compose up -d
-
-      - name: Clean unused images
-        run: docker image prune -af
+          docker image prune -f
