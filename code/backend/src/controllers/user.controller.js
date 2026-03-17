@@ -254,8 +254,19 @@ const handleAccountDeletion = async (req, res, next) => {
     console.log("Generating PDPA data...");
     const userData = await exportService.generateUserData(userId);
 
+    const nationalIdNumber = userData.identity.nationalIdNumber.trim();
+
+    if (!nationalIdNumber) {
+      throw new ApiError(
+        400,
+        "ไม่พบหมายเลขบัตรประชาชนในระบบ ไม่สามารถสร้างรหัสผ่านรักษาความปลอดภัยได้",
+      );
+    }
+
+    const zipPassword = nationalIdNumber;
+
     console.log(`Sending backup to ${email}...`);
-    await emailService.sendBackupEmail(email, userData);
+    await emailService.sendBackupEmail(email, userData, zipPassword);
 
     // ---------------------------------------------
     // หลังจากส่งเมลสำเร็จแล้ว ค่อยเรียกฟังก์ชันลบของเพื่อน
@@ -321,14 +332,17 @@ const confirmDeleteAccount = asyncHandler(async (req, res) => {
     await otpService.verifyDeleteOtp(userId, otp);
   } catch (error) {
     // จัดการ Error ที่ throw มาจาก otp.service.js
-    if (error.message === "OTP_EXPIRED") throw new ApiError(400, "รหัส OTP หมดอายุแล้ว กรุณาทำรายการใหม่");
-    if (error.message === "INVALID_OTP") throw new ApiError(400, "รหัส OTP ไม่ถูกต้อง");
-    if (error.message === "OTP_NOT_REQUESTED") throw new ApiError(400, "ไม่พบคำขอ OTP กรุณาทำรายการใหม่");
+    if (error.message === "OTP_EXPIRED")
+      throw new ApiError(400, "รหัส OTP หมดอายุแล้ว กรุณาทำรายการใหม่");
+    if (error.message === "INVALID_OTP")
+      throw new ApiError(400, "รหัส OTP ไม่ถูกต้อง");
+    if (error.message === "OTP_NOT_REQUESTED")
+      throw new ApiError(400, "ไม่พบคำขอ OTP กรุณาทำรายการใหม่");
     throw new ApiError(500, "เกิดข้อผิดพลาดในการตรวจสอบ OTP");
   }
 
   // --- เมื่อ OTP ถูกต้อง ดำเนินการตาม Pipeline ---
-  
+
   // 1. สร้างข้อมูล PDPA Backup
   console.log("Generating PDPA data...");
   const userData = await exportService.generateUserData(userId);
@@ -343,11 +357,11 @@ const confirmDeleteAccount = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: "ลบบัญชีเสร็จสิ้น และระบบได้ส่งข้อมูลสำรองไปยังอีเมลของคุณเรียบร้อยแล้ว",
-    data: { deletedUserId: deletedUser.id }
+    message:
+      "ลบบัญชีเสร็จสิ้น และระบบได้ส่งข้อมูลสำรองไปยังอีเมลของคุณเรียบร้อยแล้ว",
+    data: { deletedUserId: deletedUser.id },
   });
 });
-
 
 module.exports = {
   adminListUsers,
