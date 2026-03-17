@@ -202,6 +202,18 @@
             โปรดตรวจสอบให้แน่ใจว่าอีเมลนี้ถูกต้อง
           </p>
         </div>
+        <div class="bg-yellow-50 border border-yellow-300 rounded-md p-4 mb-6">
+          <p class="text-sm text-gray-800">
+            <span class="font-semibold">หมายเหตุ:</span>
+            ข้อมูลส่วนบุคคลที่จัดส่งจะอยู่ในรูปแบบไฟล์
+            <span class="font-semibold">ZIP</span>
+            และมีการตั้งรหัสผ่านเพื่อความปลอดภัย โดยรหัสผ่านคือ
+            <span class="font-semibold text-red-600"
+              >เลขบัตรประจำตัวประชาชน 13 หลัก</span
+            >
+            ของท่าน
+          </p>
+        </div>
 
         <div class="flex justify-center space-x-4 mt-4">
           <button
@@ -467,8 +479,6 @@ const verifyPassword = async () => {
       },
     });
 
-    console.log("📋 Deletion Status:", deletionStatus);
-
     // ถ้าไม่สามารถลบได้
     if (!deletionStatus?.canDelete) {
       errorMessage.value =
@@ -494,9 +504,6 @@ const verifyPassword = async () => {
 
 const fetchUserEmail = async () => {
   try {
-    console.log("🔍 Token:", token.value);
-    console.log("🔍 API Base:", config.public.apiBase);
-
     const userProfile = await $fetch("/users/me", {
       method: "GET",
       baseURL: config.public.apiBase,
@@ -505,12 +512,9 @@ const fetchUserEmail = async () => {
       },
     });
 
-    console.log("📧 User profile:", userProfile);
-
     if (userProfile?.data?.email) {
       email.value = userProfile.data.email;
       loadedEmail.value = userProfile.data.email;
-      console.log("✅ Email loaded:", loadedEmail.value);
     } else {
       console.warn("⚠️ No email in profile response");
       loadedEmail.value = "ไม่พบอีเมลในโปรไฟล์";
@@ -523,7 +527,6 @@ const fetchUserEmail = async () => {
 };
 
 const sendOTP = async () => {
-  console.log("Password Send OTP: ", password.value);
   try {
     errorMessage.value = ""; // เคลียร์ error
     await $fetch("/users/me/delete/request-otp", {
@@ -679,10 +682,10 @@ const isValidPassword = computed(() => {
   return password.value.length >= 8;
 });
 
-const closeModal = () => {
+const closeModal = async () => {
   // ถ้า step = 6 (success) ต้อง logout ก่อนปิด modal
   if (step.value === 6) {
-    logout();
+    await logout();
     window.location.href = "/login";
     return;
   }
@@ -721,7 +724,7 @@ const finishDelete = async () => {
   }
 
   emit("confirm");
-  logout();
+  await logout();
   closeModal();
 };
 </script>
