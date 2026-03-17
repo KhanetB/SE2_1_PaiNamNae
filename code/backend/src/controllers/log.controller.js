@@ -91,8 +91,9 @@ const exportLogs = asyncHandler(async (req, res, next) => {
   -----------------------
   ขั้นตอนที่ 1: เปิด Command Line (Terminal) แล้วเข้าไปโฟลเดอร์ที่แตกไฟล์ zip นี้ไว้
   ขั้นตอนที่ 2: แปลงไฟล์ signature กลับเป็นรูปแบบ binary
-    สำหรับผู้ใช้ MacOS/Linux: base64 -d signature.sig > signature.bin
+    สำหรับผู้ใช้ Linux: base64 -d signature.sig > signature.bin
     สำหรับผู้ใช้ Windows: certutil -decode signature.sig signature.bin
+    สำหรับผู้ใช้ MacOS: base64 -D -i signature.sig -o signature.bin
   ขั้นตอนที่ 3: ใช้ OpenSSL ตรวจสอบความถูกต้องของไฟล์
     คำสั่ง: openssl dgst -sha256 -verify public_key.pem -signature signature.bin audit_log.csv
     สำหรับผู้ใช้ Windows กรณีไม่ได้ทำการติดตั้ง openssl ในเครื่องให้ทำการติดตั้งโดยใช้คำสั่ง winget install openssl

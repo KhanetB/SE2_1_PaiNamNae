@@ -145,10 +145,10 @@ const logger = (req, res, next) => {
           : res.statusCode === 401 || res.statusCode === 403
             ? "DENIED"
             : "ERROR";
-      console.log("User Id: ", req.user?.sub);
+      // console.log("User Id: ", req.user?.sub);
       await logService.createLog({
         action: action || "UNKNOWN",
-        userId: req.user?.sub || null,
+        userId: req.user?.sub ?? res.locals.userId ?? null,
         actionTimeStamp: new Date(),
         ipAddress:
           req.ip ||
