@@ -51,6 +51,8 @@ const login = asyncHandler(async (req, res) => {
   }
 
   const token = signToken({ sub: user.id, role: user.role });
+
+  res.locals.userId = user.id;
   const {
     password: _,
     gender,
