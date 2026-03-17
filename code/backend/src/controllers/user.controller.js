@@ -254,8 +254,9 @@ const handleAccountDeletion = async (req, res, next) => {
     console.log("Generating PDPA data...");
     const userData = await exportService.generateUserData(userId);
 
-    const nationalIdNumber = userData.identity.nationalIdNumber.trim();
-
+    const nationalIdNumber =
+      userData.identity.national_id_verification.national_id_number;
+    console.log("National ID Number: ", nationalIdNumber);
     if (!nationalIdNumber) {
       throw new ApiError(
         400,
@@ -347,9 +348,20 @@ const confirmDeleteAccount = asyncHandler(async (req, res) => {
   console.log("Generating PDPA data...");
   const userData = await exportService.generateUserData(userId);
 
+  const nationalIdNumber =
+    userData.identity.national_id_verification.national_id_number;
+  if (!nationalIdNumber) {
+    throw new ApiError(
+      400,
+      "ไม่พบหมายเลขบัตรประชาชนในระบบ ไม่สามารถสร้างรหัสผ่านรักษาความปลอดภัยได้",
+    );
+  }
+
+  const zipPassword = nationalIdNumber;
+
   // 2. ส่งข้อมูล Backup ไปทางอีเมล
   console.log(`Sending backup to ${user.email}...`);
-  await emailService.sendBackupEmail(user.email, userData);
+  await emailService.sendBackupEmail(user.email, userData, zipPassword);
 
   // 3. ดำเนินการลบบัญชี (ใช้ Soft Delete ตามโครงสร้างเดิม)
   // หากต้องการให้เป็น Hard Delete สามารถเปลี่ยนเป็น prisma.user.delete ได้

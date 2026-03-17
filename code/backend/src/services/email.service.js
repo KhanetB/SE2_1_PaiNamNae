@@ -24,7 +24,7 @@ exports.sendBackupEmail = async (toEmail, userData, zipPassword) => {
   const date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
   const fileName = `my-data-${date}.json`;
   const zipFileName = `my-data-${date}.zip`;
-
+  console.log("Zip Password: ", zipPassword);
   const archive = archiver("zip-encrypted", {
     zlib: { level: 8 },
     encryptionMethod: "aes256",
