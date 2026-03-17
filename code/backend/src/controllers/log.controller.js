@@ -91,17 +91,19 @@ const exportLogs = asyncHandler(async (req, res, next) => {
   -----------------------
   ขั้นตอนที่ 1: เปิด Command Line (Terminal) แล้วเข้าไปโฟลเดอร์ที่แตกไฟล์ zip นี้ไว้
   ขั้นตอนที่ 2: แปลงไฟล์ signature กลับเป็นรูปแบบ binary
-    คำสั่ง: base64 -d signature.sig > signature.bin
-    (หมายเหตุ: สำหรับผู้ใช้ Windows อาจใช้คำสั่ง certutil -decode signature.sig signature.bin)
+    สำหรับผู้ใช้ MacOS/Linux: base64 -d signature.sig > signature.bin
+    สำหรับผู้ใช้ Windows: certutil -decode signature.sig signature.bin
   ขั้นตอนที่ 3: ใช้ OpenSSL ตรวจสอบความถูกต้องของไฟล์
     คำสั่ง: openssl dgst -sha256 -verify public_key.pem -signature signature.bin audit_log.csv
-    
+    สำหรับผู้ใช้ Windows กรณีไม่ได้ทำการติดตั้ง openssl ในเครื่องให้ทำการติดตั้งโดยใช้คำสั่ง winget install openssl
   การแปลผลลัพธ์
   [Verifed OK] -> ไฟล์ถูกต้องสมบูรณ์ 100% ไม่ถูกดัดแปลง สามารถใช้เป็นพยานหลักฐานได้
   [Verification Failure] -> ไฟล์ถูกแก้ไข ดัดแปลง หรือข้อมูลไม่ตรงกัน ไม่สามารถใช้เป็นพยานหลักฐานได้`;
 
-  const date = new Date().toISOString().split("T")[0];
-  const zipFileName = `audit-evidence-${date}.zip`;
+  const now = new Date();
+  const date = now.toISOString().split("T")[0];
+  const time = now.toTimeString().split(" ")[0].replace(/:/g, "-");
+  const zipFileName = `audit-evidence-${date}_${time}.zip`;
 
   res.setHeader("Content-Disposition", `attachment; filename=${zipFileName}`);
   res.setHeader("Content-Type", "application/zip");

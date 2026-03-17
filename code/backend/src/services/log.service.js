@@ -337,12 +337,7 @@ function generateExportSignature(csvContent) {
   return sign.sign(SYSTEM_PRIVATE_KEY, "base64");
 }
 
-async function exportLogSecurely(
-  filters = {},
-  selectedUserFields = [],
-  adminId,
-  adminIp,
-) {
+async function exportLogSecurely(filters = {}, selectedUserFields = []) {
   const logs = await getLogsToExport(filters, selectedUserFields);
 
   const csvContent = logsToCSV(logs, selectedUserFields);

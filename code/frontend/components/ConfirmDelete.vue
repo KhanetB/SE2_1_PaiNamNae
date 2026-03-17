@@ -202,6 +202,18 @@
             โปรดตรวจสอบให้แน่ใจว่าอีเมลนี้ถูกต้อง
           </p>
         </div>
+        <div class="bg-yellow-50 border border-yellow-300 rounded-md p-4 mb-6">
+          <p class="text-sm text-gray-800">
+            <span class="font-semibold">หมายเหตุ:</span>
+            ข้อมูลส่วนบุคคลที่จัดส่งจะอยู่ในรูปแบบไฟล์
+            <span class="font-semibold">ZIP</span>
+            และมีการตั้งรหัสผ่านเพื่อความปลอดภัย โดยรหัสผ่านคือ
+            <span class="font-semibold text-red-600"
+              >เลขบัตรประจำตัวประชาชน 13 หลัก</span
+            >
+            ของท่าน
+          </p>
+        </div>
 
         <div class="flex justify-center space-x-4 mt-4">
           <button

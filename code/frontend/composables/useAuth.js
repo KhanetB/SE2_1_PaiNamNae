@@ -51,10 +51,14 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      const res = await $api("/auth/logout", {
-        method: "GET",
+      await $fetch("/auth/logout", {
+        method: "POST",
+        baseURL: config.public.apiBase,
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token.value}`,
+        },
       });
-      console.log("Res: ", res);
       token.value = null;
       user.value = null;
       return router.push("/");
