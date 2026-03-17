@@ -3,17 +3,18 @@ name: CI/CD Pipeline
 on:
   push:
     branches: ["main"]
-    paths: 
-      - 'code/backend/**'
+    paths:
+      - "code/backend/**"
 
 env:
   REGISTRY: ghcr.io
+  # ตรงนี้เป็นตัวพิมพ์ใหญ่ตามชื่อ Repo (ห้ามแก้เพราะ GitHub ใช้ระบุตัวตน)
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       contents: read
       packages: write
 
@@ -30,49 +31,50 @@ jobs:
 
       - name: Lowercase Image Name
         run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Build and push docker image
         uses: docker/build-push-action@v5
         with:
           context: ./code/backend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # ใช้ตัวพิมพ์เล็กที่แปลงแล้ว
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
 
   deploy:
     needs: build-and-push
     runs-on: self-hosted
-    permissions:
-      contents: read 
-      packages: read 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Lowercase Image Name
         run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Create .env file 
+      - name: Create .env file
         run: |
-          echo "PORT=3000" >> .env
-          echo "${{ secrets.ENV_FILE }}" > .env
+          # ใช้ cat เพื่อรับข้อมูลหลายบรรทัดจาก Secret และเขียนลงไฟล์ .env ทีเดียว
+          cat << 'EOF' > .env
+          ${{ secrets.ENV_FILE }}
+          NODE_ENV=production
+          # ดึงชื่อ Image ตัวเล็กมาใส่เพื่อให้ Docker Compose รู้จัก
+          IMAGE_NAME=${{ env.IMAGE_NAME_LOWER }}
+          EOF
 
-          echo "NODE_ENV=production" >> .env
-      - name: Check .env file
+      - name: Check .env file (Debug)
         run: |
-          cat .env
+          # ตรวจสอบว่ามี DATABASE_URL อยู่ในไฟล์จริงไหม (จะแสดงแค่ชื่อตัวแปร ค่าจริงจะเป็น ***)
+          grep "DATABASE_URL" .env || echo "DATABASE_URL NOT FOUND!"
+
       - name: Pull and Restart
-        run: |
-          
-          docker compose pull
-          
-          docker compose up -d
-          
-          docker image prune -f
+        # บังคับใช้ตัวแปรชื่อ Image ตัวพิมพ์เล็ก
         env:
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          IMAGE_NAME: ${{ env.IMAGE_NAME_LOWER }}
+        run: |
+          docker compose pull
+          docker compose up -d
+          docker image prune -f

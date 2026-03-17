@@ -1,3 +1,4 @@
+#test
 name: CI/CD Pipeline
 
 on:
@@ -5,11 +6,9 @@ on:
     branches: ["main"]
     paths: 
       - 'code/backend/**'
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

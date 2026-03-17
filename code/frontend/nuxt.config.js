@@ -11,8 +11,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:3000/api/",
+      // apiBase: "http://localhost:3000/api/"
+      apiBase: "https://backend-se.pasitgut.com/api/",
+      // apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:3000/api/",
       // apiBase: "http://localhost:3000/api/",
+      // apiBase: "http://10.198.200.62:3000/api/",
+      // apiBase: "https://backend-se.pasitlab.com/api/",
       // apiBase:"https://painamnae-backend.onrender.com/api/",
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
     },

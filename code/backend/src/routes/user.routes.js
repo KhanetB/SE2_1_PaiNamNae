@@ -115,4 +115,21 @@ router.put(
 // DELETE /api/users/me
 router.delete("/me", protect, userController.deleteUserController);
 
+
+// POST /api/users/me/delete/request-otp
+// Step 1: รับรหัสผ่าน (body: { password }) แล้วส่งอีเมล OTP
+router.post(
+  "/me/delete/request-otp", 
+  protect, 
+  userController.requestDeleteOtp
+);
+
+// POST /api/users/me/delete/confirm
+// Step 2: ยืนยัน OTP (body: { otp }) -> ส่งเมล Backup -> ลบบัญชี
+router.post(
+  "/me/delete/confirm", 
+  protect, 
+  userController.confirmDeleteAccount
+);
+
 module.exports = router;

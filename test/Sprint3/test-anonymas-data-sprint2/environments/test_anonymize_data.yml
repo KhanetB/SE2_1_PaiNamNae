@@ -1,0 +1,24 @@
+name: test_anonymize_data
+variables:
+  - name: passenger_email
+    value: test_deleted@gmail.com
+  - name: passenger_password
+    value: "123456789"
+  - name: driver_email
+    value: test_driver_deleted@gmail.com
+  - name: driver_password
+    value: "123456789"
+  - name: passenger_token
+    value: ""
+  - name: driver_token
+    value: ""
+  - name: vehicle_id
+    value: cmm7qymkf000v13qpaurkywf0
+  - name: route_id
+    value: ""
+  - name: booking_id
+    value: ""
+  - name: driver_id
+    value: cmm7qy78x000r13qp778gzm7k
+  - name: admin_token
+    value: ""

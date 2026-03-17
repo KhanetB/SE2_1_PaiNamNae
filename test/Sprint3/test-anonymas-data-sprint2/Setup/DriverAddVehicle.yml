@@ -1,0 +1,66 @@
+info:
+  name: DriverAddVehicle
+  type: http
+  seq: 2
+  tags:
+    - setup
+
+http:
+  method: POST
+  url: http://localhost:3000/api/vehicles
+  headers:
+    - name: Authorization
+      value: Bearer {{driver_token}}
+  body:
+    type: multipart-form
+    data:
+      - name: vehicleModel
+        type: text
+        value: Toyota Corolla Altis
+      - name: licensePlate
+        type: text
+        value: กค 4321 ขอนแก่น
+      - name: vehicleType
+        type: text
+        value: Sedan
+      - name: color
+        type: text
+        value: White
+      - name: seatCapacity
+        type: text
+        value: "4"
+      - name: amenities[0]
+        type: text
+        value: Air Conditioning
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const vehicleId = bru.getEnvVar("vehicle_id")
+        if(vehicleId){
+          bru.runner.skipRequest();
+        }
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        bru.setEnvVar("vehicle_id", body.data.id)
+    - type: tests
+      code: |-
+        test("get HTTP 201",function(){
+          const status = res.getStatus();
+          expect(status).to.equal(201);
+        });
+
+        test("get vehical id",function(){
+          const body = res.getBody();
+          expect(body).to.have.property("data")
+          expect(body.data).to.have.property("id")
+        })
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

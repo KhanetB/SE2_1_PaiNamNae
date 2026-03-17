@@ -75,6 +75,100 @@ enum ReviewFileType {
   VIDEO
 }
 
+enum ActionType {
+  UNKNOWN
+  // AUTHENTICATION
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  PASSWORD_CHANGED
+  // USER 
+  USER_REGISTERED
+  USER_DELETED
+  PROFILE_VIEWED
+  PROFILE_UPDATED
+  USER_DATA_EXPORT_REQUESTED
+
+  // VEHICLE
+  VEHICLE_CREATED
+  VEHICLE_UPDATED
+  VEHICLE_DELETED
+  VEHICLE_VIEWED
+
+  // BOOKING
+  BOOKING_CREATED
+  BOOKING_UPDATED
+  BOOKING_DELETED
+  BOOKING_VIEWED
+
+  // ROUTE 
+  ROUTE_CREATED
+  ROUTE_UPDATED
+  ROUTE_VIEWED
+  ROUTE_DELETE
+
+  // REVIEW 
+  REVIEW_CREATED
+
+  // DRIVER VERIFICATION
+  DRIVER_VERIFICATION_SUBMITTED
+  DRIVER_VERIFICATION_UPDATED
+  DRIVER_LICENSES_VIEWED
+
+  // Admin Actions
+  ADMIN_VIEWED
+  ADMIN_CREATED
+  ADMIN_UPDATED
+  ADMIN_DELETED
+  ADMIN_LOG_VIEWED
+  ADMIN_LOG_EXPORTED
+
+  // System
+  SYSTEM_ERROR
+}
+
+enum AccessResult {
+  SUCCESS
+  ERROR
+  DENIED
+}
+
+model AuditLog {
+  id           String  @id @default(cuid())
+  // ข้อกำหนด: ข้อมูลในการระบุตัวตนผู้ใช้
+  userId       String?
+  user         User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // ข้อกำหนด: วันเวลาและรายละเอียดเหตุการณ์สำคัญ
+  action          ActionType
+  actionTimeStamp DateTime // UTC, NTP-Synced
+
+  // ข้อกำหนด: ข้อมูลอุปกรณ์และเครือข่าย
+  ipAddress  String // support ipv4 and ipv6
+  userAgent  String
+  deviceInfo String?
+
+  // ข้อกำหนด: รายละเอียดการใช้งาน
+  httpMethod     String?
+  endpoint       String
+  resourceType   String
+  // ข้อกำหนด: success or defined
+  accessResult   AccessResult
+  httpStatusCode String
+
+  // ข้อกำหนด: รายละเอียดเพิ่มเติม
+  metaData       Json?   @db.Json
+  errorMessage   String?
+  integrityHash String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([action])
+  @@index([accessResult])
+}
 
 model User {
   id                      String              @id @default(cuid())
@@ -94,6 +188,8 @@ model User {
   isVerified              Boolean             @default(false)
   isActive                Boolean             @default(true)
   otpCode                 String?
+  deleteOtp               String?
+  deleteOtpExpiresAt      DateTime?
   lastLogin               DateTime?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
@@ -110,6 +206,7 @@ model User {
   PassengerReviews        Review[]            @relation("PassengerReviews")
   DriverReviews           Review[]            @relation("DriverReviews")
 
+  auditLog         AuditLog[]
 
   @@index([role])
   @@index([isActive])
@@ -142,7 +239,7 @@ model DriverVerification {
 
 model Notification {
   id     String @id @default(cuid())
-  userId String?
+  userId String? 
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type     NotificationType @default(SYSTEM)

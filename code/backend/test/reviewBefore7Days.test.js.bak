@@ -1,0 +1,211 @@
+import * as request from "supertest"
+const axios = require("axios")
+
+
+
+let driver_token, passenger_token;
+let vehicle_id = "cmm9jfwmy0004ifpy8r8quun4" ;
+let route_id,booking_id;
+beforeAll(async function() {
+  const res = await axios.post("http://localhost:3000/api/auth/login", {
+    email: "test_driver@gmail.com",
+    password: "123456789",
+  })
+  driver_token = res.data?.data?.token
+  // console.log("Driver token:", driver_token)
+  const res2 = await axios.post("http://localhost:3000/api/auth/login", {
+    email: "test_passenger@gmail.com",
+    password: "123456789",
+  })
+  passenger_token = res2.data?.data?.token
+  // console.log("Passenger token:", passenger_token)
+})
+
+beforeEach(async function() {
+  const route_res = await axios.post("http://localhost:3000/api/routes", {
+    "vehicleId": vehicle_id,
+    "startLocation": {
+      "lat": 16.4772,
+      "lng": 102.8141,
+      "name": "Khon Kaen University",
+      "address": "123 ถนนมิตรภาพ"
+    },
+    "endLocation": {
+      "lat": 16.445,
+      "lng": 102.834,
+      "name": "Central Plaza Khon Kaen",
+      "address": "ถ. ศรีจันทร์"
+    },
+    "departureTime": "2030-10-15T09:00:00Z",
+    "availableSeats": 3,
+    "pricePerSeat": 50,
+    "conditions": "ห้ามสูบบุหรี่ในรถ",
+    "waypoints": [
+      {
+        "lat": 16.46,
+        "lng": 102.82,
+        "name": "ตลาดต้นตาล"
+      }
+    ],
+    "optimizeWaypoints": true
+  }, {
+    headers: {
+      Authorization: `Bearer ${driver_token}`,
+    },
+  })
+  // console.log("Route creation response:", route_res.data)
+  route_id = route_res.data?.data?.id
+
+  const booking_res = await axios.post("http://localhost:3000/api/bookings", 
+    {
+      "routeId": route_id,
+      "numberOfSeats": 2,
+      "pickupLocation": {
+        "lat": 16.4772,
+        "lng": 102.8141,
+        "name": "หน้ามข.",
+        "address": "ถนนหลังมอ"
+      },
+      "dropoffLocation": {
+        "lat": 16.4755,
+        "lng": 102.8256,
+        "name": "ปลายทางฝั่งตะวันออก",
+        "address": "ถนนสหศาสตร์"
+    }
+  },
+  { headers: {
+    Authorization: `Bearer ${passenger_token}`,
+  }})
+  // console.log("Booking creation response:", booking_res.data)
+  booking_id = booking_res.data?.data?.id
+
+  const accept_res = await axios.patch(`http://localhost:3000/api/bookings/${booking_id}/status`, {
+    status: "CONFIRMED"
+  }, {
+    headers: {
+      Authorization: `Bearer ${driver_token}`,
+    },
+  })
+  // console.log("Booking acceptance response:", accept_res.data)
+
+  const start_res = await axios.patch(`http://localhost:3000/api/routes/${route_id}/start`, {}, {
+    headers: {
+      Authorization: `Bearer ${driver_token}`,
+    }
+  })
+  // console.log("Route start response:", start_res.data)
+
+  const passenger_arrival_res = await axios.patch(`http://localhost:3000/api/bookings/${booking_id}/passenger-confirm-dropoff`, {
+  "status": "COMPLETED"
+  }, {
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  })
+
+  // console.log("Passenger arrival confirmation response:", passenger_arrival_res.data)
+
+  const driver_arrival_res = await axios.patch(`http://localhost:3000/api/bookings/${booking_id}/driver-confirm-dropoff`, {
+    "status": "COMPLETED"
+  }, {
+    headers: {
+      Authorization: `Bearer ${driver_token}`,
+    },
+  })
+
+  // console.log("Driver arrival confirmation response:", driver_arrival_res.data)
+})
+afterEach(async function() {
+  const delete_res = await axios.delete(`http://localhost:3000/api/routes/${route_id}`, {
+    headers: {
+      Authorization: `Bearer ${driver_token}`,
+    },
+  })
+})
+
+
+
+test("TC01 Review after 0 days", async function() {
+  const review_res = await axios.post("http://localhost:3000/api/reviews", {
+  "bookingId": booking_id,
+  "rating": 4.5,
+  "comment":"Great ride, very comfortable and the driver was friendly!",
+  "now": new Date().toISOString() // 1 day later
+  },{
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  })
+  expect(review_res.status).toBe(201)
+})
+
+test("TC02 Review after 1 days", async function() {
+  const review_res = await axios.post("http://localhost:3000/api/reviews", {
+  "bookingId": booking_id,
+  "rating": 4.5,
+  "comment":"Great ride, very comfortable and the driver was friendly!",
+  "now": new Date(new Date().getTime() + 1 * 24 * 60 * 60 * 1000).toISOString() // 1 day later
+  },{
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  })
+  expect(review_res.status).toBe(201)
+})
+
+test("TC03 Review after 4 days", async function() {
+  const review_res = await axios.post("http://localhost:3000/api/reviews", {
+  "bookingId": booking_id,
+  "rating": 4.5,
+  "comment":"Great ride, very comfortable and the driver was friendly!",
+  "now": new Date(new Date().getTime() + 4 * 24 * 60 * 60 * 1000).toISOString() // 4 days later
+  },{
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  })
+  expect(review_res.status).toBe(201)
+})
+
+test("TC04 Review after 6 days", async function() {
+  const review_res = await axios.post("http://localhost:3000/api/reviews", {
+  "bookingId": booking_id,
+  "rating": 4.5,
+  "comment":"Great ride, very comfortable and the driver was friendly!",
+  "now": new Date(new Date().getTime() + 6 * 24 * 60 * 60 * 1000).toISOString() // 6 days later
+  },{
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  })
+  expect(review_res.status).toBe(201)
+})
+
+test("TC05 Review after 7 days", async function() {
+  const review_res = await axios.post("http://localhost:3000/api/reviews", {
+  "bookingId": booking_id,
+  "rating": 4.5,
+  "comment":"Great ride, very comfortable and the driver was friendly!",
+  "now": new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000).now // 7 days later
+  },{
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  })
+  expect(review_res.status).toBe(201)
+})
+
+test("TC06 Review after 8 days", async function() {
+  const review_res = await axios.post("http://localhost:3000/api/reviews", {
+  "bookingId": booking_id,
+  "rating": 4.5,
+  "comment":"Great ride, very comfortable and the driver was friendly!",
+  "now": new Date(new Date().getTime() + 8 * 24 * 60 * 60 * 1000).toISOString() // 8 days later
+  },{
+    headers: {
+      Authorization: `Bearer ${passenger_token}`,
+    },
+  }).catch(error => {
+    expect(error.response.status).toBe(400)
+  })
+})

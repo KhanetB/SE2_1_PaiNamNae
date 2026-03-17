@@ -1,0 +1,40 @@
+meta {
+  name: CreateDriverAccount
+  type: http
+  seq: 3
+  tags: [
+    create
+  ]
+}
+
+post {
+  url: http://localhost:3000/api/users
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  email: {{driver_email}}
+  username: {{driver_username}}
+  password: {{driver_password}}
+  firstName: {{driver_firstName}}
+  lastName: {{driver_lastName}}
+  phoneNumber: {{driver_phoneNumber}}
+  gender: {{driver_gender}}
+  nationalIdNumber: {{driver_nationalIdNumber}}
+  nationalIdExpiryDate: {{driver_nationalIdExpiryDate}}
+  nationalIdPhotoUrl: @file(person.jpg)
+  selfiePhotoUrl: @file(person.jpg)
+}
+
+script:pre-request {
+  const passengerToken = bru.getEnvVar("driver_token")
+  if(passengerToken){
+    bru.runner.skipRequest();
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

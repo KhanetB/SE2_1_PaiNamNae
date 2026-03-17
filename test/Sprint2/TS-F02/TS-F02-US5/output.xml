@@ -1,0 +1,778 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.1 (Python 3.11.9 on win32)" generated="2026-03-03T20:51:27.531598" rpa="false" schemaversion="5">
+<suite id="s1" name="TS-F02-US5" source="E:\SE2_1_PaiNamNae\test\TS-F02\TS-F02-US5\TS-F02-US5.robot">
+<kw name="Prepare Environment" type="SETUP">
+<kw name="Open System Browser" owner="common_resource">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:27.729590" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001'.</msg>
+<arg>${WEB_URL}</arg>
+<arg>${BROWSER}</arg>
+<arg>options=add_argument("--incognito")</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:51:27.729590" elapsed="1.652161"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-03-03T20:51:29.381751" elapsed="0.035000"/>
+</kw>
+<status status="PASS" start="2026-03-03T20:51:27.728563" elapsed="1.688188"/>
+</kw>
+<kw name="Run Keyword And Ignore Error" owner="BuiltIn">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-03-03T20:51:29.417754" level="INFO">Creating Session using : alias=api_session, url=http://localhost:3000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>api_session</arg>
+<arg>${BASE_API_URL}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-03-03T20:51:29.417754" elapsed="0.000998"/>
+</kw>
+<arg>Create Session</arg>
+<arg>api_session</arg>
+<arg>${BASE_API_URL}</arg>
+<doc>Runs the given keyword with the given arguments and ignores possible error.</doc>
+<status status="PASS" start="2026-03-03T20:51:29.416751" elapsed="0.002001"/>
+</kw>
+<status status="PASS" start="2026-03-03T20:51:27.728563" elapsed="1.690189"/>
+</kw>
+<test id="s1-t1" name="TC13 เข้าสู่ระบบด้วยบัญชีที่สร้างไว้ใน TC01 ของ US1" line="60">
+<kw name="Login To System" owner="common_resource">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:29.420751" level="INFO">Opening url 'http://localhost:3001/login'</msg>
+<arg>${WEB_URL}/login</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:51:29.419750" elapsed="0.234002"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${TXT_USERNAME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:51:29.653752" elapsed="0.220283"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:29.874035" level="INFO">Typing text 'passengerreview' into text field 'id=identifier'.</msg>
+<arg>${TXT_USERNAME}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:29.874035" elapsed="0.078999"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:29.953034" level="INFO">Typing text '123456789' into text field 'id=password'.</msg>
+<arg>${TXT_PASSWORD}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:29.953034" elapsed="0.052000"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:30.005034" level="INFO">Clicking button 'id=loginButton'.</msg>
+<arg>${BTN_LOGIN}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:30.005034" elapsed="0.071000"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//main</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:51:30.076034" elapsed="0.005999"/>
+</kw>
+<arg>${PASSENGER_USER_REVIEW}</arg>
+<arg>${PASSENGER_PASS_REVIEW}</arg>
+<status status="PASS" start="2026-03-03T20:51:29.419750" elapsed="0.662283"/>
+</kw>
+<doc>ทดสอบล็อกอินด้วยบัญชีที่สร้างไว้ใน TC01 ของ US1</doc>
+<status status="PASS" start="2026-03-03T20:51:29.418752" elapsed="0.664281"/>
+</test>
+<test id="s1-t2" name="TC14,TC15 เข้าหน้าการเดินทางที่จบแล้วและเขียนรีวิว" line="64">
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>0.5s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-03-03T20:51:30.084033" elapsed="0.000000"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//a[contains(.,'การเดินทางของฉัน')]</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:51:30.085033" elapsed="1.222762"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:31.309793" level="INFO">Clicking element 'xpath=//a[contains(.,'การเดินทางของฉัน')]'.</msg>
+<arg>xpath=//a[contains(.,'การเดินทางของฉัน')]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:31.308795" elapsed="1.125087"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(normalize-space(.), 'ทั้งหมด')]</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:51:32.434913" elapsed="1.028363"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:33.464300" level="INFO">Clicking button 'xpath=//button[contains(normalize-space(.), 'ทั้งหมด')]'.</msg>
+<arg>xpath=//button[contains(normalize-space(.), 'ทั้งหมด')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:33.463276" elapsed="2.607139"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(.,'เขียนรีวิว')]</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:51:36.072438" elapsed="0.543001"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:36.617576" level="INFO">Clicking element 'xpath=//button[contains(.,'เขียนรีวิว')]'.</msg>
+<arg>xpath=//button[contains(.,'เขียนรีวิว')]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:36.617576" elapsed="1.114580"/>
+</kw>
+<kw name="Set Rating">
+<kw name="Convert To Number" owner="BuiltIn">
+<msg time="2026-03-03T20:51:37.736293" level="INFO">${rating} = 3.5</msg>
+<var>${rating}</var>
+<arg>${rating}</arg>
+<doc>Converts the given item to a floating point number.</doc>
+<status status="PASS" start="2026-03-03T20:51:37.735295" elapsed="0.000998"/>
+</kw>
+<kw name="Return From Keyword If" owner="BuiltIn">
+<arg>${rating} == 0</arg>
+<doc>Returns from the enclosing user keyword if ``condition`` is true.</doc>
+<status status="PASS" start="2026-03-03T20:51:37.736293" elapsed="0.001890"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-03-03T20:51:37.739690" level="INFO">${full} = 3</msg>
+<var>${full}</var>
+<arg>int(${rating})</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-03-03T20:51:37.738183" elapsed="0.001507"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-03-03T20:51:37.740702" level="INFO">${half} = 1</msg>
+<var>${half}</var>
+<arg>1 if (${rating} - int(${rating}) == 0.5) else 0</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-03-03T20:51:37.739690" elapsed="0.001012"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-03-03T20:51:37.741702" level="INFO">${star_index} = 4</msg>
+<var>${star_index}</var>
+<arg>${full} + (${half} if ${half} else 0)</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-03-03T20:51:37.740702" elapsed="0.001000"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//div[contains(@class,'text-3xl') and contains(@class,'cursor-pointer')]</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:51:37.741702" elapsed="1.028281"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:38.770992" level="INFO">Executing JavaScript:
+const stars = document.querySelectorAll("div.text-3xl.cursor-pointer span.relative");const el = stars[4 - 1];const rect = el.getBoundingClientRect();const x = rect.left + (1 === 1 ? rect.width * 0.25 : rect.width * 0.75);const y = rect.top + rect.height / 2;const evt = new MouseEvent('click', { clientX: x, clientY: y, bubbles: true });el.dispatchEvent(evt);
+Without any arguments.</msg>
+<arg>const stars = document.querySelectorAll("div.text-3xl.cursor-pointer span.relative");</arg>
+<arg>const el = stars[${star_index} - 1];</arg>
+<arg>const rect = el.getBoundingClientRect();</arg>
+<arg>const x = rect.left + (${half} === 1 ? rect.width * 0.25 : rect.width * 0.75);</arg>
+<arg>const y = rect.top + rect.height / 2;</arg>
+<arg>const evt = new MouseEvent('click', { clientX: x, clientY: y, bubbles: true });</arg>
+<arg>el.dispatchEvent(evt);</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-03T20:51:38.769983" elapsed="0.510922"/>
+</kw>
+<arg>3.5</arg>
+<status status="PASS" start="2026-03-03T20:51:37.734187" elapsed="1.546718"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:39.283918" level="INFO">Clicking button 'xpath=//Button[contains(.,'ขับขี่ปลอดภัย')]'.</msg>
+<arg>xpath=//Button[contains(.,'ขับขี่ปลอดภัย')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:39.282922" elapsed="2.662341"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:41.948260" level="INFO">Clicking button 'xpath=//Button[contains(.,'รถสะอาดน่านั่ง')]'.</msg>
+<arg>xpath=//Button[contains(.,'รถสะอาดน่านั่ง')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:41.947262" elapsed="2.592179"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:44.539441" level="INFO">Clicking button 'xpath=//Button[contains(.,'คนขับอัธยาศัยดี')]'.</msg>
+<arg>xpath=//Button[contains(.,'คนขับอัธยาศัยดี')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:44.539441" elapsed="2.618246"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:47.158195" level="INFO">Clicking button 'xpath=//Button[contains(.,'ชอบเพลงที่เปิด')]'.</msg>
+<arg>xpath=//Button[contains(.,'ชอบเพลงที่เปิด')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:47.158195" elapsed="2.621807"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//textarea[@placeholder='เขียนรีวิวที่นี่']</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:51:49.782053" elapsed="1.036482"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:50.823972" level="INFO">Typing text 'ขับดีมากครับพี่ รถพี่สุดยอด' into text field 'xpath=//textarea[@placeholder='เขียนรีวิวที่นี่']'.</msg>
+<arg>xpath=//textarea[@placeholder='เขียนรีวิวที่นี่']</arg>
+<arg>ขับดีมากครับพี่ รถพี่สุดยอด</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:50.822855" elapsed="1.638386"/>
+</kw>
+<kw name="Scroll Element Into View" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(.,'ส่งรีวิว')]</arg>
+<doc>Scrolls the element identified by ``locator`` into view.</doc>
+<status status="PASS" start="2026-03-03T20:51:52.462098" elapsed="1.313669"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:51:53.777829" level="INFO">Clicking button 'xpath=//button[contains(.,'ส่งรีวิว')]'.</msg>
+<arg>xpath=//button[contains(.,'ส่งรีวิว')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:51:53.776789" elapsed="2.696627"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-03T20:51:59.483481" level="INFO">Slept 3 seconds.</msg>
+<arg>3s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-03T20:51:56.474430" elapsed="3.010049"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>สำเร็จ</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:51:59.489479" elapsed="0.513309"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:00.003810" level="INFO">✓ ส่งรีวิวสำเร็จแล้ว</msg>
+<arg>✓ ส่งรีวิวสำเร็จแล้ว</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:00.003810" elapsed="0.000000"/>
+</kw>
+<doc>จำลอง Passenger เข้าหน้าเส้นทางที่จบแล้วเพื่อเขียนรีวิวให้ Driver</doc>
+<status status="PASS" start="2026-03-03T20:51:30.083033" elapsed="29.921786"/>
+</test>
+<test id="s1-t3" name="ลบรีวิวผ่าน API DELETE" line="92">
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.010303" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-03T20:52:00.007820" elapsed="2.002483"/>
+</kw>
+<kw name="Get User Token Via API" owner="common_resource">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.012313" level="INFO">${login_data} = {'username': 'passengerreview', 'password': '123456789'}</msg>
+<var>${login_data}</var>
+<arg>username=${username}</arg>
+<arg>password=${password}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.011311" elapsed="0.001002"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-03-03T20:52:02.125436" level="INFO">POST Request : url=http://localhost:3000/api/auth/login 
+ path_url=/api/auth/login 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '56', 'Content-Type': 'application/json'} 
+ body=b'{"username": "passengerreview", "password": "123456789"}' 
+ </msg>
+<msg time="2026-03-03T20:52:02.125436" level="INFO">POST Response : url=http://localhost:3000/api/auth/login 
+ status=200, reason=OK 
+ headers={'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests", 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Resource-Policy': 'same-origin', 'Origin-Agent-Cluster': '?1', 'Referrer-Policy': 'no-referrer', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-DNS-Prefetch-Control': 'off', 'X-Download-Options': 'noopen', 'X-Frame-Options': 'SAMEORIGIN', 'X-Permitted-Cross-Domain-Policies': 'none', 'X-XSS-Protection': '0', 'Vary': 'Origin', 'Access-Control-Allow-Credentials': 'true', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '484', 'Date': 'Tue, 03 Mar 2026 13:52:02 GMT', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5'} 
+ body={"success":true,"message":"Login successful","data":{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB9-dBF7vra64B-6darjKiQuzL0","user":{"id":"cmmakitba00542mbfpeb0223a","firstName":"passenger","lastName":"review","profilePicture":null,"role":"PASSENGER","passengerSuspendedUntil":null,"driverSuspendedUntil":null,"deletedAt":null,"deletedBy":null}}} 
+ </msg>
+<msg time="2026-03-03T20:52:02.126411" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/api/auth/login</arg>
+<arg>json=${login_data}</arg>
+<arg>expected_status=any</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.012313" elapsed="0.114098"/>
+</kw>
+<kw name="Should Be Equal As Numbers" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.128431" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to real numbers.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.126411" elapsed="0.002020"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.130410" level="INFO">${token} = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB9-dBF7vra64B-6darjKiQuzL0</msg>
+<var>${token}</var>
+<arg>${response.json()}[data][token]</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.129429" elapsed="0.000981"/>
+</kw>
+<return>
+<value>${token}</value>
+<status status="PASS" start="2026-03-03T20:52:02.130410" elapsed="0.000000"/>
+</return>
+<msg time="2026-03-03T20:52:02.131414" level="INFO">${token} = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB9-dBF7vra64B-6darjKiQuzL0</msg>
+<var>${token}</var>
+<arg>${PASSENGER_USER_REVIEW}</arg>
+<arg>${PASSENGER_PASS_REVIEW}</arg>
+<doc>Login via API และ return access token</doc>
+<status status="PASS" start="2026-03-03T20:52:02.011311" elapsed="0.120103"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.132414" level="INFO">Access Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB9-dBF7vra64B-6darjKiQuzL0</msg>
+<arg>Access Token: ${token}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.131414" elapsed="0.001000"/>
+</kw>
+<kw name="Should Not Be Empty" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.136428" level="INFO">Length is 199.</msg>
+<arg>${token}</arg>
+<arg>msg=Token ต้องไม่เป็นค่าว่าง</arg>
+<doc>Verifies that the given item is not empty.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.133414" elapsed="0.003014"/>
+</kw>
+<kw name="Get My Reviews Via API" owner="common_resource">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.141417" level="INFO">${headers} = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB...</msg>
+<var>${headers}</var>
+<arg>Authorization=Bearer ${access_token}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.139423" elapsed="0.002993"/>
+</kw>
+<kw name="GET On Session" owner="RequestsLibrary">
+<msg time="2026-03-03T20:52:02.153412" level="INFO">GET Request : url=http://localhost:3000/api/reviews/me 
+ path_url=/api/reviews/me 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB9-dBF7vra64B-6darjKiQuzL0'} 
+ body=None 
+ </msg>
+<msg time="2026-03-03T20:52:02.154417" level="INFO">GET Response : url=http://localhost:3000/api/reviews/me 
+ status=200, reason=OK 
+ headers={'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests", 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Resource-Policy': 'same-origin', 'Origin-Agent-Cluster': '?1', 'Referrer-Policy': 'no-referrer', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-DNS-Prefetch-Control': 'off', 'X-Download-Options': 'noopen', 'X-Frame-Options': 'SAMEORIGIN', 'X-Permitted-Cross-Domain-Policies': 'none', 'X-XSS-Protection': '0', 'Vary': 'Origin', 'Access-Control-Allow-Credentials': 'true', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '420', 'Date': 'Tue, 03 Mar 2026 13:52:02 GMT', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5'} 
+ body=[{"id":"cmmao2m3000c71xatvbb89fit","bookingId":"cmmaknz2b007e2mbfx3f4nr1w","driverId":"cmmakixdo00592mbfa9z9j2al","passengerId":"cmmakitba00542mbfpeb0223a","rating":3.5,"comment":"ขับดีมากครับพี่ รถพี่สุดยอด","files":[],"labels":["SAFE_DRIVING","CLEAN_CAR","FRIENDLY_DRIVER","GOOD_MUSIC"],"createdAt":"2026-03-03T13:51:55.980Z","updatedAt":"2026-03-03T13:51:55.980Z"}] 
+ </msg>
+<msg time="2026-03-03T20:52:02.155425" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/api/reviews/me</arg>
+<arg>headers=${headers}</arg>
+<arg>expected_status=any</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.142416" elapsed="0.013009"/>
+</kw>
+<kw name="Should Be Equal As Numbers" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.165413" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to real numbers.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.156418" elapsed="0.010018"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.168428" level="INFO">${reviews_list} = [{'id': 'cmmao2m3000c71xatvbb89fit', 'bookingId': 'cmmaknz2b007e2mbfx3f4nr1w', 'driverId': 'cmmakixdo00592mbfa9z9j2al', 'passengerId': 'cmmakitba00542mbfpeb0223a', 'rating': 3.5, 'comment': 'ขับดีมากค...</msg>
+<var>${reviews_list}</var>
+<arg>${response.json()}</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.166436" elapsed="0.001992"/>
+</kw>
+<return>
+<value>${reviews_list}</value>
+<status status="PASS" start="2026-03-03T20:52:02.169414" elapsed="0.000000"/>
+</return>
+<msg time="2026-03-03T20:52:02.169414" level="INFO">${reviews_list} = [{'id': 'cmmao2m3000c71xatvbb89fit', 'bookingId': 'cmmaknz2b007e2mbfx3f4nr1w', 'driverId': 'cmmakixdo00592mbfa9z9j2al', 'passengerId': 'cmmakitba00542mbfpeb0223a', 'rating': 3.5, 'comment': 'ขับดีมากค...</msg>
+<var>${reviews_list}</var>
+<arg>${token}</arg>
+<doc>เรียก GET /api/reviews/me เพื่อดึงรีวิวทั้งหมดของ user ที่ login อยู่ (return list โดยตรง)</doc>
+<status status="PASS" start="2026-03-03T20:52:02.137419" elapsed="0.033008"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.173417" level="INFO">My Reviews: [{'id': 'cmmao2m3000c71xatvbb89fit', 'bookingId': 'cmmaknz2b007e2mbfx3f4nr1w', 'driverId': 'cmmakixdo00592mbfa9z9j2al', 'passengerId': 'cmmakitba00542mbfpeb0223a', 'rating': 3.5, 'comment': 'ขับดีมากครับพี่ รถพี่สุดยอด', 'files': [], 'labels': ['SAFE_DRIVING', 'CLEAN_CAR', 'FRIENDLY_DRIVER', 'GOOD_MUSIC'], 'createdAt': '2026-03-03T13:51:55.980Z', 'updatedAt': '2026-03-03T13:51:55.980Z'}]</msg>
+<arg>My Reviews: ${reviews_list}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.171426" elapsed="0.001991"/>
+</kw>
+<kw name="Get Length" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.176416" level="INFO">Length is 1.</msg>
+<msg time="2026-03-03T20:52:02.176416" level="INFO">${review_count} = 1</msg>
+<var>${review_count}</var>
+<arg>${reviews_list}</arg>
+<doc>Returns and logs the length of the given item as an integer.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.174417" elapsed="0.003014"/>
+</kw>
+<kw name="Should Be True" owner="BuiltIn">
+<arg>${review_count} &gt; 0</arg>
+<arg>msg=ไม่พบรีวิวในระบบ</arg>
+<doc>Fails if the given condition is not true.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.178426" elapsed="0.001993"/>
+</kw>
+<kw name="Get From List" owner="Collections">
+<msg time="2026-03-03T20:52:02.181414" level="INFO">${first_review} = {'id': 'cmmao2m3000c71xatvbb89fit', 'bookingId': 'cmmaknz2b007e2mbfx3f4nr1w', 'driverId': 'cmmakixdo00592mbfa9z9j2al', 'passengerId': 'cmmakitba00542mbfpeb0223a', 'rating': 3.5, 'comment': 'ขับดีมากคร...</msg>
+<var>${first_review}</var>
+<arg>${reviews_list}</arg>
+<arg>0</arg>
+<doc>Returns the value specified with an ``index`` from ``list``.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.180419" elapsed="0.000995"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<msg time="2026-03-03T20:52:02.184415" level="INFO">${review_id} = cmmao2m3000c71xatvbb89fit</msg>
+<var>${review_id}</var>
+<arg>${first_review}</arg>
+<arg>id</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.182416" elapsed="0.001999"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.187425" level="INFO">Review ID ที่จะลบ: cmmao2m3000c71xatvbb89fit</msg>
+<arg>Review ID ที่จะลบ: ${review_id}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.186433" elapsed="0.001982"/>
+</kw>
+<kw name="Delete Review Via API" owner="common_resource">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.207421" level="INFO">${headers} = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB...</msg>
+<var>${headers}</var>
+<arg>Authorization=Bearer ${access_token}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.200432" elapsed="0.006989"/>
+</kw>
+<kw name="DELETE On Session" owner="RequestsLibrary">
+<msg time="2026-03-03T20:52:02.249428" level="INFO">DELETE Request : url=http://localhost:3000/api/reviews/cmmao2m3000c71xatvbb89fit 
+ path_url=/api/reviews/cmmao2m3000c71xatvbb89fit 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkyMiwiZXhwIjoxNzcyNTQ5NTIyfQ.VxqlTUBrpySKRHsFZB9-dBF7vra64B-6darjKiQuzL0', 'Content-Length': '0'} 
+ body=None 
+ </msg>
+<msg time="2026-03-03T20:52:02.249428" level="INFO">DELETE Response : url=http://localhost:3000/api/reviews/cmmao2m3000c71xatvbb89fit 
+ status=200, reason=OK 
+ headers={'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests", 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Resource-Policy': 'same-origin', 'Origin-Agent-Cluster': '?1', 'Referrer-Policy': 'no-referrer', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-DNS-Prefetch-Control': 'off', 'X-Download-Options': 'noopen', 'X-Frame-Options': 'SAMEORIGIN', 'X-Permitted-Cross-Domain-Policies': 'none', 'X-XSS-Protection': '0', 'Vary': 'Origin', 'Access-Control-Allow-Credentials': 'true', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '56', 'Date': 'Tue, 03 Mar 2026 13:52:02 GMT', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5'} 
+ body={"success":true,"message":"Review deleted successfully"} 
+ </msg>
+<msg time="2026-03-03T20:52:02.250429" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/api/reviews/${review_id}</arg>
+<arg>headers=${headers}</arg>
+<arg>expected_status=any</arg>
+<doc>Sends a DELETE request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.208418" elapsed="0.042011"/>
+</kw>
+<return>
+<value>${response}</value>
+<status status="PASS" start="2026-03-03T20:52:02.250429" elapsed="0.000000"/>
+</return>
+<msg time="2026-03-03T20:52:02.250429" level="INFO">${delete_response} = &lt;Response [200]&gt;</msg>
+<var>${delete_response}</var>
+<arg>${token}</arg>
+<arg>${review_id}</arg>
+<doc>เรียก DELETE /api/reviews/:reviewId เพื่อลบรีวิว</doc>
+<status status="PASS" start="2026-03-03T20:52:02.195419" elapsed="0.055010"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.256435" level="INFO">Delete Response Status: 200</msg>
+<arg>Delete Response Status: ${delete_response.status_code}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.252412" elapsed="0.005015"/>
+</kw>
+<kw name="Should Be True" owner="BuiltIn">
+<arg>${delete_response.status_code} in [200, 204]</arg>
+<arg>msg=ลบรีวิวไม่สำเร็จ (Status: ${delete_response.status_code})</arg>
+<doc>Fails if the given condition is not true.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.257427" elapsed="0.002986"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:02.263431" level="INFO">✓ ลบรีวิว cmmao2m3000c71xatvbb89fit สำเร็จแล้วผ่าน API</msg>
+<arg>✓ ลบรีวิว ${review_id} สำเร็จแล้วผ่าน API</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.260413" elapsed="0.003018"/>
+</kw>
+<kw name="Run Keyword And Return Status" owner="BuiltIn">
+<kw name="Verify Review Button Appears After Delete">
+<kw name="Login To System" owner="common_resource">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:02.267418" level="INFO">Opening url 'http://localhost:3001/login'</msg>
+<arg>${WEB_URL}/login</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.266417" elapsed="0.938087"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>${TXT_USERNAME}</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:52:03.205542" elapsed="1.043477"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:04.257032" level="INFO">Typing text 'passengerreview' into text field 'id=identifier'.</msg>
+<arg>${TXT_USERNAME}</arg>
+<arg>${username}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:52:04.249019" elapsed="1.749480"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:05.999513" level="INFO">Typing text '123456789' into text field 'id=password'.</msg>
+<arg>${TXT_PASSWORD}</arg>
+<arg>${password}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:52:05.998499" elapsed="1.697839"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:07.696338" level="INFO">Clicking button 'id=loginButton'.</msg>
+<arg>${BTN_LOGIN}</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:52:07.696338" elapsed="2.654282"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//main</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:52:10.351156" elapsed="0.529867"/>
+</kw>
+<arg>${PASSENGER_USER_REVIEW}</arg>
+<arg>${PASSENGER_PASS_REVIEW}</arg>
+<status status="PASS" start="2026-03-03T20:52:02.265428" elapsed="8.615595"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//a[contains(.,'การเดินทางของฉัน')]</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:52:10.882050" elapsed="0.522229"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:11.404797" level="INFO">Clicking element 'xpath=//a[contains(.,'การเดินทางของฉัน')]'.</msg>
+<arg>xpath=//a[contains(.,'การเดินทางของฉัน')]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:52:11.404797" elapsed="1.228403"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(normalize-space(.), 'ทั้งหมด')]</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-03T20:52:12.633200" elapsed="1.035303"/>
+</kw>
+<kw name="Click Button" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:13.669535" level="INFO">Clicking button 'xpath=//button[contains(normalize-space(.), 'ทั้งหมด')]'.</msg>
+<arg>xpath=//button[contains(normalize-space(.), 'ทั้งหมด')]</arg>
+<doc>Clicks the button identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-03T20:52:13.668503" elapsed="2.653361"/>
+</kw>
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(.,'เขียนรีวิว')]</arg>
+<arg>timeout=10s</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:52:16.322889" elapsed="0.517997"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-03-03T20:52:17.378886" level="INFO">Current page contains element 'xpath=//button[contains(.,'เขียนรีวิว')]'.</msg>
+<arg>xpath=//button[contains(.,'เขียนรีวิว')]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-03-03T20:52:16.840886" elapsed="0.538000"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:17.379910" level="INFO">✓ ตรวจสอบแล้ว: ปุ่ม "เขียนรีวิว" ปรากฏขึ้นมาใหม่หลังจากลบรีวิวสำเร็จ</msg>
+<arg>✓ ตรวจสอบแล้ว: ปุ่ม "เขียนรีวิว" ปรากฏขึ้นมาใหม่หลังจากลบรีวิวสำเร็จ</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:17.378886" elapsed="0.001024"/>
+</kw>
+<doc>ตรวจสอบว่าหลังจากลบรีวิวแล้ว ปุ่ม "เขียนรีวิว" จะปรากฏขึ้นมาใหม่</doc>
+<status status="PASS" start="2026-03-03T20:52:02.265428" elapsed="15.114482"/>
+</kw>
+<msg time="2026-03-03T20:52:17.382924" level="INFO">${status} = True</msg>
+<var>${status}</var>
+<arg>Verify Review Button Appears After Delete</arg>
+<doc>Runs the specified keyword and returns the status as a Boolean value.</doc>
+<status status="PASS" start="2026-03-03T20:52:02.264430" elapsed="15.118494"/>
+</kw>
+<kw name="Run Keyword If" owner="BuiltIn">
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:17.386910" level="INFO">✓ ตรวจสอบ UI แล้ว: ปุ่ม "เขียนรีวิว" ปรากฏขึ้นมาใหม่</msg>
+<arg>✓ ตรวจสอบ UI แล้ว: ปุ่ม "เขียนรีวิว" ปรากฏขึ้นมาใหม่</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:17.385912" elapsed="0.000998"/>
+</kw>
+<arg>${status}</arg>
+<arg>Log</arg>
+<arg>✓ ตรวจสอบ UI แล้ว: ปุ่ม "เขียนรีวิว" ปรากฏขึ้นมาใหม่</arg>
+<arg>ELSE</arg>
+<arg>Log</arg>
+<arg>⚠ ข้าม UI verification (อาจเกิดจาก browser session หรือ user logout)</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="PASS" start="2026-03-03T20:52:17.384911" elapsed="0.001999"/>
+</kw>
+<doc>ทดสอบการลบรีวิวผ่าน API โดยใช้ review ID ที่ได้จาก GET /api/reviews/me</doc>
+<status status="PASS" start="2026-03-03T20:52:00.005833" elapsed="17.383064"/>
+</test>
+<test id="s1-t4" name="ลบรีวิวโดยใช้ review ID ที่กำหนด" line="125">
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.401089" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-03T20:52:17.399251" elapsed="2.001838"/>
+</kw>
+<kw name="Get User Token Via API" owner="common_resource">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.403115" level="INFO">${login_data} = {'username': 'passengerreview', 'password': '123456789'}</msg>
+<var>${login_data}</var>
+<arg>username=${username}</arg>
+<arg>password=${password}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.402099" elapsed="0.001016"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-03-03T20:52:19.521127" level="INFO">POST Request : url=http://localhost:3000/api/auth/login 
+ path_url=/api/auth/login 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '56', 'Content-Type': 'application/json'} 
+ body=b'{"username": "passengerreview", "password": "123456789"}' 
+ </msg>
+<msg time="2026-03-03T20:52:19.522112" level="INFO">POST Response : url=http://localhost:3000/api/auth/login 
+ status=200, reason=OK 
+ headers={'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests", 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Resource-Policy': 'same-origin', 'Origin-Agent-Cluster': '?1', 'Referrer-Policy': 'no-referrer', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-DNS-Prefetch-Control': 'off', 'X-Download-Options': 'noopen', 'X-Frame-Options': 'SAMEORIGIN', 'X-Permitted-Cross-Domain-Policies': 'none', 'X-XSS-Protection': '0', 'Vary': 'Origin', 'Access-Control-Allow-Credentials': 'true', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '484', 'Date': 'Tue, 03 Mar 2026 13:52:19 GMT', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5'} 
+ body={"success":true,"message":"Login successful","data":{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkzOSwiZXhwIjoxNzcyNTQ5NTM5fQ.7Q9U5sPYxcLn0sxSPLQN1XKF0WTkK6-weNnFtAhU1-o","user":{"id":"cmmakitba00542mbfpeb0223a","firstName":"passenger","lastName":"review","profilePicture":null,"role":"PASSENGER","passengerSuspendedUntil":null,"driverSuspendedUntil":null,"deletedAt":null,"deletedBy":null}}} 
+ </msg>
+<msg time="2026-03-03T20:52:19.522112" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/api/auth/login</arg>
+<arg>json=${login_data}</arg>
+<arg>expected_status=any</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.404099" elapsed="0.118013"/>
+</kw>
+<kw name="Should Be Equal As Numbers" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.524100" level="INFO">Argument types are:
+&lt;class 'int'&gt;
+&lt;class 'str'&gt;</msg>
+<arg>${response.status_code}</arg>
+<arg>200</arg>
+<doc>Fails if objects are unequal after converting them to real numbers.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.522112" elapsed="0.002988"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.527099" level="INFO">${token} = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkzOSwiZXhwIjoxNzcyNTQ5NTM5fQ.7Q9U5sPYxcLn0sxSPLQN1XKF0WTkK6-weNnFtAhU1-o</msg>
+<var>${token}</var>
+<arg>${response.json()}[data][token]</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.525100" elapsed="0.001999"/>
+</kw>
+<return>
+<value>${token}</value>
+<status status="PASS" start="2026-03-03T20:52:19.528100" elapsed="0.000000"/>
+</return>
+<msg time="2026-03-03T20:52:19.529100" level="INFO">${token} = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkzOSwiZXhwIjoxNzcyNTQ5NTM5fQ.7Q9U5sPYxcLn0sxSPLQN1XKF0WTkK6-weNnFtAhU1-o</msg>
+<var>${token}</var>
+<arg>${PASSENGER_USER_REVIEW}</arg>
+<arg>${PASSENGER_PASS_REVIEW}</arg>
+<doc>Login via API และ return access token</doc>
+<status status="PASS" start="2026-03-03T20:52:19.402099" elapsed="0.128003"/>
+</kw>
+<kw name="Set Variable" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.532118" level="INFO">${review_id} = cmma9sqzx001hez3r8f49ztcc</msg>
+<var>${review_id}</var>
+<arg>cmma9sqzx001hez3r8f49ztcc</arg>
+<doc>Returns the given values which can then be assigned to a variables.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.531098" elapsed="0.001020"/>
+</kw>
+<kw name="Delete Review Via API" owner="common_resource">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.533112" level="INFO">${headers} = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkzOSwiZXhwIjoxNzcyNTQ5NTM5fQ.7Q9U5sPYxcLn0sxSPL...</msg>
+<var>${headers}</var>
+<arg>Authorization=Bearer ${access_token}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.533112" elapsed="0.000000"/>
+</kw>
+<kw name="DELETE On Session" owner="RequestsLibrary">
+<msg time="2026-03-03T20:52:19.542295" level="INFO">DELETE Request : url=http://localhost:3000/api/reviews/cmma9sqzx001hez3r8f49ztcc 
+ path_url=/api/reviews/cmma9sqzx001hez3r8f49ztcc 
+ headers={'User-Agent': 'python-requests/2.32.5', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW1ha2l0YmEwMDU0Mm1iZnBlYjAyMjNhIiwicm9sZSI6IlBBU1NFTkdFUiIsImlhdCI6MTc3MjU0NTkzOSwiZXhwIjoxNzcyNTQ5NTM5fQ.7Q9U5sPYxcLn0sxSPLQN1XKF0WTkK6-weNnFtAhU1-o', 'Content-Length': '0'} 
+ body=None 
+ </msg>
+<msg time="2026-03-03T20:52:19.542295" level="INFO">DELETE Response : url=http://localhost:3000/api/reviews/cmma9sqzx001hez3r8f49ztcc 
+ status=404, reason=Not Found 
+ headers={'Content-Security-Policy': "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests", 'Cross-Origin-Opener-Policy': 'same-origin', 'Cross-Origin-Resource-Policy': 'same-origin', 'Origin-Agent-Cluster': '?1', 'Referrer-Policy': 'no-referrer', 'Strict-Transport-Security': 'max-age=15552000; includeSubDomains', 'X-Content-Type-Options': 'nosniff', 'X-DNS-Prefetch-Control': 'off', 'X-Download-Options': 'noopen', 'X-Frame-Options': 'SAMEORIGIN', 'X-Permitted-Cross-Domain-Policies': 'none', 'X-XSS-Protection': '0', 'Vary': 'Origin', 'Access-Control-Allow-Credentials': 'true', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '58', 'Date': 'Tue, 03 Mar 2026 13:52:19 GMT', 'Connection': 'keep-alive', 'Keep-Alive': 'timeout=5'} 
+ body={"success":false,"message":"Review not found","data":null} 
+ </msg>
+<msg time="2026-03-03T20:52:19.542295" level="INFO">${response} = &lt;Response [404]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/api/reviews/${review_id}</arg>
+<arg>headers=${headers}</arg>
+<arg>expected_status=any</arg>
+<doc>Sends a DELETE request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.534111" elapsed="0.009213"/>
+</kw>
+<return>
+<value>${response}</value>
+<status status="PASS" start="2026-03-03T20:52:19.543324" elapsed="0.000000"/>
+</return>
+<msg time="2026-03-03T20:52:19.543324" level="INFO">${delete_response} = &lt;Response [404]&gt;</msg>
+<var>${delete_response}</var>
+<arg>${token}</arg>
+<arg>${review_id}</arg>
+<doc>เรียก DELETE /api/reviews/:reviewId เพื่อลบรีวิว</doc>
+<status status="PASS" start="2026-03-03T20:52:19.532118" elapsed="0.011206"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.545310" level="INFO">Delete Response Status: 404</msg>
+<arg>Delete Response Status: ${delete_response.status_code}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.544310" elapsed="0.001000"/>
+</kw>
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.547297" level="INFO">Delete Response Body: {"success":false,"message":"Review not found","data":null}</msg>
+<arg>Delete Response Body: ${delete_response.content}</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.545310" elapsed="0.001987"/>
+</kw>
+<kw name="Run Keyword If" owner="BuiltIn">
+<kw name="Log" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.552309" level="INFO">ไม่พบรีวิวนี้ในระบบ</msg>
+<arg>ไม่พบรีวิวนี้ในระบบ</arg>
+<doc>Logs the given message with the given level.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.552309" elapsed="0.000000"/>
+</kw>
+<arg>${delete_response.status_code} == 200</arg>
+<arg>Log</arg>
+<arg>ลบรีวิวสำเร็จ</arg>
+<arg>ELSE IF</arg>
+<arg>${delete_response.status_code} == 204</arg>
+<arg>Log</arg>
+<arg>ลบรีวิวสำเร็จ (No Content)</arg>
+<arg>ELSE IF</arg>
+<arg>${delete_response.status_code} == 404</arg>
+<arg>Log</arg>
+<arg>ไม่พบรีวิวนี้ในระบบ</arg>
+<arg>ELSE IF</arg>
+<arg>${delete_response.status_code} == 403</arg>
+<arg>Log</arg>
+<arg>ไม่มีสิทธิ์ลบรีวิวนี้</arg>
+<arg>ELSE IF</arg>
+<arg>${delete_response.status_code} == 400</arg>
+<arg>Log</arg>
+<arg>ไม่สามารถลบได้ (เกิน 7 วัน หรือเงื่อนไขอื่นๆ)</arg>
+<arg>ELSE</arg>
+<arg>Log</arg>
+<arg>Error: ${delete_response.status_code}</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.548297" elapsed="0.004012"/>
+</kw>
+<kw name="Evaluate" owner="BuiltIn">
+<msg time="2026-03-03T20:52:19.554309" level="INFO">${should_verify} = False</msg>
+<var>${should_verify}</var>
+<arg>${delete_response.status_code} in [200, 204]</arg>
+<doc>Evaluates the given expression in Python and returns the result.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.553310" elapsed="0.001984"/>
+</kw>
+<kw name="Run Keyword If" owner="BuiltIn">
+<arg>${should_verify}</arg>
+<arg>Run Keyword And Ignore Error</arg>
+<arg>Verify Review Button Appears After Delete</arg>
+<doc>Runs the given keyword with the given arguments, if ``condition`` is true.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.555294" elapsed="0.000000"/>
+</kw>
+<doc>ทดสอบการลบรีวิวด้วย review ID ที่ระบุโดยตรง (เช่น cmma9sqzx001hez3r8f49ztcc)</doc>
+<status status="PASS" start="2026-03-03T20:52:17.396695" elapsed="2.159602"/>
+</test>
+<kw name="Close All Browsers" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes all open browsers and resets the browser cache.</doc>
+<status status="PASS" start="2026-03-03T20:52:19.565296" elapsed="2.663238"/>
+</kw>
+<doc>US-5: ผู้ใช้เขียนรีวิวไม่ใส่รูป</doc>
+<status status="PASS" start="2026-03-03T20:51:27.533615" elapsed="54.694919"/>
+</suite>
+<statistics>
+<total>
+<stat pass="4" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="TS-F02-US5" id="s1" pass="4" fail="0" skip="0">TS-F02-US5</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
